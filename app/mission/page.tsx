@@ -1,0 +1,453 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { v4 as uuidv4 } from "uuid";
+import { Fraunces, JetBrains_Mono, Inter } from "next/font/google";
+import {
+  Bot,
+  Sparkles,
+  ArrowRight,
+  Plus,
+  X,
+  Rocket,
+  Menu,
+  Target,
+  CheckCircle2,
+  Loader2,
+  Stamp as StampIcon,
+} from "lucide-react";
+
+const display = Fraunces({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-display",
+});
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
+});
+const body = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-body",
+});
+
+const EXAMPLES = [
+  {
+    goal: "I am a Nigerian Computer Science student looking for fully-funded AI scholarships in Canada",
+    education: "BSc Computer Science",
+    skills: ["Python", "Machine Learning", "Mathematics"],
+    country: "Nigeria",
+    careerGoal: "AI Research Scientist",
+  },
+  {
+    goal: "I need AI/ML internships in Europe for summer 2027",
+    education: "MSc Data Science",
+    skills: ["Python", "TensorFlow", "Statistics"],
+    country: "Kenya",
+    careerGoal: "ML Engineer",
+  },
+  {
+    goal: "I want a fully-funded Masters in Data Science anywhere in the world",
+    education: "BSc Mathematics",
+    skills: ["Statistics", "R", "Python"],
+    country: "Ghana",
+    careerGoal: "Data Scientist",
+  },
+  {
+    goal: "I am a Kenyan engineering graduate looking for tech fellowships",
+    education: "BEng Electrical Engineering",
+    skills: ["C++", "Embedded Systems", "IoT"],
+    country: "Kenya",
+    careerGoal: "Tech Lead",
+  },
+  {
+    goal: "I need conference funding for research in renewable energy",
+    education: "MSc Renewable Energy",
+    skills: ["Research", "Data Analysis", "Technical Writing"],
+    country: "South Africa",
+    careerGoal: "Energy Researcher",
+  },
+];
+
+function Stamp({
+  label,
+  tone = "brass",
+  pulse = false,
+}: {
+  label: string;
+  tone?: "brass" | "signal";
+  pulse?: boolean;
+}) {
+  const c =
+    tone === "signal"
+      ? "border-[#3FA78E] text-[#3FA78E]"
+      : "border-[#C9A227] text-[#C9A227]";
+  return (
+    <motion.span
+      initial={{ scale: 0.85, rotate: -8, opacity: 0 }}
+      animate={{ scale: 1, rotate: -3, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 16 }}
+      className={`inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-dashed px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] ${c}`}
+    >
+      {pulse && (
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-60" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-current" />
+        </span>
+      )}
+      {label}
+    </motion.span>
+  );
+}
+
+function GrainOverlay() {
+  return (
+    <svg
+      className="pointer-events-none fixed inset-0 z-[1] h-full w-full opacity-[0.035] mix-blend-overlay"
+      aria-hidden="true"
+    >
+      <filter id="grain">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.8"
+          numOctaves="2"
+          stitchTiles="stitch"
+        />
+      </filter>
+      <rect width="100%" height="100%" filter="url(#grain)" />
+    </svg>
+  );
+}
+
+export default function MissionPage() {
+  const router = useRouter();
+  const [goal, setGoal] = useState("");
+  const [education, setEducation] = useState("");
+  const [country, setCountry] = useState("");
+  const [careerGoal, setCareerGoal] = useState("");
+  const [skillInput, setSkillInput] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const caseNumber = useMemo(() => {
+    const year = new Date().getFullYear();
+    const seq = String(Math.floor(Math.random() * 900) + 100);
+    return `MISSION №${year}-${seq}`;
+  }, []);
+
+  function addSkill() {
+    const s = skillInput.trim();
+    if (s && !skills.includes(s)) {
+      setSkills([...skills, s]);
+      setSkillInput("");
+    }
+  }
+
+  function removeSkill(skill: string) {
+    setSkills(skills.filter((s) => s !== skill));
+  }
+
+  function fillExample(ex: (typeof EXAMPLES)[number]) {
+    setGoal(ex.goal);
+    setEducation(ex.education);
+    setSkills(ex.skills);
+    setCountry(ex.country);
+    setCareerGoal(ex.careerGoal);
+  }
+
+  function launchAgent() {
+    if (!goal.trim()) return;
+    setLoading(true);
+    const sessionId = uuidv4();
+    const params = new URLSearchParams({ goal: goal.trim() });
+    if (education.trim()) params.set("education", education.trim());
+    if (skills.length > 0) params.set("skills", skills.join(","));
+    if (country.trim()) params.set("country", country.trim());
+    if (careerGoal.trim()) params.set("careerGoal", careerGoal.trim());
+    router.push(`/agent/${sessionId}?${params.toString()}`);
+  }
+
+  return (
+    <div
+      className={`${display.variable} ${mono.variable} ${body.variable} relative min-h-screen bg-[#0B0E13] text-[#F3EEE1] antialiased`}
+      style={{ fontFamily: "var(--font-body)" }}
+    >
+      <GrainOverlay />
+      <div className="pointer-events-none fixed -top-40 right-0 z-0 h-[560px] w-[560px] rounded-full bg-[#C9A227]/[0.06] blur-[140px]" />
+      <div className="pointer-events-none fixed -bottom-40 left-0 z-0 h-[400px] w-[400px] rounded-full bg-[#3FA78E]/[0.04] blur-[120px]" />
+
+      {/* NAV */}
+      <header className="fixed top-0 z-50 w-full px-4">
+        <div className="mx-auto max-w-7xl mt-2 rounded-sm border border-[#F3EEE1]/10 bg-[#0B0E13]/90 backdrop-blur-md shadow-[0_1px_0_rgba(243,238,225,0.06)]">
+          <div className="mx-auto flex h-14 items-center justify-between px-4 sm:px-6">
+            <a href="/" className="group flex items-center gap-3">
+              <div className="flex h-7 w-7 items-center justify-center rounded-sm border-[1.5px] border-[#C9A227] text-[#C9A227] transition-transform group-hover:-rotate-6">
+                <StampIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
+              </div>
+              <div className="leading-none">
+                <span
+                  className="block text-sm font-medium tracking-tight text-[#F3EEE1]"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  Opportunity AI
+                </span>
+                <span className="mt-0.5 block font-mono text-[9px] uppercase tracking-[0.2em] text-[#F3EEE1]/35">
+                  Mission intake
+                </span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <main className="relative z-10 flex-1">
+        <div className="mx-auto max-w-2xl px-4 pt-28 pb-16 sm:px-6">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="text-center mb-10"
+          >
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Stamp label={caseNumber} pulse />
+            </div>
+            <h1
+              className="text-[2.4rem] sm:text-[3rem] font-medium tracking-tight leading-[1.05]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              File your{" "}
+              <span className="italic text-[#C9A227]">mission brief</span>
+            </h1>
+            <p className="mt-3 text-sm text-[#F3EEE1]/45 leading-relaxed max-w-md mx-auto">
+              Describe your goal, education, skills, and preferences. The
+              autonomous agent handles everything else.
+            </p>
+          </motion.div>
+
+          {/* Form */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.7,
+              delay: 0.15,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D] overflow-hidden"
+          >
+            <div className="flex items-center justify-between border-b border-[#F3EEE1]/10 px-5 py-3.5">
+              <div className="flex items-center gap-2.5">
+                <Bot
+                  className="h-4 w-4 text-[#C9A227]"
+                  strokeWidth={1.75}
+                />
+                <span
+                  className="text-sm font-medium text-[#F3EEE1]/90"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  Intake dossier
+                </span>
+              </div>
+            </div>
+
+            <div className="p-5 space-y-6">
+              {/* Goal */}
+              <div>
+                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                  Mission goal <span className="text-[#C2703D]">*</span>
+                </label>
+                <textarea
+                  value={goal}
+                  onChange={(e) => setGoal(e.target.value)}
+                  placeholder="e.g. I am a Nigerian CS student looking for fully-funded AI scholarships in Canada..."
+                  rows={3}
+                  className="w-full resize-none border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* Education */}
+              <div>
+                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                  Education / Degree
+                </label>
+                <input
+                  value={education}
+                  onChange={(e) => setEducation(e.target.value)}
+                  placeholder="e.g. BSc Computer Science, MSc Data Science..."
+                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* Skills */}
+              <div>
+                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                  Skills
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    value={skillInput}
+                    onChange={(e) => setSkillInput(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addSkill())
+                    }
+                    placeholder="Type a skill and press Enter..."
+                    className="flex-1 border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
+                  />
+                  <button
+                    onClick={addSkill}
+                    disabled={!skillInput.trim()}
+                    className="inline-flex items-center gap-1 rounded-sm border border-[#C9A227]/40 bg-[#C9A227]/10 px-3 py-2 text-xs font-semibold text-[#C9A227] hover:bg-[#C9A227]/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add
+                  </button>
+                </div>
+                {skills.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2.5">
+                    {skills.map((s) => (
+                      <span
+                        key={s}
+                        className="inline-flex items-center gap-1 rounded-sm border border-[#3FA78E]/30 bg-[#3FA78E]/10 px-2.5 py-1 font-mono text-[11px] font-medium text-[#3FA78E]"
+                      >
+                        {s}
+                        <button
+                          onClick={() => removeSkill(s)}
+                          className="hover:text-[#C2703D] transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Country */}
+              <div>
+                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                  Your country
+                </label>
+                <input
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  placeholder="e.g. Nigeria, Kenya, Ghana, South Africa..."
+                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* Career Goal */}
+              <div>
+                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                  Career goal{" "}
+                  <span className="text-[#F3EEE1]/20">(optional)</span>
+                </label>
+                <input
+                  value={careerGoal}
+                  onChange={(e) => setCareerGoal(e.target.value)}
+                  placeholder="e.g. AI Research Scientist, ML Engineer, Data Scientist..."
+                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Footer / Actions */}
+            <div className="border-t border-[#F3EEE1]/10 px-5 py-4 space-y-3">
+              <button
+                onClick={launchAgent}
+                disabled={!goal.trim() || loading}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-[#C9A227] px-6 py-3.5 text-sm font-semibold text-[#0B0E13] transition-all hover:-translate-y-0.5 disabled:opacity-30 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Launching
+                    agent...
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    <Rocket className="h-4 w-4" /> Launch autonomous agent
+                  </span>
+                )}
+              </button>
+
+              <div className="flex items-center justify-between">
+                <a
+                  href="/"
+                  className="inline-flex items-center gap-1 text-xs text-[#F3EEE1]/30 hover:text-[#F3EEE1]/60 transition-colors"
+                >
+                  <ArrowRight className="h-3 w-3 -rotate-180" /> Back to home
+                </a>
+                <span className="font-mono text-[9px] text-[#F3EEE1]/20">
+                  powered by Gemma 4
+                </span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Examples */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.7,
+              delay: 0.3,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="mt-10"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <Target
+                className="h-3.5 w-3.5 text-[#C2703D]"
+                strokeWidth={1.75}
+              />
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/30">
+                Try an example mission
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
+              {EXAMPLES.map((ex, i) => (
+                <button
+                  key={i}
+                  onClick={() => fillExample(ex)}
+                  className="group text-left rounded-sm border border-[#F3EEE1]/[0.06] bg-[#F3EEE1]/[0.02] px-4 py-2.5 text-xs text-[#F3EEE1]/30 hover:border-[#C9A227]/30 hover:bg-[#C9A227]/[0.04] hover:text-[#F3EEE1]/60 transition-all"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <span className="font-mono text-[9px] text-[#F3EEE1]/15">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    {ex.goal.length > 80 ? ex.goal.slice(0, 80) + "..." : ex.goal}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Stats bar */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.45 }}
+            className="mt-8 flex items-center justify-center gap-x-6 gap-y-2 font-mono text-[11px] text-[#F3EEE1]/25"
+          >
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-3 w-3 text-[#C9A227]/50" /> 12
+              specialized agents
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-3 w-3 text-[#3FA78E]/50" /> 10+ search
+              tools
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-3 w-3 text-[#C2703D]/50" /> No signup
+              required
+            </span>
+          </motion.div>
+        </div>
+      </main>
+    </div>
+  );
+}
