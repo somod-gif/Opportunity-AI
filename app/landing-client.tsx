@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
@@ -70,11 +70,7 @@ export function LandingClient() {
   const [demoLog, setDemoLog] = useState<Array<{ name: string; action: string; status: "pending" | "active" | "done" }>>([]);
   const [demoComplete, setDemoComplete] = useState(false);
 
-  const caseNumber = useMemo(() => {
-    const year = new Date().getFullYear();
-    const seq = String(Math.floor(Math.random() * 900) + 100);
-    return `FILE №${year}-${seq}`;
-  }, []);
+
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -158,7 +154,6 @@ export function LandingClient() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 w-full">
             <div className="grid lg:grid-cols-5 gap-10 lg:gap-14 items-start">
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }} className="lg:col-span-2 space-y-7 lg:sticky lg:top-28">
-                <div className="flex items-center gap-3"><Stamp label={caseNumber} pulse /></div>
                 <h1 className="text-[2.6rem] sm:text-5xl lg:text-[3.4rem] font-medium tracking-tight leading-[1.05]" style={{ fontFamily: "var(--font-display)" }}>
                   Your autonomous<span className="block italic text-[#C9A227]">career agent</span>
                   <span className="block text-[#F3EEE1]/40 text-lg sm:text-xl font-normal mt-3" style={{ fontFamily: "var(--font-body)" }}>For global opportunities</span>
@@ -333,6 +328,74 @@ export function LandingClient() {
           </div>
         </section>
 
+        {/* ARCHITECTURE & TECHNOLOGY */}
+        <section className="relative py-28 border-t border-[#F3EEE1]/[0.06]">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mb-14 max-w-2xl">
+              <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#C9A227]/50 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A227] -rotate-1">Engineering</span>
+              <h2 className="text-4xl sm:text-5xl font-medium tracking-tight mb-4" style={{ fontFamily: "var(--font-display)" }}>Architecture & <span className="italic text-[#C9A227]">technology</span></h2>
+            </motion.div>
+
+            {/* Badges grid */}
+            <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="flex flex-wrap gap-2 justify-center mb-14">
+              {[
+                ["Next.js 16", "Server components, App Router, Turbopack"],
+                ["TypeScript 5", "Strict mode, zero `any` types"],
+                ["Drizzle ORM", "8 PostgreSQL tables, typed queries"],
+                ["Gemma 4", "gemma-4-27b-it via OpenRouter + Google AI"],
+                ["Tailwind v4", "Utility-first styling, dark theme"],
+                ["shadcn/ui", "Radix primitives, Nova components"],
+                ["Framer Motion", "Spring animations, staggered reveals"],
+                ["SSE Streaming", "Real-time agent reasoning via EventSource"],
+                ["pgvector", "Semantic memory with cosine similarity"],
+                ["Function Calling", "Native tool selection via LLM"],
+                ["Docker", "Multi-stage build + docker-compose"],
+                ["5+ Tests", "Tool registry, memory, emitter, planner, embeddings"],
+              ].map(([name, desc], i) => (
+                <motion.div key={name} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.02 }}
+                  className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D] px-4 py-2.5 text-center min-w-[100px]">
+                  <p className="text-[13px] font-medium text-[#F3EEE1]" style={{ fontFamily: "var(--font-display)" }}>{name}</p>
+                  <p className="text-[11px] text-[#F3EEE1]/40 mt-0.5">{desc}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Architecture flow */}
+            <div className="grid lg:grid-cols-3 gap-4">
+              {[
+                { title: "Multi-Agent Coordinator", desc: "9 specialized sub-agents (Scholarship, Grant, Internship, Research, Competition, Web, Evaluation, Career Coach, Document) orchestrated by a Mission Commander. Each agent has its own role, tools, and decision-making logic.", items: ["State machine with validated phase transitions", "Event bus for decoupled communication", "12-iteration max loop with early termination"] },
+                { title: "Tool Registry + Function Calling", desc: "8 dynamically registered tools with Zod validation. The agent selects tools via native function calling API — not JSON prompting.", items: ["search_opportunities · web_search · eligibility_analyzer", "opportunity_ranking · gap_analysis · generate_document", "email_reminder · pdf_generator"] },
+                { title: "Persistent Memory + Semantic Search", desc: "Three-tier memory (episodic/semantic/procedural) with importance scoring, access tracking, and embedding-based retrieval.", items: ["Google text-embedding-004 for vector embeddings", "128-dim vectors stored in metadata JSONB", "Cosine similarity re-ranking on recall"] },
+                { title: "Dual AI Provider Architecture", desc: "Supports both OpenRouter (gemma-4-27b-it) and direct Google AI API switchable at runtime via AI_PROVIDER env var.", items: ["JSON mode for structured output", "Streaming support via SSE", "Exponential backoff retry logic"] },
+                { title: "SSE Real-Time Streaming", desc: "Server-Sent Events stream every agent decision — reasoning, tool selection, execution results, and memory updates — to the UI in real time.", items: ["Phase indicators (perceive/reason/plan/execute)", "Typewriter effect for reasoning text", "Auto-reconnect on disconnect"] },
+                { title: "Document Generation", desc: "AI generates application documents — resumes, cover letters, personal statements, checklists — tailored to each opportunity and user profile.", items: ["Markdown output with html2pdf.js", "Structured with user education, skills, experience", "Downloadable mission reports"] },
+              ].map((block, i) => (
+                <motion.div key={block.title} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.04, duration: 0.4 }}
+                  className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D] p-5">
+                  <h3 className="text-sm font-medium text-[#C9A227] mb-2" style={{ fontFamily: "var(--font-display)" }}>{block.title}</h3>
+                  <p className="text-xs text-[#F3EEE1]/50 leading-relaxed mb-3">{block.desc}</p>
+                  <ul className="space-y-1.5">
+                    {block.items.map((item) => (
+                      <li key={item} className="flex items-start gap-2 text-[12px] text-[#F3EEE1]/40">
+                        <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-[#C9A227]/50" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Gemma 4 badge */}
+            <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mt-10 text-center">
+              <a href="https://ai.google.dev/gemma" target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-[#C9A227]/30 bg-[#C9A227]/5 px-5 py-2 text-xs text-[#C9A227] hover:bg-[#C9A227]/10 transition-colors">
+                <Sparkles className="h-3.5 w-3.5" /> Built with <strong>Gemma 4</strong> — AI for Africa Hackathon 2026
+              </a>
+            </motion.div>
+          </div>
+        </section>
+
         {/* AGENTS */}
         <section id="agents" className="relative py-28 border-t border-[#F3EEE1]/[0.06]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -433,6 +496,7 @@ export function LandingClient() {
               <span className="text-xs font-medium text-[#F3EEE1]" style={{ fontFamily: "var(--font-display)" }}>Opportunity AI</span>
               <span className="font-mono text-[10px] text-[#F3EEE1]/25 uppercase tracking-wide">Est. 2026 · Powered by Gemma 4</span>
             </div>
+            <a href="https://github.com/somod-gif/Opportunity-AI" target="_blank" rel="noopener noreferrer" className="font-mono text-[10px] text-[#F3EEE1]/25 hover:text-[#C9A227]/70 transition-colors">View on GitHub →</a>
             <p className="font-mono text-[10px] text-[#F3EEE1]/25 text-center uppercase tracking-wide">Built for Build with Gemma: AI for Africa Hackathon 2026 — Best Autonomous AI Agent</p>
           </div>
         </div>

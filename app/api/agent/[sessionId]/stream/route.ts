@@ -15,12 +15,13 @@ export async function GET(
   const country = url.searchParams.get("country") || undefined;
   const careerGoal = url.searchParams.get("careerGoal") || undefined;
   const experienceLevel = url.searchParams.get("experienceLevel") || undefined;
+  const email = url.searchParams.get("email") || undefined;
 
   if (!goal) {
     return new Response("Missing goal parameter", { status: 400 });
   }
 
-  const mission: Mission = { goal, education, skills, country, careerGoal, experienceLevel };
+  const mission: Mission = { goal, education, skills, country, careerGoal, experienceLevel, email };
   const emitter = new SSEEmitter();
   const coordinator = new MultiAgentCoordinator(sessionId, mission, emitter);
 

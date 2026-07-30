@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
@@ -141,6 +141,7 @@ export default function MissionPage() {
   const [skillInput, setSkillInput] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [experienceLevel, setExperienceLevel] = useState("");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
   // CV upload
@@ -184,11 +185,7 @@ export default function MissionPage() {
     setCvParsing(false);
   }
 
-  const caseNumber = useMemo(() => {
-    const year = new Date().getFullYear();
-    const seq = String(Math.floor(Math.random() * 900) + 100);
-    return `MISSION №${year}-${seq}`;
-  }, []);
+
 
   function addSkill() {
     const s = skillInput.trim();
@@ -221,6 +218,7 @@ export default function MissionPage() {
     if (country.trim()) params.set("country", country.trim());
     if (careerGoal.trim()) params.set("careerGoal", careerGoal.trim());
     if (experienceLevel) params.set("experienceLevel", experienceLevel);
+    if (email.trim()) params.set("email", email.trim());
     router.push(`/agent/${sessionId}?${params.toString()}`);
   }
 
@@ -266,9 +264,6 @@ export default function MissionPage() {
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             className="text-center mb-10"
           >
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <Stamp label={caseNumber} pulse />
-            </div>
             <h1
               className="text-[2.4rem] sm:text-[3rem] font-medium tracking-tight leading-[1.05]"
               style={{ fontFamily: "var(--font-display)" }}
@@ -500,6 +495,21 @@ export default function MissionPage() {
                   <option value="lead" className="bg-[#12161D]">Lead / Manager</option>
                   <option value="executive" className="bg-[#12161D]">Executive</option>
                 </select>
+              </div>
+
+              {/* Email (for reminders) */}
+              <div>
+                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                  Email{" "}
+                  <span className="text-[#F3EEE1]/20">(for deadline reminders)</span>
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
+                />
               </div>
             </div>
 

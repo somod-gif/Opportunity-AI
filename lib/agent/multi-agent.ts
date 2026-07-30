@@ -343,7 +343,7 @@ Only include agents that are relevant to this specific mission.`;
       document: { tool: "generate_document", params: { type: "resume", opportunityTitle: this.mission.goal, opportunityProvider: "", opportunityType: "", opportunityDescription: "", opportunityEligibility: "", opportunityDeadline: null } },
       application: { tool: "generate_document", params: { type: "cover-letter", opportunityTitle: this.mission.goal, opportunityProvider: "", opportunityType: "", opportunityDescription: "", opportunityEligibility: "", opportunityDeadline: null } },
       verification: { tool: "web_search", params: { query: `verify ${this.mission.goal}` } },
-      deadline: { tool: "email_reminder", params: { opportunityTitle: this.mission.goal, reminderType: "deadline", message: "Follow up on opportunities", dueAt: new Date(Date.now() + 7 * 86400000).toISOString() } },
+      deadline: { tool: "email_reminder", params: { opportunityTitle: this.mission.goal, reminderType: "deadline", message: "Follow up on opportunities", dueAt: new Date(Date.now() + 7 * 86400000).toISOString(), email: this.mission.email } },
     };
     return agentToolMap[agent.id] || { tool: "search_opportunities", params: { types: ["scholarship", "fellowship", "internship", "grant"], limit: 20 } };
   }
