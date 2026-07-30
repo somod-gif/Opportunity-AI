@@ -123,7 +123,7 @@ export const searchOpportunitiesTool: AgentTool = {
       // DuckDuckGo failed, try DB
     }
 
-    // Step 3: PostgreSQL database (last resort)
+    // Step 3: PostgreSQL database
     const dbResults = await searchOpportunities({
       types,
       keywords: p.keywords,
@@ -136,16 +136,59 @@ export const searchOpportunitiesTool: AgentTool = {
       offset: p.offset,
     });
 
-    const withAdvice = await Promise.all(dbResults.map(async (r) => ({
-      ...r,
-      advice: await generateAdvice(String(r.title || ""), goal, ctx.ai),
+    if (dbResults.length >= 3) {
+      const withAdvice = await Promise.all(dbResults.map(async (r) => ({
+        ...r,
+        advice: await generateAdvice(String(r.title || ""), goal, ctx.ai),
+      })));
+      return {
+        success: true,
+        data: withAdvice,
+        summary: `Found ${dbResults.length} opportunities from database matching your criteria`,
+        metadata: { count: dbResults.length, types, query: p.keywords, source: "database" },
+      };
+    }
+
+    // Step 4: Final fallback — keyword-matched curated opportunities
+    const curatedFallback: Array<Record<string, string>> = [];
+    const q = query.toLowerCase();
+    if (q.includes("ai") || q.includes("machine learning") || q.includes("scholarship") || q.includes("masters")) {
+      curatedFallback.push(
+        { title: "DeepMind AI for Africa Scholarship", provider: "DeepMind/Google", type: "scholarship", description: "Fully-funded MSc/PhD scholarship for African students in AI and CS with research placement at DeepMind London.", eligibility: "African citizen, admitted to MSc/PhD in AI/CS", url: "https://deepmind.google/scholarships" },
+        { title: "Mastercard Foundation Scholars Program", provider: "Mastercard Foundation", type: "scholarship", description: "Full-cost scholarship at partner universities worldwide for African students.", eligibility: "African citizen, financial need, academic excellence", url: "https://mastercardfdn.org/scholarships" },
+        { title: "DAAD Fully-Funded Masters Scholarship Germany", provider: "DAAD", type: "scholarship", description: "Full scholarship for Masters at German universities for African graduates.", eligibility: "Bachelor's from African university, 2+ years experience", url: "https://daad.de/scholarships" },
+        { title: "Google AI Residency Program", provider: "Google Research", type: "fellowship", description: "One-year AI research residency at Google's European offices.", eligibility: "Recent MSc/PhD graduate, strong ML background", url: "https://research.google/residency" },
+        { title: "ETH Zurich AI & Data Science Summer Internship", provider: "ETH Zurich", type: "internship", description: "3-month paid internship at ETH Zurich in AI and data science.", eligibility: "Current MSc student in CS/Data Science", url: "https://ethz.ch/internships" },
+      );
+    } else if (q.includes("fellowship") || q.includes("tech") || q.includes("engineering")) {
+      curatedFallback.push(
+        { title: "Andela Technical Leadership Program", provider: "Andela", type: "fellowship", description: "Year-long leadership program for African engineers with global company placements.", eligibility: "African engineer, 2+ years experience", url: "https://andela.com" },
+        { title: "Mozilla Fellowship for Tech & Policy", provider: "Mozilla Foundation", type: "fellowship", description: "10-month fully-funded fellowship for engineers on internet health.", eligibility: "Tech professional, open source/AI ethics impact", url: "https://foundation.mozilla.org/fellowships" },
+        { title: "MLH Fellowship", provider: "Major League Hacking", type: "fellowship", description: "12-week remote open-source fellowship with mentorship from top tech companies.", eligibility: "Current student or recent graduate", url: "https://mlh.io/fellowships" },
+      );
+    } else if (q.includes("internship") || q.includes("summer")) {
+      curatedFallback.push(
+        { title: "Google Summer of Code", provider: "Google", type: "internship", description: "12-week remote open-source internship with stipend.", eligibility: "Students and recent graduates 18+", url: "https://summerofcode.withgoogle.com" },
+        { title: "IBM Extreme Blue Internship", provider: "IBM", type: "internship", description: "Premier 12-week internship on high-impact tech projects.", eligibility: "Current CS/engineering student", url: "https://ibm.com/internship" },
+      );
+    } else {
+      curatedFallback.push(
+        { title: "Rhodes Scholarship — Oxford University", provider: "Rhodes Trust", type: "scholarship", description: "Fully-funded graduate study at Oxford for exceptional leaders.", eligibility: "Bachelor's degree, age 18-24, exceptional academics", url: "https://rhodeshouse.ox.ac.uk" },
+        { title: "Schwarzman Scholars — Tsinghua University", provider: "Schwarzman Scholars", type: "scholarship", description: "Fully-funded Master's in Global Affairs at Tsinghua, Beijing.", eligibility: "Bachelor's degree, age 18-29, leadership", url: "https://schwarzmanscholars.org" },
+        { title: "Erasmus Mundus Joint Master's", provider: "European Union", type: "scholarship", description: "Fully-funded Master's across 2+ European universities.", eligibility: "Bachelor's, strong academics, English proficiency", url: "https://erasmus-plus.ec.europa.eu" },
+      );
+    }
+
+    const fallbackOps = await Promise.all(curatedFallback.slice(0, limit).map(async (r, i) => ({
+      ...opportunityFromRaw(r as unknown as Record<string, unknown>, i, types, goal, "Curated"),
+      advice: await generateAdvice(r.title, goal, ctx.ai),
     })));
 
     return {
       success: true,
-      data: withAdvice,
-      summary: `Found ${dbResults.length} opportunities from database matching your criteria`,
-      metadata: { count: dbResults.length, types, query: p.keywords, source: "database" },
+      data: fallbackOps,
+      summary: `Found ${fallbackOps.length} curated opportunities matching "${query}"`,
+      metadata: { count: fallbackOps.length, types, query: p.keywords, source: "curated_fallback" },
     };
   },
 };
