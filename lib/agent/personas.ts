@@ -9,7 +9,7 @@ export interface AgentPersona {
   id: string;
   name: string;
   role: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
   color: string;
   gradient: string;
   tools: string[];

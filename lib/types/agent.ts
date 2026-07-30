@@ -21,6 +21,7 @@ export interface Mission {
   skills?: string[];
   country?: string;
   careerGoal?: string;
+  experienceLevel?: string;
   preferredTypes?: string[];
   preferredRegions?: string[];
 }

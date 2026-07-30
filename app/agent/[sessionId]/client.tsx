@@ -6,10 +6,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Bot, Loader2, CheckCircle2, XCircle, ArrowRight, AlertCircle, Cpu, Sparkles, Clock,
   Eye, Brain, Target, Search, Database, Shield, FileText, BarChart3, Activity, Lightbulb,
-  ChevronRight, Globe, Award, Star, Zap, GraduationCap, Radio, Terminal, ScanLine
+  ChevronRight, Globe, Award, Star, Zap, GraduationCap, Radio, Terminal,
+  Stamp as StampIcon,
 } from "lucide-react";
 import { AGENT_PERSONAS, resolvePersonaForTool, resolvePersona } from "@/lib/agent/personas";
 import type { MissionReport, SubAgentStatus } from "@/lib/types";
+
+const BRASS = "#C9A227";
+const SIGNAL = "#3FA78E";
+const OCHRE = "#C2703D";
 
 interface PhaseEvent { phase: string; iteration: number; agent?: string }
 interface ThoughtEvent { content: string }
@@ -25,10 +30,15 @@ function formatTime(ms: number) {
   return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
-function AgentIcon({ id }: { id: string }) {
-  const p = resolvePersona(id);
-  const Icon = p.icon;
-  return <Icon className={`h-3.5 w-3.5 ${p.color}`} />;
+function GrainOverlay() {
+  return (
+    <svg className="pointer-events-none fixed inset-0 z-50 h-full w-full opacity-[0.025] mix-blend-overlay" aria-hidden="true">
+      <filter id="grain-agent">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch" />
+      </filter>
+      <rect width="100%" height="100%" filter="url(#grain-agent)" />
+    </svg>
+  );
 }
 
 export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: string }) {
@@ -91,12 +101,8 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
         addLog(`${p.name} completed`, "done");
         setSubAgents(prev => prev.map(a => a.id === agentId ? { ...a, status: "complete" as const } : a));
       }
-      if (data.phase === "tool_execute") {
-        addLog("Executing tool...", "tool");
-      }
-      if (data.phase === "memory") {
-        addLog("Storing to memory", "info");
-      }
+      if (data.phase === "tool_execute") addLog("Executing tool...", "tool");
+      if (data.phase === "memory") addLog("Storing to memory", "info");
     });
 
     source.addEventListener("thought", (e: MessageEvent) => {
@@ -190,52 +196,57 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
 
   if (!goal) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen bg-[#0B0E13] flex items-center justify-center">
         <div className="text-center space-y-4">
-          <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground/50" />
-          <h2 className="text-lg font-semibold">No mission specified</h2>
-          <button onClick={() => router.push("/mission")} className="btn-primary px-6 py-2.5 text-sm rounded-xl">Go to Mission</button>
+          <AlertCircle className="mx-auto h-12 w-12 text-[#F3EEE1]/30" strokeWidth={1.5} />
+          <h2 className="text-lg font-medium text-[#F3EEE1]" style={{ fontFamily: "var(--font-display)" }}>No mission specified</h2>
+          <button onClick={() => router.push("/mission")} className="rounded-sm bg-[#C9A227] px-6 py-2.5 text-sm font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all">
+            Go to Mission
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* SCAN LINES */}
-      <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.015]" style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px)" }} />
+    <div className="min-h-screen bg-[#0B0E13] text-[#F3EEE1]">
+      <GrainOverlay />
+      <div className="pointer-events-none fixed -top-40 right-0 z-0 h-[560px] w-[560px] rounded-full bg-[#C9A227]/[0.06] blur-[140px]" />
+      <div className="pointer-events-none fixed -bottom-40 left-0 z-0 h-[400px] w-[400px] rounded-full bg-[#3FA78E]/[0.04] blur-[120px]" />
 
       <div className="mx-auto max-w-7xl px-3 py-3 space-y-3 relative z-10">
         {/* TOP BAR */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-border bg-muted/80 backdrop-blur-xl px-4 py-2.5">
+          className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D]/90 backdrop-blur-xl px-4 py-2.5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#7C3AED]/30 to-[#7C3AED]/5 border border-[#7C3AED]/20">
-                <Bot className="h-4 w-4 text-[#7C3AED]" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-sm border border-[#C9A227]/30 bg-[#C9A227]/10">
+                <StampIcon className="h-4 w-4 text-[#C9A227]" strokeWidth={1.75} />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-foreground">AGENT_CTRL</span>
+                  <span className="text-xs font-semibold text-[#F3EEE1] font-mono">AGENT_CTRL</span>
                   {!completed && !error && (
-                    <span className="inline-flex items-center gap-1 rounded border border-[#22C55E]/30 bg-[#22C55E]/10 px-1.5 py-0.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E] animate-pulse" />
-                      <span className="text-[11px] font-mono text-[#22C55E]">LIVE</span>
+                    <span className="inline-flex items-center gap-1 rounded-sm border border-[#3FA78E]/30 bg-[#3FA78E]/10 px-1.5 py-0.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#3FA78E] animate-pulse" />
+                      <span className="text-[11px] font-mono text-[#3FA78E]">LIVE</span>
                     </span>
                   )}
                 </div>
-                <p className="text-[13px] text-muted-foreground truncate max-w-[200px] sm:max-w-md">{goal}</p>
+                <p className="text-[13px] text-[#F3EEE1]/50 truncate max-w-[200px] sm:max-w-md">{goal}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-[12px] font-mono text-muted-foreground/80 shrink-0">
-              <span className="hidden sm:flex items-center gap-1"><Cpu className="h-3 w-3" /> ITR {currentIteration}/12</span>
-              <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {formatTime(elapsed * 1000)}</span>
-              <span className="hidden sm:flex items-center gap-1"><Activity className="h-3 w-3" /> T{completedCount + failedCount}</span>
+            <div className="flex items-center gap-2 text-[12px] font-mono text-[#F3EEE1]/40 shrink-0">
+              <span className="hidden sm:flex items-center gap-1"><Cpu className="h-3 w-3" strokeWidth={1.75} /> ITR {currentIteration}/12</span>
+              <span className="flex items-center gap-1"><Clock className="h-3 w-3" strokeWidth={1.75} /> {formatTime(elapsed * 1000)}</span>
+              <span className="hidden sm:flex items-center gap-1"><Activity className="h-3 w-3" strokeWidth={1.75} /> T{completedCount + failedCount}</span>
               {completed && (
                 <motion.button initial={{ scale: 0.9 }} animate={{ scale: 1 }}
                   onClick={() => router.push(`/dashboard/${sessionId}`)}
-                  className="flex items-center gap-1 rounded-md bg-[#7C3AED]/20 px-2 py-1 text-[11px] font-medium text-[#7C3AED] hover:bg-[#7C3AED]/30">DASH <ArrowRight className="h-2.5 w-2.5" /></motion.button>
+                  className="flex items-center gap-1 rounded-sm bg-[#C9A227]/20 px-2 py-1 text-[11px] font-medium text-[#C9A227] hover:bg-[#C9A227]/30 transition-all">
+                  DASH <ArrowRight className="h-2.5 w-2.5" strokeWidth={2} />
+                </motion.button>
               )}
             </div>
           </div>
@@ -245,9 +256,9 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
         <div className="grid lg:grid-cols-12 gap-3">
           {/* LEFT: Agent Pipeline + Terminal */}
           <div className="lg:col-span-8 space-y-3">
-            {/* Agent Pipeline - Horizontal Flow */}
+            {/* Agent Pipeline */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="rounded-xl border border-border bg-muted/60 backdrop-blur-xl p-2.5 overflow-x-auto">
+              className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D]/60 backdrop-blur-xl p-2.5 overflow-x-auto">
               <div className="flex items-center gap-1 min-w-max">
                 {["scholarship", "grant", "internship", "research", "web", "eligibility", "career", "document", "application"].map((id, i) => {
                   const p = resolvePersona(id);
@@ -256,19 +267,21 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                   const isDone = toolCalls.some(tc => resolvePersonaForTool(tc.tool).id === id);
                   return (
                     <div key={id} className="flex items-center gap-1">
-                      <div className={`flex items-center gap-1.5 rounded-lg border px-2 py-1.5 transition-all ${
-                        isActive ? "border-[#7C3AED]/40 bg-[#7C3AED]/10 shadow-lg shadow-[#7C3AED]/10" :
-                        isDone ? "border-[#22C55E]/20 bg-[#22C55E]/5" : "border-border/30 bg-muted/20"
+                      <div className={`flex items-center gap-1.5 rounded-sm border px-2 py-1.5 transition-all ${
+                        isActive ? "border-[#C9A227]/40 bg-[#C9A227]/10" :
+                        isDone ? "border-[#3FA78E]/20 bg-[#3FA78E]/5" : "border-[#F3EEE1]/[0.06] bg-transparent"
                       }`}>
-                        <div className={`flex h-5 w-5 items-center justify-center rounded ${isActive ? "bg-[#7C3AED]/20" : isDone ? "bg-[#22C55E]/10" : "bg-muted/40"}`}>
-                          {isDone ? <CheckCircle2 className="h-3 w-3 text-[#22C55E]" /> : <Icon className={`h-3 w-3 ${p.color} ${isActive ? "animate-pulse" : ""}`} />}
+                        <div className={`flex h-5 w-5 items-center justify-center rounded-sm ${isActive ? "bg-[#C9A227]/20" : isDone ? "bg-[#3FA78E]/10" : "bg-[#F3EEE1]/[0.04]"}`}>
+                          {isDone ? <CheckCircle2 className="h-3 w-3 text-[#3FA78E]" strokeWidth={2} /> : <Icon className={`h-3 w-3 ${isActive ? "text-[#C9A227] animate-pulse" : "text-[#F3EEE1]/40"}`} strokeWidth={1.75} />}
                         </div>
                         <div className="hidden sm:block">
-                          <p className={`text-[12px] font-semibold leading-tight ${isActive ? "text-foreground" : isDone ? "text-[#22C55E]/70" : "text-muted-foreground/80"}`}>{p.name.split(" ")[0]}</p>
+                          <p className={`text-[12px] font-semibold leading-tight ${isActive ? "text-[#F3EEE1]" : isDone ? "text-[#3FA78E]/70" : "text-[#F3EEE1]/40"}`}>
+                            {p.name.split(" ")[0]}
+                          </p>
                         </div>
-                        {isActive && <motion.div animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 1, repeat: Infinity }} className="h-1.5 w-1.5 rounded-full bg-[#7C3AED]" />}
+                        {isActive && <motion.div animate={{ scale: [1, 1.5, 1] }} transition={{ duration: 1, repeat: Infinity }} className="h-1.5 w-1.5 rounded-full bg-[#C9A227]" />}
                       </div>
-                      {i < 8 && <ChevronRight className={`h-2.5 w-2.5 ${isDone ? "text-[#22C55E]/40" : "text-muted-foreground/80/20"} shrink-0`} />}
+                      {i < 8 && <ChevronRight className={`h-2.5 w-2.5 ${isDone ? "text-[#3FA78E]/40" : "text-[#F3EEE1]/[0.06]"} shrink-0`} strokeWidth={1.5} />}
                     </div>
                   );
                 })}
@@ -277,32 +290,32 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
 
             {/* CURRENT AGENT STATUS CARD */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              className="rounded-xl border border-[#7C3AED]/20 bg-card shadow-lg shadow-[#7C3AED]/5 p-3">
+              className="rounded-sm border border-[#C9A227]/20 bg-[#12161D] p-3">
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${currentPersona.gradient} border border-border`}>
-                  <currentPersona.icon className={`h-5 w-5 ${currentPersona.color}`} />
+                <div className="flex h-10 w-10 items-center justify-center rounded-sm border border-[#C9A227]/30 bg-[#C9A227]/10">
+                  <currentPersona.icon className="h-5 w-5 text-[#C9A227]" strokeWidth={1.75} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold">{activeSubAgent?.name || currentPersona.name}</span>
+                    <span className="text-sm font-semibold text-[#F3EEE1]">{activeSubAgent?.name || currentPersona.name}</span>
                     {!completed && !error && (
                       <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
-                        className="text-[11px] font-mono text-[#7C3AED] px-1.5 py-0.5 rounded bg-[#7C3AED]/10 border border-[#7C3AED]/20">
+                        className="text-[11px] font-mono text-[#C9A227] px-1.5 py-0.5 rounded-sm bg-[#C9A227]/10 border border-[#C9A227]/20">
                         {currentPhaseVal.replace("agent:", "").replace("complete:", "").toUpperCase()}
                       </motion.span>
                     )}
                   </div>
-                  <p className="text-[13px] text-muted-foreground">{activeSubAgent?.currentTask || currentPersona.description}</p>
+                  <p className="text-[13px] text-[#F3EEE1]/50">{activeSubAgent?.currentTask || currentPersona.description}</p>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-[#7C3AED]">
+                  <div className="text-lg font-bold text-[#C9A227]" style={{ fontFamily: "var(--font-mono)" }}>
                     {completed ? 100 : subAgents.find(a => a.status === "complete") ? Math.min(95, subAgents.filter(a => a.status === "complete").length * 8 + 10) : 10}%
                   </div>
-                  <p className="text-[11px] text-muted-foreground/80 font-mono">COMPLETE</p>
+                  <p className="text-[11px] text-[#F3EEE1]/40 font-mono">COMPLETE</p>
                 </div>
               </div>
-              <div className="mt-2.5 h-1 w-full rounded-full bg-muted/50 overflow-hidden">
-                <motion.div className="h-full rounded-full bg-gradient-to-r from-[#7C3AED] to-[#8B5CF6]"
+              <div className="mt-2.5 h-1 w-full rounded-full bg-[#F3EEE1]/[0.06] overflow-hidden">
+                <motion.div className="h-full rounded-full bg-gradient-to-r from-[#C9A227] to-[#C9A227]/60"
                   initial={{ width: "0%" }}
                   animate={{ width: `${Math.min(100, (subAgents.filter(a => a.status === "complete").length / 9) * 100)}%` }}
                   transition={{ duration: 0.5, ease: "easeOut" }} />
@@ -310,53 +323,52 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
             </motion.div>
 
             {/* TERMINAL OUTPUT */}
-            <div className="rounded-xl border border-border bg-background overflow-hidden shadow-inner">
-              <div className="flex items-center justify-between border-b border-border px-3 py-2 bg-muted/50">
+            <div className="rounded-sm border border-[#F3EEE1]/10 bg-[#0B0E13] overflow-hidden">
+              <div className="flex items-center justify-between border-b border-[#F3EEE1]/10 px-3 py-2 bg-[#12161D]/50">
                 <div className="flex items-center gap-2">
-                  <Terminal className="h-3 w-3 text-[#22C55E]" />
-                  <span className="text-[12px] font-semibold text-[#22C55E] font-mono">agent_terminal</span>
+                  <Terminal className="h-3 w-3 text-[#3FA78E]" strokeWidth={1.75} />
+                  <span className="text-[12px] font-semibold text-[#3FA78E] font-mono">agent_terminal</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-[#22C55E]/50" />
-                  <span className="h-2 w-2 rounded-full bg-[#F59E0B]/50" />
-                  <span className="h-2 w-2 rounded-full bg-[#EF4444]/50" />
+                  <span className="h-2 w-2 rounded-full bg-[#3FA78E]/50" />
+                  <span className="h-2 w-2 rounded-full bg-[#C9A227]/50" />
+                  <span className="h-2 w-2 rounded-full bg-[#C2703D]/50" />
                 </div>
               </div>
-              <div className="p-3 space-y-1 max-h-[280px] overflow-y-auto font-mono" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                {/* Connecting */}
+              <div className="p-3 space-y-1 max-h-[280px] overflow-y-auto font-mono text-[13px] leading-relaxed">
                 {connecting && (
-                  <div className="flex items-center gap-2 text-[13px] text-[#22C55E]">
+                  <div className="flex items-center gap-2 text-[#3FA78E]">
                     <Loader2 className="h-3 w-3 animate-spin" />
                     <span>$ connecting to gemma-4-27b-it...</span>
                   </div>
                 )}
 
-                {/* Current reasoning streaming */}
                 {currentThought && !completed && !error && (
-                  <div className="text-[13px] text-[#22C55E]/90 leading-relaxed py-1">
-                    <span className="text-muted-foreground/80">$ </span>{currentThought}
-                    <motion.span animate={{ opacity: [1, 0] }} transition={{ duration: 0.8, repeat: Infinity }} className="text-[#22C55E]">_</motion.span>
+                  <div className="text-[#3FA78E]/90 py-1">
+                    <span className="text-[#F3EEE1]/40">$ </span>{currentThought}
+                    <motion.span animate={{ opacity: [1, 0] }} transition={{ duration: 0.8, repeat: Infinity }} className="text-[#3FA78E]">_</motion.span>
                   </div>
                 )}
 
-                {/* Log entries */}
                 {log.slice(-15).map((entry, i) => (
-                  <div key={i} className={`text-[13px] leading-relaxed ${
-                    entry.type === "done" ? "text-[#22C55E]" : entry.type === "error" ? "text-[#EF4444]" : entry.type === "tool" ? "text-[#7C3AED]" : "text-muted-foreground"
+                  <div key={i} className={`${
+                    entry.type === "done" ? "text-[#3FA78E]" :
+                    entry.type === "error" ? "text-[#C2703D]" :
+                    entry.type === "tool" ? "text-[#C9A227]" : "text-[#F3EEE1]/50"
                   }`}>
-                    <span className="text-muted-foreground/80">[{entry.time}]</span> $ {entry.msg}
+                    <span className="text-[#F3EEE1]/20">[{entry.time}]</span> $ {entry.msg}
                   </div>
                 ))}
 
                 {completed && (
-                  <div className="text-[13px] text-[#22C55E] font-bold py-1">
-                    <span className="text-muted-foreground/80">$ </span>mission_complete ✓
+                  <div className="text-[#3FA78E] font-bold py-1">
+                    <span className="text-[#F3EEE1]/40">$ </span>mission_complete ✓
                   </div>
                 )}
 
                 {error && (
-                  <div className="text-[13px] text-[#EF4444] py-1">
-                    <span className="text-muted-foreground/80">$ </span>error: {error}
+                  <div className="text-[#C2703D] py-1">
+                    <span className="text-[#F3EEE1]/40">$ </span>error: {error}
                   </div>
                 )}
 
@@ -368,11 +380,13 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
           {/* RIGHT: Agent Roster + Memory */}
           <div className="lg:col-span-4 space-y-3">
             {/* AGENT ROSTER */}
-            <div className="rounded-xl border border-border bg-muted/60 backdrop-blur-xl p-2.5">
+            <div className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D]/60 backdrop-blur-xl p-2.5">
               <div className="flex items-center gap-1.5 mb-2 px-1">
-                <Radio className="h-3 w-3 text-[#7C3AED]" />
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Agent Roster</span>
-                <span className="ml-auto text-[11px] font-mono text-muted-foreground/80">{subAgents.filter(a => a.status === "complete").length}/{toolCalls.length > 0 ? toolCalls.length + 1 : 9}</span>
+                <Radio className="h-3 w-3 text-[#C9A227]" strokeWidth={1.75} />
+                <span className="text-[11px] font-semibold text-[#F3EEE1]/50 uppercase tracking-wider font-mono">Agent Roster</span>
+                <span className="ml-auto text-[11px] font-mono text-[#F3EEE1]/40">
+                  {subAgents.filter(a => a.status === "complete").length}/{toolCalls.length > 0 ? toolCalls.length + 1 : 9}
+                </span>
               </div>
               <div className="space-y-1">
                 {["scholarship", "grant", "internship", "research", "web", "eligibility", "career", "document", "application"].map((id) => {
@@ -381,19 +395,20 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                   const isActive = activeSubAgent?.id === id || activeAgentId === id;
                   const isDone = toolCalls.some(tc => resolvePersonaForTool(tc.tool).id === id);
                   return (
-                    <div key={id} className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 transition-all ${
-                      isActive ? "bg-[#7C3AED]/10 border border-[#7C3AED]/20" : isDone ? "bg-[#22C55E]/5 border border-[#22C55E]/10" : "border border-transparent opacity-40"
+                    <div key={id} className={`flex items-center gap-2 rounded-sm px-2.5 py-1.5 transition-all ${
+                      isActive ? "bg-[#C9A227]/10 border border-[#C9A227]/20" :
+                      isDone ? "bg-[#3FA78E]/5 border border-[#3FA78E]/10" : "border border-transparent opacity-40"
                     }`}>
-                      <div className={`flex h-6 w-6 items-center justify-center rounded-md ${isActive ? "bg-[#7C3AED]/20" : isDone ? "bg-[#22C55E]/10" : "bg-muted/40"}`}>
-                        {isDone ? <CheckCircle2 className="h-3 w-3 text-[#22C55E]" /> : <Icon className={`h-3 w-3 ${p.color} ${isActive ? "animate-pulse" : ""}`} />}
+                      <div className={`flex h-6 w-6 items-center justify-center rounded-sm ${isActive ? "bg-[#C9A227]/20" : isDone ? "bg-[#3FA78E]/10" : "bg-[#F3EEE1]/[0.04]"}`}>
+                        {isDone ? <CheckCircle2 className="h-3 w-3 text-[#3FA78E]" strokeWidth={2} /> : <Icon className={`h-3 w-3 ${isActive ? "text-[#C9A227] animate-pulse" : "text-[#F3EEE1]/40"}`} strokeWidth={1.75} />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className={`text-[12px] font-medium ${isActive ? "text-foreground" : isDone ? "text-[#22C55E]/70" : "text-muted-foreground/80"}`}>
+                          <span className={`text-[12px] font-medium ${isActive ? "text-[#F3EEE1]" : isDone ? "text-[#3FA78E]/70" : "text-[#F3EEE1]/40"}`}>
                             {p.name.split(" ")[0]}
                           </span>
-                          {isActive && <Loader2 className="h-2.5 w-2.5 text-[#7C3AED] animate-spin" />}
-                            {isDone && <CheckCircle2 className="h-2.5 w-2.5 text-[#22C55E]/50" />}
+                          {isActive && <Loader2 className="h-2.5 w-2.5 text-[#C9A227] animate-spin" />}
+                          {isDone && <CheckCircle2 className="h-2.5 w-2.5 text-[#3FA78E]/50" strokeWidth={2} />}
                         </div>
                       </div>
                     </div>
@@ -405,21 +420,21 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
             {/* STATS */}
             {toolResults.length > 0 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="rounded-xl border border-border bg-muted/60 backdrop-blur-xl p-2.5">
+                className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D]/60 backdrop-blur-xl p-2.5">
                 <div className="flex items-center gap-1.5 mb-2 px-1">
-                  <BarChart3 className="h-3 w-3 text-[#8B5CF6]" />
-                  <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Telemetry</span>
+                  <BarChart3 className="h-3 w-3 text-[#3FA78E]" strokeWidth={1.75} />
+                  <span className="text-[11px] font-semibold text-[#F3EEE1]/50 uppercase tracking-wider font-mono">Telemetry</span>
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
                   {[
-                    { label: "AGENTS", value: `${subAgents.filter(a => a.status === "complete").length}/9`, color: "text-[#7C3AED]" },
-                    { label: "TOOLS", value: `${completedCount + failedCount}`, color: "text-foreground" },
-                    { label: "SUCCESS", value: completedCount + failedCount > 0 ? `${Math.round(completedCount / (completedCount + failedCount) * 100)}%` : "0%", color: "text-[#22C55E]" },
-                    { label: "ELAPSED", value: formatTime(elapsed * 1000), color: "text-muted-foreground" },
+                    { label: "AGENTS", value: `${subAgents.filter(a => a.status === "complete").length}/9`, color: "text-[#C9A227]" },
+                    { label: "TOOLS", value: `${completedCount + failedCount}`, color: "text-[#F3EEE1]" },
+                    { label: "SUCCESS", value: completedCount + failedCount > 0 ? `${Math.round(completedCount / (completedCount + failedCount) * 100)}%` : "0%", color: "text-[#3FA78E]" },
+                    { label: "ELAPSED", value: formatTime(elapsed * 1000), color: "text-[#F3EEE1]/50" },
                   ].map(s => (
-                    <div key={s.label} className="rounded-lg bg-background/50 border border-border/40 px-2.5 py-2">
+                    <div key={s.label} className="rounded-sm bg-[#0B0E13]/50 border border-[#F3EEE1]/[0.06] px-2.5 py-2">
                       <p className={`text-sm font-bold font-mono ${s.color}`}>{s.value}</p>
-                      <p className="text-[11px] text-muted-foreground/80 font-mono mt-0.5">{s.label}</p>
+                      <p className="text-[11px] text-[#F3EEE1]/40 font-mono mt-0.5">{s.label}</p>
                     </div>
                   ))}
                 </div>
@@ -427,23 +442,23 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
             )}
 
             {/* MEMORY QUICK VIEW */}
-            <div className="rounded-xl border border-border bg-muted/60 backdrop-blur-xl p-2.5">
+            <div className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D]/60 backdrop-blur-xl p-2.5">
               <div className="flex items-center gap-1.5 mb-2 px-1">
-                <Database className="h-3 w-3 text-[#8B5CF6]" />
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Memory Buffer</span>
+                <Database className="h-3 w-3 text-[#3FA78E]" strokeWidth={1.75} />
+                <span className="text-[11px] font-semibold text-[#F3EEE1]/50 uppercase tracking-wider font-mono">Memory Buffer</span>
               </div>
               <div className="space-y-1 max-h-[120px] overflow-y-auto">
                 {memories.length === 0 && (
-                  <p className="text-[12px] text-muted-foreground/80 px-1">
+                  <p className="text-[12px] text-[#F3EEE1]/40 px-1">
                     {completed ? "No memories stored" : "Awaiting memory writes..."}
                   </p>
                 )}
                 {memories.slice(-4).reverse().flatMap((m, i) =>
                   m.memories.slice(0, 1).map((mem, j) => (
-                    <div key={`${i}-${j}`} className="flex items-center gap-2 rounded bg-background/50 border border-border/40 px-2 py-1.5">
-                      <Database className="h-2.5 w-2.5 text-[#8B5CF6]/50 shrink-0" />
-                      <span className="text-[11px] text-muted-foreground truncate flex-1 font-mono">{mem.key}</span>
-                      <span className="text-[13px] text-muted-foreground/80 font-mono">{Math.round(mem.importance * 100)}%</span>
+                    <div key={`${i}-${j}`} className="flex items-center gap-2 rounded-sm bg-[#0B0E13]/50 border border-[#F3EEE1]/[0.06] px-2 py-1.5">
+                      <Database className="h-2.5 w-2.5 text-[#3FA78E]/50 shrink-0" strokeWidth={1.5} />
+                      <span className="text-[11px] text-[#F3EEE1]/50 truncate flex-1 font-mono">{mem.key}</span>
+                      <span className="text-[13px] text-[#F3EEE1]/40 font-mono">{Math.round(mem.importance * 100)}%</span>
                     </div>
                   ))
                 )}
@@ -454,30 +469,30 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
             <AnimatePresence>
               {completed && missionReport && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  className="rounded-xl border border-[#22C55E]/20 bg-[#22C55E]/5 p-3">
+                  className="rounded-sm border border-[#3FA78E]/20 bg-[#3FA78E]/5 p-3">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <CheckCircle2 className="h-4 w-4 text-[#22C55E]" />
-                    <span className="text-[12px] font-semibold text-[#22C55E] uppercase tracking-wider">Mission Complete</span>
+                    <CheckCircle2 className="h-4 w-4 text-[#3FA78E]" strokeWidth={2} />
+                    <span className="text-[12px] font-semibold text-[#3FA78E] uppercase tracking-wider font-mono">Mission Complete</span>
                   </div>
                   <div className="grid grid-cols-3 gap-1.5 mb-2">
-                    <div className="text-center bg-background/50 rounded-lg p-1.5">
-                      <p className="text-sm font-bold text-[#22C55E] font-mono">{missionReport.missionSuccess}%</p>
-                      <p className="text-[13px] text-muted-foreground/80">SUCCESS</p>
+                    <div className="text-center bg-[#0B0E13]/50 rounded-sm p-1.5">
+                      <p className="text-sm font-bold text-[#3FA78E] font-mono">{missionReport.missionSuccess}%</p>
+                      <p className="text-[13px] text-[#F3EEE1]/40 font-mono">SUCCESS</p>
                     </div>
-                    <div className="text-center bg-background/50 rounded-lg p-1.5">
-                      <p className="text-sm font-bold text-foreground font-mono">{missionReport.iterations}</p>
-                      <p className="text-[13px] text-muted-foreground/80">LOOPS</p>
+                    <div className="text-center bg-[#0B0E13]/50 rounded-sm p-1.5">
+                      <p className="text-sm font-bold text-[#F3EEE1] font-mono">{missionReport.iterations}</p>
+                      <p className="text-[13px] text-[#F3EEE1]/40 font-mono">LOOPS</p>
                     </div>
-                    <div className="text-center bg-background/50 rounded-lg p-1.5">
-                      <p className="text-sm font-bold text-[#7C3AED] font-mono">{missionReport.documentsGenerated}</p>
-                      <p className="text-[13px] text-muted-foreground/80">DOCS</p>
+                    <div className="text-center bg-[#0B0E13]/50 rounded-sm p-1.5">
+                      <p className="text-sm font-bold text-[#C9A227] font-mono">{missionReport.documentsGenerated}</p>
+                      <p className="text-[13px] text-[#F3EEE1]/40 font-mono">DOCS</p>
                     </div>
                   </div>
                   <div className="flex gap-1.5">
                     <button onClick={() => router.push(`/dashboard/${sessionId}`)}
-                      className="flex-1 rounded-lg bg-[#7C3AED] px-2.5 py-1.5 text-[12px] font-semibold text-white hover:bg-[#7C3AED]/90 transition-all">Dashboard</button>
+                      className="flex-1 rounded-sm bg-[#C9A227] px-2.5 py-1.5 text-[12px] font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all">Dashboard</button>
                     <button onClick={() => router.push(`/memory/${sessionId}`)}
-                      className="flex-1 rounded-lg border border-border px-2.5 py-1.5 text-[12px] font-medium hover:bg-muted/50 transition-all">Memory</button>
+                      className="flex-1 rounded-sm border border-[#F3EEE1]/10 px-2.5 py-1.5 text-[12px] font-medium text-[#F3EEE1]/60 hover:bg-[#F3EEE1]/[0.03] transition-all">Memory</button>
                   </div>
                 </motion.div>
               )}

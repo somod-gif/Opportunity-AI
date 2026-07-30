@@ -6,6 +6,8 @@ import { ToolRegistry } from "./tools/registry";
 import { AgentMemory } from "./memory/AgentMemory";
 import { ToolDispatcher } from "./dispatcher";
 import { AgentLogger } from "./logger";
+import { AgentPlanner, type PlanContext } from "./planner";
+import { AgentReflector } from "./reflection";
 import * as AllTools from "./tools";
 import { AGENT_PERSONAS, resolvePersonaForTool, createDefaultSubAgents } from "./personas";
 import type { Mission, ToolCall, SubAgentStatus, MissionReport, AgentState, MemoryEntry } from "@/lib/types";
@@ -34,12 +36,17 @@ export class MultiAgentCoordinator {
   private toolsUsed = new Set<string>();
   private sourcesFound = 0;
   private documentsGenerated = 0;
+  private planner: AgentPlanner;
+  private reflector: AgentReflector;
 
   constructor(
     private sessionId: string,
     private mission: Mission,
     private emitter: SSEEmitter
-  ) {}
+  ) {
+    this.planner = new AgentPlanner();
+    this.reflector = new AgentReflector();
+  }
 
   async initialize(): Promise<string> {
     const { v4: uuidv4 } = await import("uuid");
@@ -193,25 +200,37 @@ Only include agents that are relevant to this specific mission.`;
       state.phase = "perceive";
       this.emitter.emitPhase("perceive", this.currentIteration);
 
-      // REASON
+      // REASON — use AgentPlanner.reason()
       state.phase = "reason";
       this.emitter.emitPhase("reason", this.currentIteration);
       const memories = await this.context.memory.recallRelevant(5);
       const lastResult = this.stateHistory[this.stateHistory.length - 1]?.toolResult;
-      const reasoning = await this.generateReasoning(agentId, memories, lastResult);
+
+      const planCtx: PlanContext = {
+        sessionId: this.sessionId,
+        missionId: this.context.missionId,
+        mission: this.mission,
+        iteration: this.currentIteration,
+        lastResult: lastResult ? JSON.stringify(lastResult).slice(0, 500) : null,
+        memories: await this.context.memory.toEntries(),
+        tools: this.context.tools,
+        ai: this.context.ai,
+      };
+      const reasoning = await this.planner.reason(planCtx);
       state.reasoning = reasoning;
       this.emitter.emitThought(reasoning);
 
-      // Select active agent sub-status
       if (activeAgent) {
         activeAgent.reasoning = reasoning;
         activeAgent.iteration = this.currentIteration;
       }
 
-      // PLAN + SELECT TOOL
+      // PLAN + SELECT TOOL — use AgentPlanner.evaluateToolSelection()
       state.phase = "tool_select";
       this.emitter.emitPhase("tool_select", this.currentIteration);
-      const toolSelection = await this.selectTool(reasoning, activeAgent);
+      const toolSelection = activeAgent
+        ? await this.selectToolForAgent(activeAgent)
+        : await this.planner.evaluateToolSelection(reasoning, this.context.tools, this.context.ai);
       state.toolCall = { name: toolSelection.tool, params: toolSelection.params, status: "running", startedAt: Date.now() };
 
       this.emitter.emitToolCall(toolSelection.tool, toolSelection.params);
@@ -235,12 +254,10 @@ Only include agents that are relevant to this specific mission.`;
         activeAgent.confidence = Math.min(99, activeAgent.confidence + 5);
       }
 
-      // Track sources
       if (result.success && result.data && Array.isArray(result.data)) {
         this.sourcesFound += result.data.length;
       }
 
-      // Track documents
       if (toolSelection.tool === "generate_document") {
         this.documentsGenerated++;
       }
@@ -258,22 +275,27 @@ Only include agents that are relevant to this specific mission.`;
         timestamp: new Date(),
       }).catch(() => {});
 
-      // OBSERVE
+      // OBSERVE + REFLECT — use AgentReflector.reflect()
       state.phase = "observe";
       this.emitter.emitPhase("observe", this.currentIteration);
-      const observation = await this.generateObservation(toolSelection.tool, result);
-      state.observations = observation.observations;
-      state.missionComplete = observation.missionComplete;
+      const reflection = await this.reflector.reflect(
+        "tool_execute",
+        reasoning,
+        result,
+        await this.context.memory.toEntries(),
+        this.mission.goal,
+        this.context.ai
+      );
+      state.observations = reflection.observations;
+      state.missionComplete = reflection.missionComplete;
 
-      // REFLECT
       state.phase = "reflect";
       this.emitter.emitPhase("reflect", this.currentIteration);
 
       // MEMORY
       state.phase = "memory";
       this.emitter.emitPhase("memory", this.currentIteration);
-      const memoryUpdates = await this.generateMemoryUpdates(toolSelection.tool, result, reasoning);
-      for (const mem of memoryUpdates) {
+      for (const mem of reflection.memoryUpdates) {
         await this.context.memory.store(mem.key, mem.value, mem.type, mem.importance).catch(() => {});
         await db.insert(agentMemories).values({
           sessionId: this.sessionId,
@@ -284,7 +306,7 @@ Only include agents that are relevant to this specific mission.`;
           importance: mem.importance,
         }).catch(() => {});
       }
-      this.emitter.emitMemoryUpdate(memoryUpdates.map((m) => ({ key: m.key, type: m.type, importance: m.importance })));
+      this.emitter.emitMemoryUpdate(reflection.memoryUpdates.map((m) => ({ key: m.key, type: m.type, importance: m.importance })));
 
       // Check if active agent's task is complete
       if (activeAgent && this.isTaskComplete(activeAgent, toolSelection.tool, result)) {
@@ -294,8 +316,6 @@ Only include agents that are relevant to this specific mission.`;
           type: "phase",
           data: { phase: `complete:${activeAgent.id}`, iteration: this.currentIteration, agent: activeAgent.name },
         });
-
-        // Activate next agent
         this.activateNextAgent();
       }
     } catch (error) {
@@ -310,32 +330,14 @@ Only include agents that are relevant to this specific mission.`;
     return state;
   }
 
-  private async generateReasoning(agentId: string, _memories: string, lastResult: unknown): Promise<string> {
-    const agent = AGENT_PERSONAS.find((p) => p.id === agentId);
-    const resultPreview = lastResult ? JSON.stringify(lastResult).slice(0, 200) : "";
-    const prompt = `${agent?.name || "Commander"} for "${this.mission.goal.slice(0, 60)}".
-${this.mission.education ? `Edu: ${this.mission.education}. ` : ""}${this.mission.country ? `Country: ${this.mission.country}.` : ""}
-ITR ${this.currentIteration}. ${lastResult ? `Last: ${resultPreview.slice(0, 100)}` : "Starting."}
-Analyze and explain your next action in 1-2 sentences.`;
-
-    try {
-      return await this.context.ai.generate(prompt);
-    } catch {
-      return `${agent?.name || "Agent"} analyzing mission context...`;
-    }
-  }
-
-  private async selectTool(reasoning: string, agent?: SubAgentStatus): Promise<{ tool: string; params: Record<string, unknown> }> {
-    const toolsList = this.context.tools.describe();
-
-    // Deterministic tool mapping per agent
+  private async selectToolForAgent(agent: SubAgentStatus): Promise<{ tool: string; params: Record<string, unknown> }> {
     const agentToolMap: Record<string, { tool: string; params: Record<string, unknown> }> = {
-      scholarship: { tool: "search_opportunities", params: { types: ["scholarship"], limit: 20 } },
-      grant: { tool: "search_opportunities", params: { types: ["grant"], limit: 20 } },
-      internship: { tool: "search_opportunities", params: { types: ["internship"], limit: 20 } },
-      research: { tool: "search_opportunities", params: { types: ["research"], limit: 20 } },
-      competition: { tool: "search_opportunities", params: { types: ["competition", "hackathon"], limit: 20 } },
-      web: { tool: "web_search", params: { query: `${this.mission.goal}` } },
+      scholarship: { tool: "search_opportunities", params: { types: ["scholarship"], limit: 20, keywords: [this.mission.goal] } },
+      grant: { tool: "search_opportunities", params: { types: ["grant"], limit: 20, keywords: [this.mission.goal] } },
+      internship: { tool: "search_opportunities", params: { types: ["internship"], limit: 20, keywords: [this.mission.goal] } },
+      research: { tool: "search_opportunities", params: { types: ["research"], limit: 20, keywords: [this.mission.goal] } },
+      competition: { tool: "search_opportunities", params: { types: ["competition", "hackathon"], limit: 20, keywords: [this.mission.goal] } },
+      web: { tool: "web_search", params: { query: `${this.mission.goal} ${this.mission.preferredTypes?.join(" ") || ""}`, maxResults: 5 } },
       eligibility: { tool: "eligibility_analyzer", params: { opportunityTitle: "top match", profileSkills: this.mission.skills || [], profileEducation: this.mission.education || "", profileCountry: this.mission.country || "" } },
       career: { tool: "gap_analysis", params: { opportunityTitle: "top match", profileSkills: this.mission.skills || [], profileEducation: this.mission.education || "" } },
       document: { tool: "generate_document", params: { type: "resume", opportunityTitle: this.mission.goal, opportunityProvider: "", opportunityType: "", opportunityDescription: "", opportunityEligibility: "", opportunityDeadline: null } },
@@ -343,82 +345,7 @@ Analyze and explain your next action in 1-2 sentences.`;
       verification: { tool: "web_search", params: { query: `verify ${this.mission.goal}` } },
       deadline: { tool: "email_reminder", params: { opportunityTitle: this.mission.goal, reminderType: "deadline", message: "Follow up on opportunities", dueAt: new Date(Date.now() + 7 * 86400000).toISOString() } },
     };
-
-    if (agent && agentToolMap[agent.id]) {
-      return agentToolMap[agent.id];
-    }
-
-    try {
-      const prompt = `Reasoning: ${reasoning}
-
-Available tools:
-${toolsList.map((t) => `- ${t.name}: ${t.description} (params: ${t.parameters})`).join("\n")}
-
-Choose ONE tool to call next.
-Return ONLY JSON: { "tool": "tool_name", "params": { ... } }`;
-
-      return await this.context.ai.generateJSON<{ tool: string; params: Record<string, unknown> }>("tool-select", prompt);
-    } catch {
-      return { tool: "search_opportunities", params: { types: ["scholarship", "fellowship", "internship", "grant"], limit: 20 } };
-    }
-  }
-
-  private async generateObservation(toolName: string, toolResult: unknown): Promise<{ observations: string; missionComplete: boolean }> {
-    const prompt = `Tool: ${toolName}
-Result: ${JSON.stringify(toolResult).slice(0, 1000)}
-Mission: ${this.mission.goal}
-
-Analyze this result:
-1. What did we learn?
-2. Is this bringing us closer to mission completion?
-3. What gaps remain?
-4. Should we continue searching or have we found enough?
-
-Return JSON:
-{
-  "observations": "Clear summary of what was found and what it means for the user.",
-  "missionComplete": false
-}`;
-
-    try {
-      return await this.context.ai.generateJSON<{ observations: string; missionComplete: boolean }>("reflect", prompt);
-    } catch {
-      return {
-        observations: `Processed ${toolName}. ${toolResult ? "Results obtained." : "No results."}`,
-        missionComplete: false,
-      };
-    }
-  }
-
-  private async generateMemoryUpdates(
-    toolName: string,
-    toolResult: unknown,
-    reasoning: string
-  ): Promise<Array<{ key: string; value: string; type: "episodic" | "semantic" | "procedural"; importance: number }>> {
-    const prompt = `Tool: ${toolName}
-Result: ${JSON.stringify(toolResult).slice(0, 500)}
-Reasoning: ${reasoning.slice(0, 300)}
-
-Decide what memories to store:
-- episodic: What happened? (searches, results, decisions)
-- semantic: What facts did I learn? (user preferences, program details)
-- procedural: What strategies worked? (search patterns, ranking criteria)
-
-Return JSON array:
-[{ "key": "search:result-1", "value": "Found 5 matching scholarships", "type": "episodic", "importance": 0.8 }]`;
-
-    try {
-      return await this.context.ai.generateJSON<
-        Array<{ key: string; value: string; type: "episodic" | "semantic" | "procedural"; importance: number }>
-      >("memory-update", prompt);
-    } catch {
-      return [{
-        key: `${toolName}:${Date.now()}`,
-        value: `Executed ${toolName}`,
-        type: "episodic" as const,
-        importance: 0.5,
-      }];
-    }
+    return agentToolMap[agent.id] || { tool: "search_opportunities", params: { types: ["scholarship", "fellowship", "internship", "grant"], limit: 20 } };
   }
 
   private isTaskComplete(agent: SubAgentStatus, toolName: string, _result: unknown): boolean {
@@ -490,7 +417,7 @@ Return JSON array:
       confidence: missionComplete ? Math.min(99, 85 + this.documentsGenerated * 2) : 50,
       topOpportunity,
       nextRecommendation: missionComplete
-        ? "Improve your portfolio with recommended skills and courses."
+        ? "Improve your profile with recommended skills and courses."
         : "Continue searching for matching opportunities.",
       subAgents: this.subAgents.filter((a) => a.status !== "idle"),
       completedAt: new Date().toISOString(),

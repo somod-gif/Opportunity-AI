@@ -1,5 +1,5 @@
 export * from "./types";
-export { AutonomousAgent } from "./engine";
+export { MultiAgentCoordinator } from "./multi-agent";
 export { SSEEmitter } from "./emit";
 export { ToolRegistry } from "./tools/registry";
 export type { AgentTool, ToolContext, AIAdapter } from "./tools/base";

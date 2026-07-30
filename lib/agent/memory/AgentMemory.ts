@@ -1,13 +1,15 @@
 import type { MemoryType, MemoryEntry } from "@/lib/types";
 import { db } from "@/lib/db";
 import { agentMemories } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, sql } from "drizzle-orm";
+import { generateEmbedding, cosineSimilarity } from "./embedding";
 
 interface StoredMemory {
   key: string;
   value: string;
   type: MemoryType;
   importance: number;
+  embedding?: number[];
   createdAt: number;
   lastAccessed: number;
   accessCount: number;
@@ -25,11 +27,13 @@ export class AgentMemory {
     type: MemoryType,
     importance = 0.5
   ): Promise<void> {
+    const embedding = await generateEmbedding(`${key}: ${value}`);
     const mem: StoredMemory = {
       key,
       value,
       type,
       importance,
+      embedding,
       createdAt: Date.now(),
       lastAccessed: Date.now(),
       accessCount: 0,
@@ -43,6 +47,7 @@ export class AgentMemory {
         key,
         value,
         importance,
+        metadata: embedding ? { embedding } : undefined,
       });
     } catch {
       // DB write failed - continue with in-memory only
@@ -64,10 +69,24 @@ export class AgentMemory {
 
   async search(query: string, type?: MemoryType): Promise<StoredMemory[]> {
     const q = query.toLowerCase();
-    return Array.from(this.storage.values()).filter((m) => {
+    const queryEmbedding = await generateEmbedding(query);
+
+    const results = Array.from(this.storage.values()).filter((m) => {
       if (type && m.type !== type) return false;
       return m.key.toLowerCase().includes(q) || m.value.toLowerCase().includes(q);
     });
+
+    // Re-rank by semantic similarity when embeddings exist
+    if (queryEmbedding.length > 0) {
+      for (const r of results) {
+        if (r.embedding && r.embedding.length > 0) {
+          const semanticScore = cosineSimilarity(queryEmbedding, r.embedding);
+          r.importance = Math.min(1, r.importance * 0.5 + semanticScore * 0.5);
+        }
+      }
+    }
+
+    return results.sort((a, b) => b.importance - a.importance);
   }
 
   async recallRelevant(limit = 10): Promise<string> {
@@ -82,11 +101,15 @@ export class AgentMemory {
           .limit(limit);
         for (const m of dbMemories) {
           if (!this.storage.has(m.key)) {
+            const emb = m.metadata && typeof m.metadata === "object" && "embedding" in m.metadata
+              ? (m.metadata as { embedding: number[] }).embedding
+              : undefined;
             this.storage.set(m.key, {
               key: m.key,
               value: m.value,
               type: m.memoryType as MemoryType,
               importance: m.importance,
+              embedding: emb,
               createdAt: m.createdAt?.getTime() || Date.now(),
               lastAccessed: m.lastAccessed?.getTime() || Date.now(),
               accessCount: m.accessCount,
@@ -106,21 +129,83 @@ export class AgentMemory {
       .join("\n");
   }
 
+  async semanticSearch(query: string, limit = 5): Promise<StoredMemory[]> {
+    const queryEmbedding = await generateEmbedding(query);
+    if (queryEmbedding.length === 0) return [];
+
+    const candidates = Array.from(this.storage.values());
+    const scored = candidates
+      .filter((m) => m.embedding && m.embedding.length > 0)
+      .map((m) => ({
+        memory: m,
+        score: cosineSimilarity(queryEmbedding, m.embedding!),
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+
+    // Also try DB for more candidates
+    if (scored.length < limit) {
+      try {
+        const dbMemories = await db
+          .select()
+          .from(agentMemories)
+          .where(and(
+            eq(agentMemories.sessionId, this.sessionId),
+            sql`${agentMemories.metadata}->'embedding' IS NOT NULL`
+          ))
+          .orderBy(desc(agentMemories.importance))
+          .limit(limit * 3);
+        for (const m of dbMemories) {
+          const emb = m.metadata && typeof m.metadata === "object" && "embedding" in m.metadata
+            ? (m.metadata as { embedding: number[] }).embedding
+            : undefined;
+          if (emb && emb.length > 0) {
+            const score = cosineSimilarity(queryEmbedding, emb);
+            scored.push({
+              memory: {
+                key: m.key,
+                value: m.value,
+                type: m.memoryType as MemoryType,
+                importance: m.importance,
+                embedding: emb,
+                createdAt: m.createdAt?.getTime() || Date.now(),
+                lastAccessed: m.lastAccessed?.getTime() || Date.now(),
+                accessCount: m.accessCount,
+              },
+              score,
+            });
+          }
+        }
+      } catch {
+        // DB read failed
+      }
+    }
+
+    return scored
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map((s) => s.memory);
+  }
+
   async getStats(): Promise<{
     total: number;
     byType: Record<MemoryType, number>;
     avgImportance: number;
+    withEmbeddings: number;
   }> {
     const byType = { episodic: 0, semantic: 0, procedural: 0 };
     let totalImportance = 0;
+    let withEmbeddings = 0;
     for (const m of this.storage.values()) {
       byType[m.type]++;
       totalImportance += m.importance;
+      if (m.embedding) withEmbeddings++;
     }
     return {
       total: this.storage.size,
       byType,
       avgImportance: this.storage.size > 0 ? totalImportance / this.storage.size : 0,
+      withEmbeddings,
     };
   }
 

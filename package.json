@@ -9,7 +9,11 @@
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "test": "tsx --test __tests__/*.test.ts",
+    "evaluate": "tsx scripts/evaluate.ts",
+    "docker:build": "set DOCKER_BUILD=true&& next build",
+    "docker:up": "docker compose up --build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.5.7",

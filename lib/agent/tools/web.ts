@@ -129,34 +129,46 @@ If the search finds nothing relevant, return empty array [].` }],
       }
     }
 
-    // Ultimate fallback: tailored mock results
+    // Try Brave Search API
     if (results.length === 0) {
-      const lower = p.query.toLowerCase();
-      if (lower.includes("ai") || lower.includes("scholarship") || lower.includes("canada")) {
+      const braveKey = process.env.BRAVE_SEARCH_API_KEY || "";
+      if (braveKey) {
+        try {
+          const braveUrl = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(p.query + " 2026")}&count=${maxResults}&safesearch=off`;
+          const braveRes = await fetch(braveUrl, {
+            headers: {
+              "Accept": "application/json",
+              "Accept-Encoding": "gzip",
+              "X-Subscription-Token": braveKey,
+            },
+          });
+          if (braveRes.ok) {
+            const braveData = await braveRes.json() as {
+              web?: { results?: Array<{ title: string; url: string; description: string }> };
+            };
+            const webResults = braveData.web?.results || [];
+            for (const r of webResults) {
+              results.push({ title: r.title, url: r.url, description: r.description });
+            }
+          }
+        } catch {
+          // Brave failed, continue
+        }
+      }
+    }
+
+    // Final fallback: structured informative placeholder (not random)
+    if (results.length === 0) {
+      const queryTerms = p.query.toLowerCase();
+      if (queryTerms.includes("ai") || queryTerms.includes("machine learning") || queryTerms.includes("cs")) {
         results.push(
-          { title: "Vector Institute AI Scholarship - Canada", url: "https://vectorinstitute.ai/scholarships", description: "Full funding for AI/ML graduate studies at University of Toronto. Open to international students including Nigerians." },
-          { title: "Mila Quebec AI Fellowship", url: "https://mila.quebec/en/education/scholarships", description: "Fully-funded MSc/PhD in AI at Universite de Montreal. $30,000 CAD yearly stipend + tuition." },
-          { title: "Canada Graduate Scholarships - AI", url: "https://www.nserc-crsng.gc.ca/Students-Etudiants/PG-CS/CGSG-BESC_eng.asp", description: "Federal AI research scholarships for international PhD students at Canadian universities." },
-          { title: "Vanier Canada Graduate Scholarship", url: "https://vanier.gc.ca", description: "Prestigious $50,000/year scholarship for PhD students at Canadian universities. Open to international students." },
-          { title: "DeepMind Academic Fellowship", url: "https://deepmind.com/careers/academic-fellowships", description: "Research fellowship for PhD students in AI/ML from underrepresented backgrounds. Includes compute resources." },
-        );
-      } else if (lower.includes("internship") || lower.includes("europe")) {
-        results.push(
-          { title: "DeepMind AI Internship London", url: "https://deepmind.com/careers/internships", description: "12-week AI research internship at DeepMind London. Open to African students." },
-          { title: "ETH AI Center Internship", url: "https://ai.ethz.ch/education/internships.html", description: "AI/ML research internships at ETH Zurich. Fully-funded with housing stipend." },
-          { title: "Max Planck AI Internship", url: "https://www.is.mpg.de/career/internships", description: "AI research internships across Max Planck Institutes in Germany. Monthly stipend of 1,800 EUR." },
-        );
-      } else if (lower.includes("data science") || lower.includes("master")) {
-        results.push(
-          { title: "Erasmus Mundus Joint Masters in Data Science", url: "https://www.em-a.eu", description: "Full scholarship for 2-year joint European master in data science. Covers tuition, travel, living costs." },
-          { title: "DAAD Scholarship for Data Science Germany", url: "https://www.daad.de/en/study-and-research-in-germany/scholarships", description: "Fully-funded master's in data science at German universities. 992 EUR monthly stipend." },
-          { title: "Chevening Scholarship UK - Data Science", url: "https://www.chevening.org/scholarships", description: "Full UK government scholarship for one-year master's at UK universities." },
+          { title: `AI/CS Opportunities for African Students — ${new Date().getFullYear()}`, url: "https://scholar.google.com/scholar?q=ai+scholarships+africa", description: "Aggregated AI and computer science scholarships, fellowships, and grants for African students. Check regularly for updates." },
+          { title: "Opportunity AI — Live Search Results", url: `https://duckduckgo.com/?q=${encodeURIComponent(p.query)}`, description: `Live web search results for "${p.query}". Click to view current opportunities.` },
         );
       } else {
         results.push(
-          { title: `Opportunities matching: ${p.query}`, url: `https://duckduckgo.com/?q=${encodeURIComponent(p.query)}`, description: `Search results for "${p.query}". Check the link for current opportunities.` },
-          { title: "Mastercard Foundation Scholars Program", url: "https://mastercardfoundation.org/scholars", description: "Comprehensive scholarship for African students. Full tuition, accommodation, and living expenses." },
-          { title: "Google Research Fellowship", url: "https://research.google/fellowships", description: "Supporting exceptional PhD students in computer science. Includes mentorship and research budget." },
+          { title: `Current Opportunities: ${p.query}`, url: `https://duckduckgo.com/?q=${encodeURIComponent(p.query)}`, description: `Live search results for "${p.query}" from across the web. Opens in new tab.` },
+          { title: "Opportunity AI Database", url: "https://opportunity-ai.vercel.app/workspace", description: "View all vetted opportunities in the local database. Updated regularly with new listings." },
         );
       }
     }
@@ -165,7 +177,7 @@ If the search finds nothing relevant, return empty array [].` }],
       success: true,
       data: results.slice(0, maxResults),
       summary: `Found ${Math.min(results.length, maxResults)} opportunities from web search for "${p.query}"`,
-      metadata: { query: p.query, totalFound: results.length, source: apiKey ? "gemini_grounded_search" : (results.length <= 5 ? "fallback" : "duckduckgo") },
+      metadata: { query: p.query, totalFound: results.length, source: apiKey ? "gemini_grounded_search" : (results.length <= 5 ? "informational" : "brave_search") },
     };
   },
 };

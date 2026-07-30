@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
@@ -17,6 +17,9 @@ import {
   CheckCircle2,
   Loader2,
   Stamp as StampIcon,
+  Upload,
+  FileText,
+  Wand2,
 } from "lucide-react";
 
 const display = Fraunces({
@@ -43,6 +46,7 @@ const EXAMPLES = [
     skills: ["Python", "Machine Learning", "Mathematics"],
     country: "Nigeria",
     careerGoal: "AI Research Scientist",
+    experienceLevel: "entry",
   },
   {
     goal: "I need AI/ML internships in Europe for summer 2027",
@@ -50,6 +54,7 @@ const EXAMPLES = [
     skills: ["Python", "TensorFlow", "Statistics"],
     country: "Kenya",
     careerGoal: "ML Engineer",
+    experienceLevel: "entry",
   },
   {
     goal: "I want a fully-funded Masters in Data Science anywhere in the world",
@@ -57,6 +62,7 @@ const EXAMPLES = [
     skills: ["Statistics", "R", "Python"],
     country: "Ghana",
     careerGoal: "Data Scientist",
+    experienceLevel: "entry",
   },
   {
     goal: "I am a Kenyan engineering graduate looking for tech fellowships",
@@ -64,6 +70,7 @@ const EXAMPLES = [
     skills: ["C++", "Embedded Systems", "IoT"],
     country: "Kenya",
     careerGoal: "Tech Lead",
+    experienceLevel: "mid",
   },
   {
     goal: "I need conference funding for research in renewable energy",
@@ -71,6 +78,7 @@ const EXAMPLES = [
     skills: ["Research", "Data Analysis", "Technical Writing"],
     country: "South Africa",
     careerGoal: "Energy Researcher",
+    experienceLevel: "mid",
   },
 ];
 
@@ -132,7 +140,49 @@ export default function MissionPage() {
   const [careerGoal, setCareerGoal] = useState("");
   const [skillInput, setSkillInput] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
+  const [experienceLevel, setExperienceLevel] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // CV upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cvFileName, setCvFileName] = useState("");
+  const [cvText, setCvText] = useState("");
+  const [cvParsing, setCvParsing] = useState(false);
+  const [showCvPaste, setShowCvPaste] = useState(false);
+
+  async function handleCvFile(file: File) {
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (!["txt", "pdf", "docx"].includes(ext || "")) {
+      alert("Please upload a .txt, .pdf, or .docx file");
+      return;
+    }
+    setCvFileName(file.name);
+    try {
+      const text = await file.text();
+      setCvText(text);
+      setShowCvPaste(false);
+    } catch {
+      alert("Could not read file. Try pasting the content instead.");
+    }
+  }
+
+  async function parseCv() {
+    if (!cvText.trim()) return;
+    setCvParsing(true);
+    try {
+      const { parseCVText } = await import("@/lib/actions/parse-cv");
+      const result = await parseCVText(cvText);
+      if (result.success && result.data) {
+        if (result.data.education) setEducation(result.data.education);
+        if (result.data.skills) setSkills(result.data.skills);
+        if (result.data.careerGoal) setCareerGoal(result.data.careerGoal);
+        if (result.data.experienceLevel) setExperienceLevel(result.data.experienceLevel);
+      }
+    } catch (e) {
+      console.error("CV parse error:", e);
+    }
+    setCvParsing(false);
+  }
 
   const caseNumber = useMemo(() => {
     const year = new Date().getFullYear();
@@ -158,6 +208,7 @@ export default function MissionPage() {
     setSkills(ex.skills);
     setCountry(ex.country);
     setCareerGoal(ex.careerGoal);
+    setExperienceLevel(ex.experienceLevel || "");
   }
 
   function launchAgent() {
@@ -169,6 +220,7 @@ export default function MissionPage() {
     if (skills.length > 0) params.set("skills", skills.join(","));
     if (country.trim()) params.set("country", country.trim());
     if (careerGoal.trim()) params.set("careerGoal", careerGoal.trim());
+    if (experienceLevel) params.set("experienceLevel", experienceLevel);
     router.push(`/agent/${sessionId}?${params.toString()}`);
   }
 
@@ -182,21 +234,21 @@ export default function MissionPage() {
       <div className="pointer-events-none fixed -bottom-40 left-0 z-0 h-[400px] w-[400px] rounded-full bg-[#3FA78E]/[0.04] blur-[120px]" />
 
       {/* NAV */}
-      <header className="fixed top-0 z-50 w-full px-4">
+      <header className="fixed top-0 z-50 w-full px-2 sm:px-4">
         <div className="mx-auto max-w-7xl mt-2 rounded-sm border border-[#F3EEE1]/10 bg-[#0B0E13]/90 backdrop-blur-md shadow-[0_1px_0_rgba(243,238,225,0.06)]">
-          <div className="mx-auto flex h-14 items-center justify-between px-4 sm:px-6">
-            <a href="/" className="group flex items-center gap-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-sm border-[1.5px] border-[#C9A227] text-[#C9A227] transition-transform group-hover:-rotate-6">
-                <StampIcon className="h-3.5 w-3.5" strokeWidth={1.75} />
+          <div className="mx-auto flex h-12 sm:h-14 items-center justify-between px-3 sm:px-6">
+            <a href="/" className="group flex items-center gap-2 sm:gap-3">
+              <div className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-sm border-[1.5px] border-[#C9A227] text-[#C9A227] transition-transform group-hover:-rotate-6">
+                <StampIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               </div>
               <div className="leading-none">
                 <span
-                  className="block text-sm font-medium tracking-tight text-[#F3EEE1]"
+                  className="block text-xs sm:text-sm font-medium tracking-tight text-[#F3EEE1]"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
                   Opportunity AI
                 </span>
-                <span className="mt-0.5 block font-mono text-[9px] uppercase tracking-[0.2em] text-[#F3EEE1]/35">
+                <span className="mt-0.5 hidden sm:block font-mono text-[9px] uppercase tracking-[0.2em] text-[#F3EEE1]/35">
                   Mission intake
                 </span>
               </div>
@@ -206,7 +258,7 @@ export default function MissionPage() {
       </header>
 
       <main className="relative z-10 flex-1">
-        <div className="mx-auto max-w-2xl px-4 pt-28 pb-16 sm:px-6">
+        <div className="mx-auto w-full max-w-[95vw] sm:max-w-xl lg:max-w-2xl px-2 sm:px-4 pt-24 sm:pt-28 pb-16 sm:px-6">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -245,7 +297,6 @@ export default function MissionPage() {
               <div className="flex items-center gap-2.5">
                 <Bot
                   className="h-4 w-4 text-[#C9A227]"
-                  strokeWidth={1.75}
                 />
                 <span
                   className="text-sm font-medium text-[#F3EEE1]/90"
@@ -269,6 +320,83 @@ export default function MissionPage() {
                   rows={3}
                   className="w-full resize-none border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
                 />
+              </div>
+
+              {/* CV Upload */}
+              <div>
+                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                  Optional — Upload CV to auto-fill
+                </label>
+                <div className="space-y-2">
+                  {!cvFileName ? (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const f = e.dataTransfer.files[0];
+                        if (f) handleCvFile(f);
+                      }}
+                      className="flex cursor-pointer items-center justify-center gap-3 rounded-sm border border-dashed border-[#F3EEE1]/20 bg-[#F3EEE1]/[0.02] px-4 py-5 text-sm text-[#F3EEE1]/30 hover:border-[#C9A227]/40 hover:bg-[#C9A227]/[0.03] hover:text-[#F3EEE1]/50 transition-colors"
+                    >
+                      <Upload className="h-4 w-4" />
+                      <span>Drop your CV here or click to browse</span>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".txt,.pdf,.docx"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleCvFile(f);
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3 rounded-sm border border-[#3FA78E]/30 bg-[#3FA78E]/10 px-4 py-3">
+                      <FileText className="h-4 w-4 text-[#3FA78E]" />
+                      <span className="flex-1 text-sm text-[#F3EEE1]/70 truncate">
+                        {cvFileName}
+                      </span>
+                      {cvParsing ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-[#C9A227]" />
+                      ) : (
+                        <button
+                          onClick={parseCv}
+                          className="inline-flex items-center gap-1 rounded-sm bg-[#C9A227]/20 px-2.5 py-1 text-xs font-semibold text-[#C9A227] hover:bg-[#C9A227]/30 transition-colors"
+                        >
+                          <Wand2 className="h-3 w-3" /> Parse with AI
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          setCvFileName("");
+                          setCvText("");
+                        }}
+                        className="text-[#F3EEE1]/30 hover:text-[#C2703D] transition-colors"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+                  {cvFileName && !showCvPaste && (
+                    <button
+                      onClick={() => setShowCvPaste(!showCvPaste)}
+                      className="text-xs text-[#F3EEE1]/25 hover:text-[#F3EEE1]/50 transition-colors"
+                    >
+                      {showCvPaste ? "Hide" : "Or paste CV text manually"}
+                    </button>
+                  )}
+                  {showCvPaste && (
+                    <textarea
+                      value={cvText}
+                      onChange={(e) => setCvText(e.target.value)}
+                      placeholder="Paste your CV text here..."
+                      rows={4}
+                      className="w-full resize-none rounded-sm border border-[#F3EEE1]/10 bg-[#0B0E13] p-3 text-xs text-[#F3EEE1]/60 placeholder:text-[#F3EEE1]/15 focus:border-[#C9A227]/40 focus:outline-none transition-colors"
+                    />
+                  )}
+                </div>
               </div>
 
               {/* Education */}
@@ -353,6 +481,26 @@ export default function MissionPage() {
                   className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
                 />
               </div>
+
+              {/* Experience Level */}
+              <div>
+                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                  Experience level{" "}
+                  <span className="text-[#F3EEE1]/20">(optional)</span>
+                </label>
+                <select
+                  value={experienceLevel}
+                  onChange={(e) => setExperienceLevel(e.target.value)}
+                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] focus:border-[#C9A227] focus:outline-none transition-colors appearance-none"
+                >
+                  <option value="" className="bg-[#12161D]">Not specified</option>
+                  <option value="entry" className="bg-[#12161D]">Entry / Student</option>
+                  <option value="mid" className="bg-[#12161D]">Mid-level</option>
+                  <option value="senior" className="bg-[#12161D]">Senior</option>
+                  <option value="lead" className="bg-[#12161D]">Lead / Manager</option>
+                  <option value="executive" className="bg-[#12161D]">Executive</option>
+                </select>
+              </div>
             </div>
 
             {/* Footer / Actions */}
@@ -402,7 +550,6 @@ export default function MissionPage() {
             <div className="flex items-center gap-3 mb-3">
               <Target
                 className="h-3.5 w-3.5 text-[#C2703D]"
-                strokeWidth={1.75}
               />
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/30">
                 Try an example mission

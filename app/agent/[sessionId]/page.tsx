@@ -13,7 +13,14 @@ export default async function AgentPage({
   const { goal } = await searchParams;
 
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0B1020] flex items-center justify-center text-center text-muted-foreground">Loading agent...</div>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0B0E13] flex items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#C9A227] border-t-transparent" />
+          <p className="text-sm text-[#F3EEE1]/40 font-mono">Initializing agent pipeline...</p>
+        </div>
+      </div>
+    }>
       <ClientAgentPage sessionId={params.sessionId} goal={goal || ""} />
     </Suspense>
   );

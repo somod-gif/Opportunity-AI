@@ -1,6 +1,7 @@
 import type { AgentPhase, Mission, MemoryEntry } from "@/lib/types";
 import type { ToolRegistry } from "./tools/registry";
 import type { AIAdapter } from "./tools/base";
+import { toolsToFunctionDeclarations, extractFunctionCall } from "./tools/function-calling";
 
 export interface AgentPlan {
   phase: AgentPhase;
@@ -144,8 +145,45 @@ Return your reasoning as a single detailed paragraph.`;
     tools: ToolRegistry,
     ai: AIAdapter
   ): Promise<{ tool: string; params: Record<string, unknown> }> {
-    const toolDescriptions = tools.describe();
+    const toolList = tools.list();
+    const declarations = toolsToFunctionDeclarations(toolList);
 
+    // Try function calling first (native tool selection)
+    try {
+      const systemPrompt = `You are an autonomous mission planner for Opportunity AI.
+Reasoning: ${reasoning}
+
+Rules for tool selection:
+- If 0 opportunities found from DB, use web_search
+- If opportunities found but not analyzed, use eligibility_analyzer
+- If eligibility done but no gaps checked, use gap_analysis
+- If gaps done, use generate_document
+- Use memory_store for important findings
+
+Select ONE tool that makes the most progress toward the mission.`;
+
+      const result = await (ai as unknown as {
+        generateWithTools?: (
+          systemPrompt: string,
+          tools: { name: string; description: string; parameters: Record<string, unknown> }[],
+          history: Array<{ role: "user" | "model"; text: string }>
+        ) => Promise<{ functionCalls?: Array<{ name: string; args: Record<string, unknown> }> }>;
+      }).generateWithTools?.(
+        systemPrompt,
+        declarations,
+        [{ role: "user", text: reasoning }]
+      );
+
+      if (result?.functionCalls?.length) {
+        const call = result.functionCalls[0];
+        return { tool: call.name, params: call.args as Record<string, unknown> };
+      }
+    } catch {
+      // function calling failed, fall through to JSON prompt
+    }
+
+    // Fallback: use generateJSON
+    const toolDescriptions = tools.describe();
     const prompt = `Reasoning: ${reasoning}
 
 Available tools:
@@ -156,7 +194,6 @@ Choose ONE tool to call next. Rules:
 - If you have opportunities but haven't analyzed eligibility yet, use eligibility_analyzer
 - If you have analyzed eligibility but haven't checked gaps, use gap_analysis
 - If you have analyzed gaps, use one of the document generators
-- Use memory_store to save important findings
 
 Return ONLY the tool name and its parameters as JSON:
 {
