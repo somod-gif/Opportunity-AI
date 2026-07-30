@@ -246,7 +246,7 @@ export default function MissionPage() {
                 >
                   Opportunity AI
                 </span>
-                <span className="mt-0.5 hidden sm:block font-mono text-[9px] uppercase tracking-[0.2em] text-[#F3EEE1]/35">
+                <span className="mt-0.5 hidden sm:block font-mono text-xs uppercase tracking-[0.2em] text-[#F3EEE1]/35">
                   Mission intake
                 </span>
               </div>
@@ -288,13 +288,13 @@ export default function MissionPage() {
             }}
             className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D] overflow-hidden"
           >
-            <div className="flex items-center justify-between border-b border-[#F3EEE1]/10 px-5 py-3.5">
-              <div className="flex items-center gap-2.5">
+            <div className="flex items-center justify-between border-b border-[#F3EEE1]/10 px-6 py-4">
+              <div className="flex items-center gap-3">
                 <Bot
-                  className="h-4 w-4 text-[#C9A227]"
+                  className="h-5 w-5 text-[#C9A227]"
                 />
                 <span
-                  className="text-sm font-medium text-[#F3EEE1]/90"
+                  className="text-base font-medium text-[#F3EEE1]/90"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
                   Intake dossier
@@ -302,27 +302,27 @@ export default function MissionPage() {
               </div>
             </div>
 
-            <div className="p-5 space-y-6">
+            <div className="p-6 space-y-7">
               {/* Goal */}
               <div>
-                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                <label className="mb-2 block font-mono text-sm uppercase tracking-[0.15em] text-[#F3EEE1]/45">
                   Mission goal <span className="text-[#C2703D]">*</span>
                 </label>
                 <textarea
                   value={goal}
                   onChange={(e) => setGoal(e.target.value)}
                   placeholder="e.g. I am a Nigerian CS student looking for fully-funded AI scholarships in Canada..."
-                  rows={3}
-                  className="w-full resize-none border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
+                  rows={4}
+                  className="w-full resize-none border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-3 text-base text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
                 />
               </div>
 
               {/* CV Upload */}
               <div>
-                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                <label className="mb-2 block font-mono text-sm uppercase tracking-[0.15em] text-[#F3EEE1]/45">
                   Optional — Upload CV to auto-fill
                 </label>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {!cvFileName ? (
                     <div
                       onClick={() => fileInputRef.current?.click()}
@@ -332,9 +332,9 @@ export default function MissionPage() {
                         const f = e.dataTransfer.files[0];
                         if (f) handleCvFile(f);
                       }}
-                      className="flex cursor-pointer items-center justify-center gap-3 rounded-sm border border-dashed border-[#F3EEE1]/20 bg-[#F3EEE1]/[0.02] px-4 py-5 text-sm text-[#F3EEE1]/30 hover:border-[#C9A227]/40 hover:bg-[#C9A227]/[0.03] hover:text-[#F3EEE1]/50 transition-colors"
+                      className="flex cursor-pointer items-center justify-center gap-3 rounded-sm border border-dashed border-[#F3EEE1]/20 bg-[#F3EEE1]/[0.02] px-5 py-6 text-base text-[#F3EEE1]/30 hover:border-[#C9A227]/40 hover:bg-[#C9A227]/[0.03] hover:text-[#F3EEE1]/50 transition-colors"
                     >
-                      <Upload className="h-4 w-4" />
+                      <Upload className="h-5 w-5" />
                       <span>Drop your CV here or click to browse</span>
                       <input
                         ref={fileInputRef}
@@ -348,19 +348,19 @@ export default function MissionPage() {
                       />
                     </div>
                   ) : (
-                    <div className="flex items-center gap-3 rounded-sm border border-[#3FA78E]/30 bg-[#3FA78E]/10 px-4 py-3">
-                      <FileText className="h-4 w-4 text-[#3FA78E]" />
-                      <span className="flex-1 text-sm text-[#F3EEE1]/70 truncate">
+                    <div className="flex items-center gap-3 rounded-sm border border-[#3FA78E]/30 bg-[#3FA78E]/10 px-5 py-4">
+                      <FileText className="h-5 w-5 text-[#3FA78E]" />
+                      <span className="flex-1 text-base text-[#F3EEE1]/70 truncate">
                         {cvFileName}
                       </span>
                       {cvParsing ? (
-                        <Loader2 className="h-4 w-4 animate-spin text-[#C9A227]" />
+                        <Loader2 className="h-5 w-5 animate-spin text-[#C9A227]" />
                       ) : (
                         <button
                           onClick={parseCv}
-                          className="inline-flex items-center gap-1 rounded-sm bg-[#C9A227]/20 px-2.5 py-1 text-xs font-semibold text-[#C9A227] hover:bg-[#C9A227]/30 transition-colors"
+                          className="inline-flex items-center gap-1 rounded-sm bg-[#C9A227]/20 px-3 py-1.5 text-sm font-semibold text-[#C9A227] hover:bg-[#C9A227]/30 transition-colors"
                         >
-                          <Wand2 className="h-3 w-3" /> Parse with AI
+                          <Wand2 className="h-4 w-4" /> Parse with AI
                         </button>
                       )}
                       <button
@@ -370,14 +370,14 @@ export default function MissionPage() {
                         }}
                         className="text-[#F3EEE1]/30 hover:text-[#C2703D] transition-colors"
                       >
-                        <X className="h-3.5 w-3.5" />
+                        <X className="h-4 w-4" />
                       </button>
                     </div>
                   )}
                   {cvFileName && !showCvPaste && (
                     <button
                       onClick={() => setShowCvPaste(!showCvPaste)}
-                      className="text-xs text-[#F3EEE1]/25 hover:text-[#F3EEE1]/50 transition-colors"
+                      className="text-sm text-[#F3EEE1]/30 hover:text-[#F3EEE1]/50 transition-colors"
                     >
                       {showCvPaste ? "Hide" : "Or paste CV text manually"}
                     </button>
@@ -387,8 +387,8 @@ export default function MissionPage() {
                       value={cvText}
                       onChange={(e) => setCvText(e.target.value)}
                       placeholder="Paste your CV text here..."
-                      rows={4}
-                      className="w-full resize-none rounded-sm border border-[#F3EEE1]/10 bg-[#0B0E13] p-3 text-xs text-[#F3EEE1]/60 placeholder:text-[#F3EEE1]/15 focus:border-[#C9A227]/40 focus:outline-none transition-colors"
+                      rows={5}
+                      className="w-full resize-none rounded-sm border border-[#F3EEE1]/10 bg-[#0B0E13] p-4 text-sm text-[#F3EEE1]/60 placeholder:text-[#F3EEE1]/15 focus:border-[#C9A227]/40 focus:outline-none transition-colors"
                     />
                   )}
                 </div>
@@ -396,23 +396,23 @@ export default function MissionPage() {
 
               {/* Education */}
               <div>
-                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                <label className="mb-2 block font-mono text-sm uppercase tracking-[0.15em] text-[#F3EEE1]/45">
                   Education / Degree
                 </label>
                 <input
                   value={education}
                   onChange={(e) => setEducation(e.target.value)}
                   placeholder="e.g. BSc Computer Science, MSc Data Science..."
-                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
+                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-3 text-base text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
                 />
               </div>
 
               {/* Skills */}
               <div>
-                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                <label className="mb-2 block font-mono text-sm uppercase tracking-[0.15em] text-[#F3EEE1]/45">
                   Skills
                 </label>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <input
                     value={skillInput}
                     onChange={(e) => setSkillInput(e.target.value)}
@@ -420,29 +420,29 @@ export default function MissionPage() {
                       e.key === "Enter" && (e.preventDefault(), addSkill())
                     }
                     placeholder="Type a skill and press Enter..."
-                    className="flex-1 border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
+                    className="flex-1 border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-3 text-base text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
                   />
                   <button
                     onClick={addSkill}
                     disabled={!skillInput.trim()}
-                    className="inline-flex items-center gap-1 rounded-sm border border-[#C9A227]/40 bg-[#C9A227]/10 px-3 py-2 text-xs font-semibold text-[#C9A227] hover:bg-[#C9A227]/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    className="inline-flex items-center gap-1 rounded-sm border border-[#C9A227]/40 bg-[#C9A227]/10 px-4 py-2.5 text-sm font-semibold text-[#C9A227] hover:bg-[#C9A227]/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   >
-                    <Plus className="h-3.5 w-3.5" /> Add
+                    <Plus className="h-4 w-4" /> Add
                   </button>
                 </div>
                 {skills.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2.5">
+                  <div className="flex flex-wrap gap-2 mt-3">
                     {skills.map((s) => (
                       <span
                         key={s}
-                        className="inline-flex items-center gap-1 rounded-sm border border-[#3FA78E]/30 bg-[#3FA78E]/10 px-2.5 py-1 font-mono text-[11px] font-medium text-[#3FA78E]"
+                        className="inline-flex items-center gap-1.5 rounded-sm border border-[#3FA78E]/30 bg-[#3FA78E]/10 px-3 py-1.5 font-mono text-sm font-medium text-[#3FA78E]"
                       >
                         {s}
                         <button
                           onClick={() => removeSkill(s)}
                           className="hover:text-[#C2703D] transition-colors"
                         >
-                          <X className="h-3 w-3" />
+                          <X className="h-3.5 w-3.5" />
                         </button>
                       </span>
                     ))}
@@ -452,82 +452,82 @@ export default function MissionPage() {
 
               {/* Country */}
               <div>
-                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                <label className="mb-2 block font-mono text-sm uppercase tracking-[0.15em] text-[#F3EEE1]/45">
                   Your country
                 </label>
                 <input
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                   placeholder="e.g. Nigeria, Kenya, Ghana, South Africa..."
-                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
+                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-3 text-base text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
                 />
               </div>
 
               {/* Career Goal */}
               <div>
-                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                <label className="mb-2 block font-mono text-sm uppercase tracking-[0.15em] text-[#F3EEE1]/45">
                   Career goal{" "}
-                  <span className="text-[#F3EEE1]/20">(optional)</span>
+                  <span className="text-[#F3EEE1]/25">(optional)</span>
                 </label>
                 <input
                   value={careerGoal}
                   onChange={(e) => setCareerGoal(e.target.value)}
                   placeholder="e.g. AI Research Scientist, ML Engineer, Data Scientist..."
-                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
+                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-3 text-base text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
                 />
               </div>
 
               {/* Experience Level */}
               <div>
-                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                <label className="mb-2 block font-mono text-sm uppercase tracking-[0.15em] text-[#F3EEE1]/45">
                   Experience level{" "}
-                  <span className="text-[#F3EEE1]/20">(optional)</span>
+                  <span className="text-[#F3EEE1]/25">(optional)</span>
                 </label>
                 <select
                   value={experienceLevel}
                   onChange={(e) => setExperienceLevel(e.target.value)}
-                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] focus:border-[#C9A227] focus:outline-none transition-colors appearance-none"
+                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-3 text-base text-[#F3EEE1] focus:border-[#C9A227] focus:outline-none transition-colors appearance-none"
                 >
-                  <option value="" className="bg-[#12161D]">Not specified</option>
-                  <option value="entry" className="bg-[#12161D]">Entry / Student</option>
-                  <option value="mid" className="bg-[#12161D]">Mid-level</option>
-                  <option value="senior" className="bg-[#12161D]">Senior</option>
-                  <option value="lead" className="bg-[#12161D]">Lead / Manager</option>
-                  <option value="executive" className="bg-[#12161D]">Executive</option>
+                  <option value="" className="bg-[#12161D] text-base">Not specified</option>
+                  <option value="entry" className="bg-[#12161D] text-base">Entry / Student</option>
+                  <option value="mid" className="bg-[#12161D] text-base">Mid-level</option>
+                  <option value="senior" className="bg-[#12161D] text-base">Senior</option>
+                  <option value="lead" className="bg-[#12161D] text-base">Lead / Manager</option>
+                  <option value="executive" className="bg-[#12161D] text-base">Executive</option>
                 </select>
               </div>
 
               {/* Email (for reminders) */}
               <div>
-                <label className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">
+                <label className="mb-2 block font-mono text-sm uppercase tracking-[0.15em] text-[#F3EEE1]/45">
                   Email{" "}
-                  <span className="text-[#F3EEE1]/20">(for deadline reminders)</span>
+                  <span className="text-[#F3EEE1]/25">(for deadline reminders)</span>
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
+                  className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-3 text-base text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors"
                 />
               </div>
             </div>
 
             {/* Footer / Actions */}
-            <div className="border-t border-[#F3EEE1]/10 px-5 py-4 space-y-3">
+            <div className="border-t border-[#F3EEE1]/10 px-5 py-5 space-y-4">
               <button
                 onClick={launchAgent}
                 disabled={!goal.trim() || loading}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-[#C9A227] px-6 py-3.5 text-sm font-semibold text-[#0B0E13] transition-all hover:-translate-y-0.5 disabled:opacity-30 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+                className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-[#C9A227] px-6 py-4 text-base font-semibold text-[#0B0E13] transition-all hover:-translate-y-0.5 disabled:opacity-30 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <span className="inline-flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Launching
+                    <Loader2 className="h-5 w-5 animate-spin" /> Launching
                     agent...
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-2">
-                    <Rocket className="h-4 w-4" /> Launch autonomous agent
+                    <Rocket className="h-5 w-5" /> Launch autonomous agent
                   </span>
                 )}
               </button>
@@ -535,11 +535,11 @@ export default function MissionPage() {
               <div className="flex items-center justify-between">
                 <a
                   href="/"
-                  className="inline-flex items-center gap-1 text-xs text-[#F3EEE1]/30 hover:text-[#F3EEE1]/60 transition-colors"
+                  className="inline-flex items-center gap-1 text-sm text-[#F3EEE1]/35 hover:text-[#F3EEE1]/60 transition-colors"
                 >
-                  <ArrowRight className="h-3 w-3 -rotate-180" /> Back to home
+                  <ArrowRight className="h-4 w-4 -rotate-180" /> Back to home
                 </a>
-                <span className="font-mono text-[9px] text-[#F3EEE1]/20">
+                <span className="font-mono text-xs text-[#F3EEE1]/25">
                   powered by Gemma 4
                 </span>
               </div>
@@ -557,11 +557,11 @@ export default function MissionPage() {
             }}
             className="mt-10"
           >
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-4">
               <Target
-                className="h-3.5 w-3.5 text-[#C2703D]"
+                className="h-4 w-4 text-[#C2703D]"
               />
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/30">
+              <p className="font-mono text-sm uppercase tracking-[0.15em] text-[#F3EEE1]/35">
                 Try an example mission
               </p>
             </div>
@@ -570,10 +570,10 @@ export default function MissionPage() {
                 <button
                   key={i}
                   onClick={() => fillExample(ex)}
-                  className="group text-left rounded-sm border border-[#F3EEE1]/[0.06] bg-[#F3EEE1]/[0.02] px-4 py-2.5 text-xs text-[#F3EEE1]/30 hover:border-[#C9A227]/30 hover:bg-[#C9A227]/[0.04] hover:text-[#F3EEE1]/60 transition-all"
+                  className="group text-left rounded-sm border border-[#F3EEE1]/[0.06] bg-[#F3EEE1]/[0.02] px-5 py-3 text-sm text-[#F3EEE1]/35 hover:border-[#C9A227]/30 hover:bg-[#C9A227]/[0.04] hover:text-[#F3EEE1]/60 transition-all"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <span className="font-mono text-[9px] text-[#F3EEE1]/15">
+                    <span className="font-mono text-xs text-[#F3EEE1]/20">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     {ex.goal.length > 80 ? ex.goal.slice(0, 80) + "..." : ex.goal}
@@ -588,18 +588,18 @@ export default function MissionPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7, delay: 0.45 }}
-            className="mt-8 flex items-center justify-center gap-x-6 gap-y-2 font-mono text-[11px] text-[#F3EEE1]/25"
+            className="mt-8 flex items-center justify-center gap-x-8 gap-y-2 font-mono text-sm text-[#F3EEE1]/30"
           >
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-3 w-3 text-[#C9A227]/50" /> 12
+              <CheckCircle2 className="h-4 w-4 text-[#C9A227]/50" /> 12
               specialized agents
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-3 w-3 text-[#3FA78E]/50" /> 10+ search
+              <CheckCircle2 className="h-4 w-4 text-[#3FA78E]/50" /> 10+ search
               tools
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-3 w-3 text-[#C2703D]/50" /> No signup
+              <CheckCircle2 className="h-4 w-4 text-[#C2703D]/50" /> No signup
               required
             </span>
           </motion.div>
