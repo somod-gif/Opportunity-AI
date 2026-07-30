@@ -1,10 +1,18 @@
 import { z } from "zod";
 import type { AgentTool, ToolResult, ToolContext } from "./base";
+import { deduplicate } from "./dedup";
+
+const adviceCache = new Map<string, string>();
 
 async function generateAdvice(title: string, goal: string, ai: ToolContext["ai"]): Promise<string> {
+  const cacheKey = `${title}::${goal}`;
+  const cached = adviceCache.get(cacheKey);
+  if (cached) return cached;
   try {
     const result = await ai.generateJSON("advice", `Generate personalized advice for an African student applying to "${title}". Mission: "${goal}". Return { advice: "2-3 sentence actionable advice" }`);
-    return (result as { advice?: string })?.advice || `Review eligibility criteria carefully for ${title}.`;
+    const advice = (result as { advice?: string })?.advice || `Review eligibility criteria carefully for ${title}.`;
+    adviceCache.set(cacheKey, advice);
+    return advice;
   } catch { return `Review eligibility criteria carefully for ${title}.`; }
 }
 
@@ -104,10 +112,11 @@ export const webSearchTool: AgentTool = {
       updatedAt: new Date().toISOString(),
     })));
 
+    const deduped = deduplicate(enriched as unknown as Array<{ title?: string; provider?: string }>);
     return {
       success: true,
-      data: enriched,
-      summary: `Found ${enriched.length} opportunities via web search for "${p.query}"`,
+      data: deduped,
+      summary: `Found ${deduped.length} opportunities via web search for "${p.query}"`,
       metadata: { query: p.query, count: enriched.length, source: "web_search" },
     };
   },

@@ -1,15 +1,23 @@
 import { z } from "zod";
 import type { AgentTool, ToolResult, ToolContext } from "./base";
 import { searchOpportunities } from "./search-utils";
+import { deduplicate } from "./dedup";
 
 const opportunityTypeSchema = z.enum([
   "scholarship","fellowship","internship","grant","competition","conference","research","job","bootcamp","accelerator","hackathon","award","exchange","training","volunteer"
 ]);
 
+const adviceCache = new Map<string, string>();
+
 async function generateAdvice(title: string, goal: string, ai: ToolContext["ai"]): Promise<string> {
+  const cacheKey = `${title}::${goal}`;
+  const cached = adviceCache.get(cacheKey);
+  if (cached) return cached;
   try {
     const result = await ai.generateJSON("advice", `Generate personalized advice for an African student applying to "${title}". Mission: "${goal}". Return { advice: "2-3 sentence actionable advice" }`);
-    return (result as { advice?: string })?.advice || `Consider applying to ${title}. Review eligibility criteria carefully.`;
+    const advice = (result as { advice?: string })?.advice || `Consider applying to ${title}. Review eligibility criteria carefully.`;
+    adviceCache.set(cacheKey, advice);
+    return advice;
   } catch { return `Consider applying to ${title}. Review eligibility criteria carefully.`; }
 }
 
@@ -65,11 +73,12 @@ export const searchOpportunitiesTool: AgentTool = {
       const searchPrompt = `Search the web for current ${query || "scholarships, fellowships, and internships"} opportunities for African students. Return a JSON array of objects with: title, description, provider, type (scholarship/fellowship/internship/grant), url, eligibility, location, deadline if known. Return up to ${limit} real opportunities from actual web sources. Today is ${new Date().toISOString().split("T")[0]}.`;
       const aiResult = await ctx.ai.generateJSON("search", searchPrompt) as Array<Record<string, unknown>>;
       if (Array.isArray(aiResult) && aiResult.length > 0) {
-        const opportunities = await Promise.all(aiResult.slice(0, limit).map(async (r, i) => ({
+        const raw = await Promise.all(aiResult.slice(0, limit).map(async (r, i) => ({
           ...opportunityFromRaw(r, i, types, goal, "AI Discovery"),
           advice: await generateAdvice(String(r.title || r.name || `Opportunity ${i + 1}`), goal, ctx.ai),
         })));
-        return {
+        const opportunities = deduplicate(raw as Array<{ title?: string; provider?: string }>);
+        if (opportunities.length > 0) return {
           success: true,
           data: opportunities,
           summary: `Found ${opportunities.length} opportunities via Gemma 4 web search matching "${query}"`,
@@ -107,11 +116,12 @@ export const searchOpportunitiesTool: AgentTool = {
         }
 
         if (duckResults.length > 0) {
-          const opportunities = await Promise.all(duckResults.slice(0, limit).map(async (r, i) => ({
+          const raw = await Promise.all(duckResults.slice(0, limit).map(async (r, i) => ({
             ...opportunityFromRaw(r, i, types, goal, "Web"),
             advice: await generateAdvice(String(r.title || `Opportunity ${i + 1}`), goal, ctx.ai),
           })));
-          return {
+          const opportunities = deduplicate(raw as Array<{ title?: string; provider?: string }>);
+          if (opportunities.length > 0) return {
             success: true,
             data: opportunities,
             summary: `Found ${opportunities.length} opportunities via web search matching "${query}"`,
@@ -137,15 +147,16 @@ export const searchOpportunitiesTool: AgentTool = {
     });
 
     if (dbResults.length >= 3) {
-      const withAdvice = await Promise.all(dbResults.map(async (r) => ({
+      const raw = await Promise.all(dbResults.map(async (r) => ({
         ...r,
         advice: await generateAdvice(String(r.title || ""), goal, ctx.ai),
       })));
-      return {
+      const withAdvice = deduplicate(raw as Array<{ title?: string; provider?: string }>);
+      if (withAdvice.length > 0) return {
         success: true,
         data: withAdvice,
-        summary: `Found ${dbResults.length} opportunities from database matching your criteria`,
-        metadata: { count: dbResults.length, types, query: p.keywords, source: "database" },
+        summary: `Found ${withAdvice.length} opportunities from database matching your criteria`,
+        metadata: { count: withAdvice.length, types, query: p.keywords, source: "database" },
       };
     }
 
@@ -179,10 +190,11 @@ export const searchOpportunitiesTool: AgentTool = {
       );
     }
 
-    const fallbackOps = await Promise.all(curatedFallback.slice(0, limit).map(async (r, i) => ({
+    const rawFallback = await Promise.all(curatedFallback.slice(0, limit).map(async (r, i) => ({
       ...opportunityFromRaw(r as unknown as Record<string, unknown>, i, types, goal, "Curated"),
       advice: await generateAdvice(r.title, goal, ctx.ai),
     })));
+    const fallbackOps = deduplicate(rawFallback as Array<{ title?: string; provider?: string }>);
 
     return {
       success: true,
