@@ -137,7 +137,11 @@ If you have enough data to analyze eligibility or gaps, mention that. If search 
 
 Return your reasoning as a single detailed paragraph.`;
 
-    return context.ai.generate(prompt);
+    try {
+      return await context.ai.generate(prompt);
+    } catch {
+      return `Continuing mission: ${context.mission.goal}. Searching for matching opportunities.`;
+    }
   }
 
   async evaluateToolSelection(

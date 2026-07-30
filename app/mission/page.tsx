@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
@@ -143,6 +143,7 @@ export default function MissionPage() {
   const [experienceLevel, setExperienceLevel] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   // CV upload
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -185,7 +186,11 @@ export default function MissionPage() {
     setCvParsing(false);
   }
 
-
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   function addSkill() {
     const s = skillInput.trim();
@@ -232,8 +237,8 @@ export default function MissionPage() {
       <div className="pointer-events-none fixed -bottom-40 left-0 z-0 h-[400px] w-[400px] rounded-full bg-[#3FA78E]/[0.04] blur-[120px]" />
 
       {/* NAV */}
-      <header className="fixed top-0 z-50 w-full px-2 sm:px-4">
-        <div className="mx-auto max-w-7xl mt-2 rounded-sm border border-[#F3EEE1]/10 bg-[#0B0E13]/90 backdrop-blur-md shadow-[0_1px_0_rgba(243,238,225,0.06)]">
+      <motion.header initial={{ y: -72 }} animate={{ y: 0 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} className="fixed top-0 z-50 w-full px-2 sm:px-4">
+        <div className={`mx-auto max-w-7xl mt-2 transition-all duration-500 ${scrolled ? "rounded-sm border border-[#F3EEE1]/10 bg-[#0B0E13]/90 backdrop-blur-md shadow-[0_1px_0_rgba(243,238,225,0.06)]" : "bg-transparent"}`}>
           <div className="mx-auto flex h-12 sm:h-14 items-center justify-between px-3 sm:px-6">
             <a href="/" className="group flex items-center gap-2 sm:gap-3">
               <div className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-sm border-[1.5px] border-[#C9A227] text-[#C9A227] transition-transform group-hover:-rotate-6">
@@ -253,7 +258,7 @@ export default function MissionPage() {
             </a>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       <main className="relative z-10 flex-1">
         <div className="mx-auto w-full max-w-[95vw] sm:max-w-xl lg:max-w-2xl px-2 sm:px-4 pt-24 sm:pt-28 pb-16 sm:px-6">

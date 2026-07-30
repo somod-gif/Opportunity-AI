@@ -31,7 +31,8 @@ export class MultiAgentCoordinator {
   private subAgents: SubAgentStatus[] = [];
   private stateHistory: AgentState[] = [];
   private currentIteration = 0;
-  private maxIterations = 12;
+  private maxIterations = 6;
+  private maxDuration = 180_000; // 3 minutes hard cap
   private startTime = 0;
   private toolsUsed = new Set<string>();
   private sourcesFound = 0;
@@ -118,6 +119,26 @@ export class MultiAgentCoordinator {
     }
 
     for (this.currentIteration = 1; this.currentIteration <= this.maxIterations; this.currentIteration++) {
+      if (Date.now() - this.startTime > this.maxDuration) {
+        this.emitter.emitThought(`Time limit of 3 minutes reached after ${this.currentIteration - 1} iterations. Finalizing results.`);
+        this.stateHistory.push({
+          sessionId: this.sessionId,
+          missionId: this.context.missionId,
+          iteration: this.currentIteration,
+          phase: "complete",
+          mission: this.mission,
+          reasoning: "Time limit reached",
+          toolCall: null,
+          toolResult: { success: true, data: null, summary: "Time limit reached" },
+          observations: "Finalized due to time limit",
+          missionComplete: true,
+          error: null,
+          startedAt: this.startTime,
+          updatedAt: Date.now(),
+        });
+        missionComplete = true;
+        break;
+      }
       this.context.iteration = this.currentIteration;
       const state = await this.executeIteration();
 
@@ -448,6 +469,6 @@ Only include agents that are relevant to this specific mission.`;
       .where(eq(agentMissions.id, this.context.missionId))
       .catch(() => {});
 
-    this.emitter.emitComplete(`Mission ${report.status === "complete" ? "complete" : "completed with partial results"}`);
+    this.emitter.emitComplete(`Mission ${report.status === "complete" ? "complete" : "completed with partial results"}`, report);
   }
 }

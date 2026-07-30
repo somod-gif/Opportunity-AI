@@ -14,7 +14,12 @@ export class ToolDispatcher {
 
     try {
       const parsed = tool.parameters.parse(call.params);
-      const result = await tool.execute(parsed, ctx);
+      const result = await Promise.race([
+        tool.execute(parsed, ctx),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`Tool "${call.name}" timed out after 30s`)), 30_000)
+        ),
+      ]);
       return {
         success: result.success,
         data: result.data,

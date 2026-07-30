@@ -56,8 +56,8 @@ export class SSEEmitter {
     this.send({ type: "error", data: { error }, timestamp: Date.now() });
   }
 
-  emitComplete(summary: string): void {
-    this.send({ type: "complete", data: { summary }, timestamp: Date.now() });
+  emitComplete(summary: string, report?: unknown): void {
+    this.send({ type: "complete", data: report ? { summary, report } : { summary }, timestamp: Date.now() });
   }
 
   phase(phase: string, iteration: number): void {

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Bot, Loader2, CheckCircle2, XCircle, ArrowRight, AlertCircle, Cpu, Sparkles, Clock,
   Eye, Brain, Target, Search, Database, Shield, FileText, BarChart3, Activity, Lightbulb,
-  ChevronRight, Globe, Award, Star, Zap, GraduationCap, Radio, Terminal,
+  ChevronRight, Globe, Award, Star, Zap, GraduationCap, Radio, Terminal, ExternalLink,
   Stamp as StampIcon,
 } from "lucide-react";
 import { AGENT_PERSONAS, resolvePersonaForTool, resolvePersona } from "@/lib/agent/personas";
@@ -238,15 +238,22 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
             </div>
 
             <div className="flex items-center gap-2 text-[12px] font-mono text-[#F3EEE1]/40 shrink-0">
-              <span className="hidden sm:flex items-center gap-1"><Cpu className="h-3 w-3" strokeWidth={1.75} /> ITR {currentIteration}/12</span>
+              <span className="hidden sm:flex items-center gap-1"><Cpu className="h-3 w-3" strokeWidth={1.75} /> ITR {currentIteration}/6</span>
               <span className="flex items-center gap-1"><Clock className="h-3 w-3" strokeWidth={1.75} /> {formatTime(elapsed * 1000)}</span>
               <span className="hidden sm:flex items-center gap-1"><Activity className="h-3 w-3" strokeWidth={1.75} /> T{completedCount + failedCount}</span>
               {completed && (
-                <motion.button initial={{ scale: 0.9 }} animate={{ scale: 1 }}
-                  onClick={() => router.push(`/dashboard/${sessionId}`)}
-                  className="flex items-center gap-1 rounded-sm bg-[#C9A227]/20 px-2 py-1 text-[11px] font-medium text-[#C9A227] hover:bg-[#C9A227]/30 transition-all">
-                  DASH <ArrowRight className="h-2.5 w-2.5" strokeWidth={2} />
-                </motion.button>
+                <>
+                  <motion.button initial={{ scale: 0.9 }} animate={{ scale: 1 }}
+                    onClick={() => router.push(`/dashboard/${sessionId}`)}
+                    className="flex items-center gap-1 rounded-sm bg-[#C9A227]/20 px-2 py-1 text-[11px] font-medium text-[#C9A227] hover:bg-[#C9A227]/30 transition-all">
+                    DASH <ArrowRight className="h-2.5 w-2.5" strokeWidth={2} />
+                  </motion.button>
+                  <motion.button initial={{ scale: 0.9 }} animate={{ scale: 1 }}
+                    onClick={() => router.push("/mission")}
+                    className="flex items-center gap-1 rounded-sm border border-[#C9A227]/20 px-2 py-1 text-[11px] font-medium text-[#C9A227]/60 hover:bg-[#C9A227]/10 transition-all">
+                    + NEW
+                  </motion.button>
+                </>
               )}
             </div>
           </div>
@@ -375,6 +382,143 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                 <div ref={logEndRef} />
               </div>
             </div>
+
+            {/* OPPORTUNITIES SEEN — rich detailed cards */}
+            {(() => {
+              const allOpps = toolResults
+                .filter(tr => tr.tool === "search_opportunities" || tr.tool === "web_search")
+                .flatMap(tr => {
+                  const items = (tr.result as any)?.data;
+                  return Array.isArray(items) ? items : [];
+                });
+              if (allOpps.length === 0) return null;
+              return (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                  <div className="flex items-center gap-2 mb-3 px-1">
+                    <Award className="h-4 w-4 text-[#C9A227]" strokeWidth={1.75} />
+                    <span className="text-sm font-semibold text-[#F3EEE1] tracking-wide" style={{ fontFamily: "var(--font-display)" }}>
+                      Discovered Opportunities
+                    </span>
+                    <span className="ml-auto text-xs font-mono text-[#C9A227] bg-[#C9A227]/10 px-2 py-0.5 rounded-sm border border-[#C9A227]/20">
+                      {allOpps.length} found
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {allOpps.slice(0, 10).map((item: any, idx: number) => {
+                      const hasUrl = item.applicationUrl || item.url;
+                      const isWebResult = !!item.url;
+                      const daysLeft = item.deadline ? Math.ceil((new Date(item.deadline).getTime() - Date.now()) / 86400000) : null;
+                      return (
+                        <motion.div
+                          key={`opp-${idx}`}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: idx * 0.05 }}
+                          className="rounded-sm border border-[#F3EEE1]/[0.08] bg-[#0B0E13]/80 hover:border-[#C9A227]/25 hover:bg-[#0B0E13] transition-all group"
+                        >
+                          {/* Header: Title + badges */}
+                          <div className="border-b border-[#F3EEE1]/[0.04] px-4 py-3 flex items-start gap-3">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-[#C9A227]/10">
+                              <Star className="h-4 w-4 text-[#C9A227]" strokeWidth={1.75} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-semibold text-[#F3EEE1] leading-snug line-clamp-2 group-hover:text-[#C9A227] transition-colors" style={{ fontFamily: "var(--font-display)" }}>
+                                {item.title || "Opportunity"}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                                <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-[#3FA78E] bg-[#3FA78E]/10 px-2 py-0.5 rounded-sm uppercase tracking-wider">
+                                  {item.type || (isWebResult ? "web" : "opportunity")}
+                                </span>
+                                {item.provider && (
+                                  <span className="text-[12px] text-[#F3EEE1]/50 font-medium">{item.provider}</span>
+                                )}
+                                {item.location && (
+                                  <span className="text-[12px] text-[#F3EEE1]/35">· {item.location}</span>
+                                )}
+                                {item.isRemote && (
+                                  <span className="text-[11px] text-[#3FA78E]/60 font-mono">· Remote</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          <div className="px-4 py-2.5">
+                            <p className="text-[13px] text-[#F3EEE1]/60 leading-relaxed line-clamp-3">
+                              {item.description || "No description available."}
+                            </p>
+                          </div>
+
+                          {/* Eligibility */}
+                          {item.eligibilityCriteria && (
+                            <div className="px-4 pb-2">
+                              <div className="rounded-sm bg-[#F3EEE1]/[0.03] border border-[#F3EEE1]/[0.05] px-3 py-2">
+                                <p className="text-[10px] font-mono font-semibold text-[#F3EEE1]/40 uppercase tracking-wider mb-1">Eligibility Criteria</p>
+                                <p className="text-[12px] text-[#F3EEE1]/55 leading-relaxed line-clamp-3">{item.eligibilityCriteria}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Tags */}
+                          {item.tags && Array.isArray(item.tags) && item.tags.length > 0 && (
+                            <div className="px-4 pb-2 flex flex-wrap gap-1.5">
+                              {item.tags.slice(0, 6).map((tag: string, t: number) => (
+                                <span key={t} className="text-[10px] font-mono text-[#C9A227]/50 bg-[#C9A227]/[0.06] px-2 py-0.5 rounded-sm border border-[#C9A227]/10">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Footer */}
+                          <div className="border-t border-[#F3EEE1]/[0.04] px-4 py-2.5 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              {daysLeft !== null && (
+                                <span className={`text-[12px] font-mono font-semibold ${
+                                  daysLeft <= 30 ? "text-[#C2703D]" : "text-[#F3EEE1]/50"
+                                }`}>
+                                  {daysLeft <= 0 ? "Due today" : `${daysLeft}d left`}
+                                </span>
+                              )}
+                              {item.deadline && (
+                                <span className="text-[11px] font-mono text-[#F3EEE1]/35">
+                                  {new Date(item.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                </span>
+                              )}
+                              {isWebResult && (
+                                <span className="text-[10px] font-mono text-[#3FA78E]/50">· web</span>
+                              )}
+                            </div>
+                            {hasUrl ? (
+                              <a
+                                href={item.applicationUrl || item.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-sm bg-[#C9A227] px-3 py-1.5 text-[12px] font-semibold text-[#0B0E13] hover:bg-[#C9A227]/90 transition-all shrink-0"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Apply <ExternalLink className="h-3 w-3" strokeWidth={2.5} />
+                              </a>
+                            ) : (
+                              <span className="text-[11px] text-[#F3EEE1]/30 font-mono italic">Apply info pending</span>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                  {allOpps.length > 8 && (
+                    <p className="text-center text-xs text-[#F3EEE1]/30 mt-3 font-mono">
+                      +{allOpps.length - 8} more opportunities — visit{" "}
+                      <button onClick={() => router.push(`/workspace/${sessionId}`)} className="text-[#C9A227]/60 hover:text-[#C9A227] underline decoration-dotted underline-offset-2">
+                        workspace
+                      </button>{" "}
+                      to view all
+                    </p>
+                  )}
+                </motion.div>
+              );
+            })()}
           </div>
 
           {/* RIGHT: Agent Roster + Memory */}
@@ -493,6 +637,8 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                       className="flex-1 rounded-sm bg-[#C9A227] px-2.5 py-1.5 text-[12px] font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all">Dashboard</button>
                     <button onClick={() => router.push(`/memory/${sessionId}`)}
                       className="flex-1 rounded-sm border border-[#F3EEE1]/10 px-2.5 py-1.5 text-[12px] font-medium text-[#F3EEE1]/60 hover:bg-[#F3EEE1]/[0.03] transition-all">Memory</button>
+                    <button onClick={() => router.push("/mission")}
+                      className="flex-1 rounded-sm border border-[#C9A227]/30 px-2.5 py-1.5 text-[12px] font-medium text-[#C9A227]/70 hover:bg-[#C9A227]/10 transition-all">+ New Mission</button>
                   </div>
                 </motion.div>
               )}

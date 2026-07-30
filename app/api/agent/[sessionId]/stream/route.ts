@@ -34,17 +34,7 @@ export async function GET(
 
       try {
         await coordinator.initialize();
-        const report = await coordinator.run();
-
-        if (!cleanup) {
-          emitter.emit({
-            type: "complete",
-            data: {
-              summary: `Mission complete after ${report.iterations} iterations`,
-              report,
-            },
-          });
-        }
+        await coordinator.run();
       } catch (error) {
         hadError = true;
         if (!cleanup) {

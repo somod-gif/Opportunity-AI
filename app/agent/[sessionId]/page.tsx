@@ -7,9 +7,10 @@ export default async function AgentPage({
   params,
   searchParams,
 }: {
-  params: { sessionId: string };
+  params: Promise<{ sessionId: string }>;
   searchParams: Promise<{ goal?: string }>;
 }) {
+  const { sessionId } = await params;
   const { goal } = await searchParams;
 
   return (
@@ -21,7 +22,7 @@ export default async function AgentPage({
         </div>
       </div>
     }>
-      <ClientAgentPage sessionId={params.sessionId} goal={goal || ""} />
+      <ClientAgentPage sessionId={sessionId} goal={goal || ""} />
     </Suspense>
   );
 }

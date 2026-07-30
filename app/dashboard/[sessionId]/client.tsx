@@ -179,7 +179,7 @@ export function DashboardClient({ sessionId, mission, memories, iterations, tota
         </div>
 
         {/* Navigation */}
-        <div className="mt-8 flex gap-3 justify-center">
+        <div className="mt-8 flex gap-3 justify-center flex-wrap">
           <Link href={`/workspace/${sessionId}`}
             className="inline-flex items-center gap-2 rounded-sm bg-[#C9A227] px-6 py-3 text-sm font-semibold text-[#0B0E13] transition-all hover:-translate-y-0.5">
             <Target className="h-4 w-4" strokeWidth={1.75} /> Opportunity Workspace
@@ -187,6 +187,10 @@ export function DashboardClient({ sessionId, mission, memories, iterations, tota
           <Link href={`/memory/${sessionId}`}
             className="inline-flex items-center gap-2 rounded-sm border border-[#F3EEE1]/10 px-6 py-3 text-sm font-medium text-[#F3EEE1]/60 hover:bg-[#F3EEE1]/[0.03] transition-all">
             <Database className="h-4 w-4" strokeWidth={1.75} /> Full Memory
+          </Link>
+          <Link href="/mission"
+            className="inline-flex items-center gap-2 rounded-sm border border-[#C9A227]/30 px-6 py-3 text-sm font-medium text-[#C9A227]/70 hover:bg-[#C9A227]/10 transition-all">
+            + New Mission
           </Link>
         </div>
       </div>

@@ -342,7 +342,7 @@ export function LandingClient() {
                 ["Next.js 16", "Server components, App Router, Turbopack"],
                 ["TypeScript 5", "Strict mode, zero `any` types"],
                 ["Drizzle ORM", "8 PostgreSQL tables, typed queries"],
-                ["Gemma 4", "gemma-4-27b-it via OpenRouter + Google AI"],
+                ["Gemma 4", "gemma-4-26b-a4b-it:free via OpenRouter + Google AI"],
                 ["Tailwind v4", "Utility-first styling, dark theme"],
                 ["shadcn/ui", "Radix primitives, Nova components"],
                 ["Framer Motion", "Spring animations, staggered reveals"],
@@ -366,7 +366,7 @@ export function LandingClient() {
                 { title: "Multi-Agent Coordinator", desc: "9 specialized sub-agents (Scholarship, Grant, Internship, Research, Competition, Web, Evaluation, Career Coach, Document) orchestrated by a Mission Commander. Each agent has its own role, tools, and decision-making logic.", items: ["State machine with validated phase transitions", "Event bus for decoupled communication", "12-iteration max loop with early termination"] },
                 { title: "Tool Registry + Function Calling", desc: "8 dynamically registered tools with Zod validation. The agent selects tools via native function calling API — not JSON prompting.", items: ["search_opportunities · web_search · eligibility_analyzer", "opportunity_ranking · gap_analysis · generate_document", "email_reminder · pdf_generator"] },
                 { title: "Persistent Memory + Semantic Search", desc: "Three-tier memory (episodic/semantic/procedural) with importance scoring, access tracking, and embedding-based retrieval.", items: ["Google text-embedding-004 for vector embeddings", "128-dim vectors stored in metadata JSONB", "Cosine similarity re-ranking on recall"] },
-                { title: "Dual AI Provider Architecture", desc: "Supports both OpenRouter (gemma-4-27b-it) and direct Google AI API switchable at runtime via AI_PROVIDER env var.", items: ["JSON mode for structured output", "Streaming support via SSE", "Exponential backoff retry logic"] },
+                { title: "Dual AI Provider Architecture", desc: "Supports both OpenRouter (gemma-4-26b-a4b-it) and direct Google AI API switchable at runtime via AI_PROVIDER env var.", items: ["JSON mode for structured output", "Streaming support via SSE", "Exponential backoff retry logic"] },
                 { title: "SSE Real-Time Streaming", desc: "Server-Sent Events stream every agent decision — reasoning, tool selection, execution results, and memory updates — to the UI in real time.", items: ["Phase indicators (perceive/reason/plan/execute)", "Typewriter effect for reasoning text", "Auto-reconnect on disconnect"] },
                 { title: "Document Generation", desc: "AI generates application documents — resumes, cover letters, personal statements, checklists — tailored to each opportunity and user profile.", items: ["Markdown output with html2pdf.js", "Structured with user education, skills, experience", "Downloadable mission reports"] },
               ].map((block, i) => (

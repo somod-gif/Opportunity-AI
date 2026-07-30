@@ -8,9 +8,9 @@ export const dynamic = "force-dynamic";
 export default async function WorkspacePage({
   params,
 }: {
-  params: { sessionId: string };
+  params: Promise<{ sessionId: string }>;
 }) {
-  const { sessionId } = params;
+  const { sessionId } = await params;
 
   const mission = await db
     .select()
