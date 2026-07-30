@@ -444,7 +444,81 @@ export const searchOpportunitiesTool: AgentTool = {
       async execute(params: unknown, ctx: ToolContext): Promise<ToolResult> {
     const p = params as { types?: string | string[]; keywords?: string | string[]; country?: string; deadlineBefore?: string; deadlineAfter?: string; provider?: string; isRemote?: boolean; limit?: number; offset?: number };
     const types = p.types ? (Array.isArray(p.types) ? p.types : [p.types]) : undefined;
-    const results = await searchOpportunities({
+    const query = Array.isArray(p.keywords) ? p.keywords.join(" ") : p.keywords || "";
+    const goal = query;
+    const limit = p.limit || 20;
+
+    // Step 1: Try DuckDuckGo web search for real-time results
+    try {
+      const searchUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query + " scholarship fellowship opportunity 2026")}&format=json&no_html=1&skip_disambig=1`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch(searchUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const data = await res.json() as {
+          AbstractText?: string;
+          AbstractSource?: string;
+          RelatedTopics?: Array<{ Text?: string; FirstURL?: string; Result?: string; Topics?: Array<{ Text?: string; FirstURL?: string }> }>;
+          Results?: Array<{ Text?: string; FirstURL?: string }>;
+        };
+
+        const webResults: Array<{ title: string; url: string; description: string }> = [];
+
+        if (data.AbstractText) {
+          webResults.push({ title: query, url: "https://duckduckgo.com/", description: data.AbstractText });
+        }
+
+        const topics = data.RelatedTopics || [];
+        for (const topic of topics.slice(0, Math.min(limit, 15))) {
+          if (topic.Topics) {
+            for (const sub of topic.Topics.slice(0, 3)) {
+              if (sub.Text) webResults.push({ title: sub.Text.split(" - ")[0] || query, url: sub.FirstURL || "https://duckduckgo.com/", description: sub.Text });
+            }
+          } else if (topic.Text) {
+            webResults.push({ title: topic.Text.split(" - ")[0] || query, url: topic.FirstURL || "https://duckduckgo.com/", description: topic.Text });
+          }
+        }
+
+        if (webResults.length > 0) {
+          const opportunities = await Promise.all(webResults.slice(0, limit).map(async (w, i) => ({
+            id: `web-${i}-${Date.now()}`,
+            title: w.title,
+            slug: w.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 50),
+            type: (types || ["scholarship", "fellowship", "internship", "grant"]).find(t => w.description.toLowerCase().includes(t)) || "scholarship",
+            provider: w.url.includes("duckduckgo.com") ? "Web Search" : new URL(w.url).hostname.replace("www.", ""),
+            description: w.description,
+            eligibilityCriteria: "Varies — check the official listing for full eligibility details.",
+            deadline: new Date(Date.now() + 60 * 86400000).toISOString(),
+            location: "Multiple",
+            isRemote: true,
+            tags: ["Web Discovery", ...(types || []).slice(0, 3)],
+            applicationUrl: w.url,
+            advice: await generateAdvice(w.title, goal, ctx.ai),
+            isActive: true,
+            benefits: null,
+            targetAudience: [],
+            requiredSkills: [],
+            preferredSkills: [],
+            experienceLevel: null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          })));
+          return {
+            success: true,
+            data: opportunities,
+            summary: `Found ${opportunities.length} opportunities via DuckDuckGo web search matching "${query}"`,
+            metadata: { count: opportunities.length, types, query: p.keywords, source: "duckduckgo_web" },
+          };
+        }
+      }
+    } catch {
+      // DuckDuckGo failed, fall through to DB
+    }
+
+    // Step 2: Query database
+    const dbResults = await searchOpportunities({
       types,
       keywords: p.keywords,
       country: p.country,
@@ -452,14 +526,13 @@ export const searchOpportunitiesTool: AgentTool = {
       deadlineAfter: p.deadlineAfter,
       provider: p.provider,
       isRemote: p.isRemote,
-      limit: p.limit,
+      limit,
       offset: p.offset,
     });
 
-    // Fallback: if DB returned less than 3 results, inject hardcoded opportunities with AI-generated advice
-    if (results.length < 3) {
-      const goal = Array.isArray(p.keywords) ? p.keywords.join(" ") : p.keywords || "";
-      const fallback = await getFallbackResults(goal, ctx.ai, p.keywords, p.limit || 20);
+    // Step 3: If DB returned less than 3 results, fall back to hardcoded with AI advice
+    if (dbResults.length < 3) {
+      const fallback = await getFallbackResults(goal, ctx.ai, p.keywords, limit);
       if (fallback.length > 0) {
         return {
           success: true,
@@ -470,17 +543,17 @@ export const searchOpportunitiesTool: AgentTool = {
       }
     }
 
-    // Add AI-generated advice to DB results
-    const withAdvice = await Promise.all(results.map(async (r) => ({
+    // Step 4: Add AI advice to DB results
+    const withAdvice = await Promise.all(dbResults.map(async (r) => ({
       ...r,
-      advice: await generateAdvice(String(r.title || ""), Array.isArray(p.keywords) ? p.keywords.join(" ") : p.keywords || "", ctx.ai),
+      advice: await generateAdvice(String(r.title || ""), goal, ctx.ai),
     })));
 
     return {
       success: true,
       data: withAdvice,
-      summary: `Found ${results.length} opportunities matching your criteria`,
-      metadata: { count: results.length, types, query: p.keywords },
+      summary: `Found ${dbResults.length} opportunities matching your criteria`,
+      metadata: { count: dbResults.length, types, query: p.keywords, source: "database" },
     };
   },
 };
