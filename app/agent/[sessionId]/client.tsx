@@ -451,10 +451,20 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
 
                           {/* Eligibility */}
                           {item.eligibilityCriteria && (
-                            <div className="px-4 pb-2">
+                            <div className="px-4 pb-1.5">
                               <div className="rounded-sm bg-[#F3EEE1]/[0.03] border border-[#F3EEE1]/[0.05] px-3 py-2">
                                 <p className="text-[10px] font-mono font-semibold text-[#F3EEE1]/40 uppercase tracking-wider mb-1">Eligibility Criteria</p>
                                 <p className="text-[12px] text-[#F3EEE1]/55 leading-relaxed line-clamp-3">{item.eligibilityCriteria}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* AI Advice */}
+                          {item.advice && (
+                            <div className="px-4 pb-1.5">
+                              <div className="rounded-sm bg-[#C9A227]/[0.04] border border-[#C9A227]/15 px-3 py-2">
+                                <p className="text-[10px] font-mono font-semibold text-[#C9A227]/60 uppercase tracking-wider mb-1">AI Recommendation</p>
+                                <p className="text-[12px] text-[#C9A227]/70 leading-relaxed line-clamp-3">{item.advice}</p>
                               </div>
                             </div>
                           )}
