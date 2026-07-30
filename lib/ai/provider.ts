@@ -10,7 +10,8 @@ export type AICapability =
   | "reflect"
   | "reason"
   | "memory-update"
-  | "parse-cv";
+  | "parse-cv"
+  | "search";
 
 export interface FunctionDeclaration {
   name: string;

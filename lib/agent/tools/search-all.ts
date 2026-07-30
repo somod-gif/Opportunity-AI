@@ -448,54 +448,27 @@ export const searchOpportunitiesTool: AgentTool = {
     const goal = query;
     const limit = p.limit || 20;
 
-    // Step 1: Try DuckDuckGo web search for real-time results
+    // Step 1: Use Gemma 4 with OpenRouter web search for real-time results
     try {
-      const searchUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query + " scholarship fellowship opportunity 2026")}&format=json&no_html=1&skip_disambig=1`;
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
-      const res = await fetch(searchUrl, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        const data = await res.json() as {
-          AbstractText?: string;
-          AbstractSource?: string;
-          RelatedTopics?: Array<{ Text?: string; FirstURL?: string; Result?: string; Topics?: Array<{ Text?: string; FirstURL?: string }> }>;
-          Results?: Array<{ Text?: string; FirstURL?: string }>;
-        };
-
-        const webResults: Array<{ title: string; url: string; description: string }> = [];
-
-        if (data.AbstractText) {
-          webResults.push({ title: query, url: "https://duckduckgo.com/", description: data.AbstractText });
-        }
-
-        const topics = data.RelatedTopics || [];
-        for (const topic of topics.slice(0, Math.min(limit, 15))) {
-          if (topic.Topics) {
-            for (const sub of topic.Topics.slice(0, 3)) {
-              if (sub.Text) webResults.push({ title: sub.Text.split(" - ")[0] || query, url: sub.FirstURL || "https://duckduckgo.com/", description: sub.Text });
-            }
-          } else if (topic.Text) {
-            webResults.push({ title: topic.Text.split(" - ")[0] || query, url: topic.FirstURL || "https://duckduckgo.com/", description: topic.Text });
-          }
-        }
-
-        if (webResults.length > 0) {
-          const opportunities = await Promise.all(webResults.slice(0, limit).map(async (w, i) => ({
-            id: `web-${i}-${Date.now()}`,
-            title: w.title,
-            slug: w.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 50),
-            type: (types || ["scholarship", "fellowship", "internship", "grant"]).find(t => w.description.toLowerCase().includes(t)) || "scholarship",
-            provider: w.url.includes("duckduckgo.com") ? "Web Search" : new URL(w.url).hostname.replace("www.", ""),
-            description: w.description,
-            eligibilityCriteria: "Varies — check the official listing for full eligibility details.",
-            deadline: new Date(Date.now() + 60 * 86400000).toISOString(),
-            location: "Multiple",
+      const searchPrompt = `Search the web for current ${query || "scholarships, fellowships, and internships"} opportunities for African students. Return a JSON array of objects with: title, description, provider, type (scholarship/fellowship/internship/grant), url, eligibility, location, deadline if known. Return up to ${limit} real opportunities from actual web sources. Today is ${new Date().toISOString().split("T")[0]}.`;
+      const aiResult = await ctx.ai.generateJSON("search", searchPrompt) as Array<Record<string, unknown>>;
+      if (Array.isArray(aiResult) && aiResult.length > 0) {
+        const opportunities = await Promise.all(aiResult.slice(0, limit).map(async (r, i) => {
+          const title = String(r.title || r.name || `Opportunity ${i + 1}`);
+          return {
+            id: `gemma-web-${i}-${Date.now()}`,
+            title,
+            slug: title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 50),
+            type: String(r.type || (types || ["scholarship"]).find(t => String(r.description || "").toLowerCase().includes(t)) || "scholarship"),
+            provider: String(r.provider || r.organization || r.institution || "Web Source"),
+            description: String(r.description || ""),
+            eligibilityCriteria: String(r.eligibility || r.eligibilityCriteria || "Varies — check the official listing."),
+            deadline: String(r.deadline || new Date(Date.now() + 60 * 86400000).toISOString()),
+            location: String(r.location || "Multiple"),
             isRemote: true,
-            tags: ["Web Discovery", ...(types || []).slice(0, 3)],
-            applicationUrl: w.url,
-            advice: await generateAdvice(w.title, goal, ctx.ai),
+            tags: ["AI Discovery", ...(types || []).slice(0, 3)],
+            applicationUrl: String(r.url || r.applicationUrl || r.link || ""),
+            advice: await generateAdvice(title, goal, ctx.ai),
             isActive: true,
             benefits: null,
             targetAudience: [],
@@ -504,17 +477,17 @@ export const searchOpportunitiesTool: AgentTool = {
             experienceLevel: null,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-          })));
-          return {
-            success: true,
-            data: opportunities,
-            summary: `Found ${opportunities.length} opportunities via DuckDuckGo web search matching "${query}"`,
-            metadata: { count: opportunities.length, types, query: p.keywords, source: "duckduckgo_web" },
           };
-        }
+        }));
+        return {
+          success: true,
+          data: opportunities,
+          summary: `Found ${opportunities.length} opportunities via Gemma 4 web search matching "${query}"`,
+          metadata: { count: opportunities.length, types, query: p.keywords, source: "gemma4_websearch" },
+        };
       }
     } catch {
-      // DuckDuckGo failed, fall through to DB
+      // Gemma web search failed, fall through to DB
     }
 
     // Step 2: Query database

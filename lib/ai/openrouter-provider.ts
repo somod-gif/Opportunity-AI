@@ -82,7 +82,8 @@ export class OpenRouterProvider implements AIProvider {
     };
   }
 
-  private async request(body: Record<string, unknown>, retries = 2, timeout = 30000): Promise<OpenRouterResponse> {
+  private async request(body: Record<string, unknown>, retries = 2, timeout = 30000, plugins?: Array<Record<string, unknown>>): Promise<OpenRouterResponse> {
+    if (plugins) body.plugins = plugins;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
 
@@ -120,17 +121,21 @@ export class OpenRouterProvider implements AIProvider {
     return data.choices?.[0]?.message?.content || "";
   }
 
-  async generateJSON<T>(_capability: AICapability, prompt: string): Promise<T> {
+  async generateJSON<T>(capability: AICapability, prompt: string): Promise<T> {
+    const plugins = capability === "search" ? [{ id: "web_search" }] : undefined;
+    const systemMsg = capability === "search"
+      ? "You are an AI assistant with web search capability. Use web search results to find current opportunities. Return ONLY valid JSON."
+      : "You are an autonomous AI agent. Return ONLY valid JSON matching the requested schema. No markdown, no explanation.";
     const data = await this.request({
       model: this.model,
       messages: [
-        { role: "system", content: "You are an autonomous AI agent. Return ONLY valid JSON matching the requested schema. No markdown, no explanation." },
+        { role: "system", content: systemMsg },
         { role: "user", content: prompt },
       ],
-      temperature: 0.1,
+      temperature: capability === "search" ? 0.3 : 0.1,
       max_tokens: 8192,
       response_format: { type: "json_object" },
-    });
+    }, 2, 45000, plugins);
     const text = data.choices?.[0]?.message?.content || "{}";
     return parseJSONFromText<T>(text);
   }
