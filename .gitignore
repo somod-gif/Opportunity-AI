@@ -39,5 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-dev-server.log  
-curl-stream*.txt  
+
+# runtime artifacts
+*.log
+curl-stream*.txt
