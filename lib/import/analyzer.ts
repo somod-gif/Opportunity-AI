@@ -151,11 +151,16 @@ async function scrapeUrl(url: string): Promise<string> {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; OpportunityAI/1.0; +opportunity-ai.vercel.app)" },
       redirect: "follow",
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const contentType = res.headers.get("content-type") || "";
     const raw = await res.text();
     if (contentType.includes("application/pdf")) return `PDF document: ${raw.slice(0, 2000)}`;
     const text = htmlToText(raw);
+
+    // Even on non-200 (e.g. 404, 403), the body may contain useful navigational
+    // or partial content. Only reject if we genuinely got nothing.
+    if (text.trim().length < 100) {
+      throw new Error(`Page returned ${res.status} with no usable content`);
+    }
     return text.slice(0, 12000);
   } finally {
     clearTimeout(timeoutId);
