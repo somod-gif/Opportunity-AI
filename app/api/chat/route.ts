@@ -1,8 +1,8 @@
-import { getProvider, DEFAULT_MODEL } from "@/lib/ai/registry";
+import { getProvider } from "@/lib/ai/registry";
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || "";
 const OR_BASE = (process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1").replace(/\/+$/, "");
-const OR_MODEL = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+const OR_MODEL = process.env.OPENROUTER_MODEL || "google/gemma-4-31b-it:free";
 const DDG_API = "https://api.duckduckgo.com";
 
 const SYSTEM = `You are Opportunity AI's in-app support agent. You know the platform inside out.

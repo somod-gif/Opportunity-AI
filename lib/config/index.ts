@@ -1,7 +1,7 @@
 export const config = {
   ai: {
     provider: process.env.AI_PROVIDER ?? "gemma",
-    model: process.env.AI_MODEL ?? "gemma-4-26b-a4b-it",
+    model: process.env.AI_MODEL ?? "gemma-4-31b-it",
     apiKey: process.env.GOOGLE_AI_API_KEY ?? "",
     temperature: 0.3,
     maxOutputTokens: 8192,

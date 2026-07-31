@@ -1,5 +1,6 @@
 import type { AIProvider, AIProviderConfig, AICapability, FunctionDeclaration, FunctionCall } from "./provider";
-import { DEFAULT_MODEL } from "./registry";
+
+const OR_DEFAULT_MODEL = "google/gemma-4-31b-it:free";
 
 interface OpenRouterResponse {
   id: string;
@@ -71,7 +72,7 @@ export class OpenRouterProvider implements AIProvider {
   constructor(config?: AIProviderConfig) {
     this.apiKey = config?.apiKey || process.env.OPENROUTER_API_KEY || "";
     this.baseUrl = (process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1").replace(/\/+$/, "");
-    this.model = config?.model || process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+    this.model = config?.model || process.env.OPENROUTER_MODEL || OR_DEFAULT_MODEL;
   }
 
   private getHeaders(): Record<string, string> {

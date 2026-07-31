@@ -11,14 +11,14 @@ Agent Loop (6 iterations max, 3 min timeout)
   SSE streamed to UI in real-time
 
 Tools:
-  search_opportunities — DuckDuckGo API → PostgreSQL DB → curated fallback (3-tier)
-  web_search          — DuckDuckGo API + keyword-matched fallback
+  search_opportunities — Gemma 4 web search → DuckDuckGo API → PostgreSQL DB → curated (3-tier)
+  web_search          — Gemma 4 web_search plugin + DuckDuckGo fallback
   analyze_eligibility  — Gemma 4 evaluates candidate fit
   generate_document    — Cover letter, resume, personal statement, checklist via Gemma 4
   rank_opportunities   — Score and sort by match quality
+  gap_analysis         — Skill gaps + learning path via Gemma 4
   memory_recall/store  — Episodic/semantic/procedural memory via PostgreSQL
-  set_reminder         — Deadline tracking
-  rank_opportunities   — Sort by match score
+  set_reminder         — Deadline tracking (email_reminder via Resend)
 ```
 
 ## Tech Stack
@@ -29,11 +29,12 @@ Tools:
 | Language | TypeScript 5.x (strict mode) |
 | UI | React 19.2.4 + Tailwind CSS v4 |
 | Components | shadcn/ui (Radix-Nova) |
-| AI | Gemma 4 (gemma-4-26b-a4b-it) via OpenRouter |
+| AI | Gemma 4 (gemma-4-31b-it) via Google AI Studio |
 | Database | PostgreSQL (Neon) + Drizzle ORM |
 | Streaming | Server-Sent Events |
 | Icons | lucide-react |
 | Animations | Framer Motion |
+| Email | Resend (reminders) |
 
 ## File Structure
 
@@ -61,8 +62,9 @@ lib/agent/
 lib/ai/
   client.ts          — AI client with streaming support
   provider.ts        — Base provider interface
-  registry.ts        — Provider registry
-  gemma-provider.ts  — Gemma 4 via OpenRouter
+  registry.ts        — Provider registry (default: gemma)
+  gemma-provider.ts  — Gemma 4 via Google AI Studio (function calling)
+  openrouter-provider.ts — OpenRouter fallback provider
 
 app/
   page.tsx           — Landing page (hero, features, agent explanation)
@@ -71,14 +73,22 @@ app/
   workspace/[sessionId]/page.tsx — Opportunity workspace
   dashboard/[sessionId]/page.tsx — Mission dashboard
   memory/[sessionId]/page.tsx    — Agent memory viewer
+  applications/[sessionId]/      — Application Kanban tracker
+  opportunity/[sessionId]/[slug] — AI-scored opportunity detail
+  report/[sessionId]/            — Printable mission report
+  settings/[sessionId]/          — System status + reminder preferences
+  history/                       — Mission history
   api/agent/[sessionId]/stream/route.ts — SSE endpoint
+  api/chat/route.ts              — AI assistant with web search
+  api/reminders/route.ts         — Reminders + Resend email
+  api/missions/route.ts          — Mission history API
 ```
 
 ## Key Decisions
 
 | Decision | Choice |
 |----------|--------|
-| Opportunity sourcing | DuckDuckGo API → PostgreSQL DB → curated fallback (all with AI advice) |
+| Opportunity sourcing | Gemma 4 web search → DuckDuckGo API → PostgreSQL DB → curated fallback (all with AI advice) |
 | Advice | Gemma 4 generates per-opportunity advice at runtime |
 | Streaming | SSE via Route Handler |
 | Agent timeout | 3 min hard cap, 6 iteration max |
@@ -89,8 +99,11 @@ app/
 ## Env Vars
 
 ```env
-OPENROUTER_API_KEY=sk-or-v1-...
-DATABASE_URL=postgresql://...
+GOOGLE_AI_API_KEY=...          # Google AI Studio (primary)
+AI_PROVIDER=gemma              # gemma (default) | openrouter
+AI_MODEL=gemma-4-31b-it
+DATABASE_URL=postgresql://...  # Neon
+RESEND_API_KEY=...             # Email reminders (optional)
 ```
 
 ## Commands

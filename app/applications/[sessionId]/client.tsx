@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Clock, ExternalLink, Trash2, GripVertical } from "lucide-react";
+import { ArrowLeft, Bell, Clock, ExternalLink, Trash2, GripVertical } from "lucide-react";
 import type { Opportunity, Application } from "@/lib/db/schema";
 import * as crud from "@/lib/actions/crud";
 
@@ -52,6 +52,33 @@ export function KanbanClient({ sessionId, applications: initialApps, opportuniti
     await crud.deleteApplication(appId);
     setApps(prev => prev.filter(a => a.id !== appId));
     router.refresh();
+  }
+
+  async function handleReminder(app: Application, days: number) {
+    const opp = getOpp(app);
+    const deadline = app.deadline || opp?.deadline;
+    if (!deadline) { alert("No deadline set for this opportunity."); return; }
+    const due = new Date(new Date(deadline).getTime() - days * 86400000);
+    const res = await fetch("/api/reminders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId,
+        opportunityId: app.opportunityId,
+        type: "deadline",
+        message: days === 0
+          ? `"${opp?.title || "Opportunity"}" is due today. Submit your application.`
+          : `"${opp?.title || "Opportunity"}" closes in ${days} day${days !== 1 ? "s" : ""}.`,
+        dueAt: due.toISOString(),
+        opportunityTitle: opp?.title,
+      }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(days === 0 ? "Reminder set for today." : `Email reminder scheduled ${days} day${days !== 1 ? "s" : ""} before the deadline.`);
+    } else {
+      alert("Failed to set reminder.");
+    }
   }
 
   return (
@@ -133,6 +160,13 @@ export function KanbanClient({ sessionId, applications: initialApps, opportuniti
                                 <span className={`text-[10px] font-mono ${daysLeft <= 7 ? "text-[#C2703D]" : "text-[#F3EEE1]/30"}`}>
                                   {daysLeft <= 0 ? "Due!" : `${daysLeft}d`}
                                 </span>
+                                <button
+                                  onClick={() => handleReminder(app, 1)}
+                                  title="Email reminder 1 day before deadline"
+                                  className="ml-1 flex items-center gap-1 rounded-sm border border-[#C9A227]/20 px-1.5 py-0.5 text-[10px] text-[#C9A227] hover:bg-[#C9A227]/10 transition-colors"
+                                >
+                                  <Bell className="h-2.5 w-2.5" strokeWidth={1.75} /> Remind
+                                </button>
                               </div>
                             )}
                           </div>

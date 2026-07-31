@@ -20,7 +20,7 @@ export function AppSidebar() {
 
   if (pathname === "/" || pathname === "/mission") return null;
 
-  const sessionMatch = pathname.match(/\/(?:agent|dashboard|workspace|memory|applications|report|opportunity)\/([^/]+)/);
+  const sessionMatch = pathname.match(/\/(?:agent|dashboard|workspace|memory|applications|report|opportunity|settings)\/([^/]+)/);
   const sessionId = sessionMatch?.[1];
 
   const sessionNav = sessionId ? [
@@ -30,6 +30,7 @@ export function AppSidebar() {
     { href: `/applications/${sessionId}`, icon: CheckCircle2, label: "Applications" },
     { href: `/report/${sessionId}`, icon: Award, label: "Report" },
     { href: `/memory/${sessionId}`, icon: FileText, label: "Memory" },
+    { href: `/settings/${sessionId}`, icon: Settings, label: "Settings" },
   ] : [];
 
   const isActive = (href: string) => {
