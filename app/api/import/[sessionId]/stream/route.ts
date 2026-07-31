@@ -3,6 +3,11 @@ import { SSEEmitter } from "@/lib/agent/emit";
 import { ImportAnalyzer } from "@/lib/import/analyzer";
 import type { ImportInput } from "@/lib/import/types";
 
+// Allow the import analyzer to run up to 230s (matching ImportAnalyzer.maxDuration)
+// without Vercel terminating the stream early.
+export const maxDuration = 300;
+export const dynamic = "force-dynamic";
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }

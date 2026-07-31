@@ -117,6 +117,15 @@ export function ClientImportPage({ sessionId, url, text }: { sessionId: string; 
     const params = new URLSearchParams({ deviceId: getDeviceId() });
     if (url) params.set("url", url);
     if (text) params.set("text", text);
+    // Forward all profile fields to the SSE stream endpoint
+    const profileParams = ["education", "skills", "country", "careerGoal", "experienceLevel", "email"];
+    if (typeof window !== "undefined") {
+      const search = new URLSearchParams(window.location.search);
+      for (const key of profileParams) {
+        const value = search.get(key);
+        if (value) params.set(key, value);
+      }
+    }
 
     const source = new EventSource(`/api/import/${sessionId}/stream?${params.toString()}`);
     sourceRef.current = source;

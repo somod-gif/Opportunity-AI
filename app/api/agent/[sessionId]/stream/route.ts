@@ -3,6 +3,11 @@ import { SSEEmitter } from "@/lib/agent/emit";
 import { MultiAgentCoordinator } from "@/lib/agent/multi-agent";
 import type { Mission } from "@/lib/types";
 
+// Allow the agent loop to run up to 3 minutes (matching MultiAgentCoordinator.maxDuration)
+// without Vercel terminating the stream early.
+export const maxDuration = 300;
+export const dynamic = "force-dynamic";
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
