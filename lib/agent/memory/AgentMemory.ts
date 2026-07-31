@@ -1,6 +1,6 @@
 import type { MemoryType, MemoryEntry } from "@/lib/types";
 import { db } from "@/lib/db";
-import { agentMemories } from "@/lib/db/schema";
+import { agentMemories, agentMissions } from "@/lib/db/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { generateEmbedding, cosineSimilarity } from "./embedding";
 
@@ -19,7 +19,7 @@ export class AgentMemory {
   private storage = new Map<string, StoredMemory>();
   private maxMemories = 500;
 
-  constructor(private sessionId: string, private missionId?: string) {}
+  constructor(private sessionId: string, private missionId?: string, private deviceId?: string) {}
 
   async store(
     key: string,
@@ -87,6 +87,48 @@ export class AgentMemory {
     }
 
     return results.sort((a, b) => b.importance - a.importance);
+  }
+
+  async recallAcrossSessions(goal: string, limit = 5): Promise<MemoryEntry[]> {
+    if (!this.deviceId) return [];
+    const keywords = goal
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length > 3)
+      .slice(0, 6);
+    try {
+      const rows = await db
+        .select({ memory: agentMemories })
+        .from(agentMemories)
+        .innerJoin(agentMissions, eq(agentMemories.missionId, agentMissions.id))
+        .where(sql`${agentMissions.metadata}->>'deviceId' = ${this.deviceId}`)
+        .orderBy(desc(agentMemories.importance))
+        .limit(limit * 3);
+      const relevant = rows.filter(
+        (r) =>
+          r.memory.sessionId !== this.sessionId &&
+          (keywords.length === 0 ||
+            keywords.some(
+              (k) =>
+                r.memory.key.toLowerCase().includes(k) ||
+                r.memory.value.toLowerCase().includes(k)
+            ))
+      );
+      return relevant.slice(0, limit).map((m) => ({
+        id: `${m.memory.sessionId}:${m.memory.key}`,
+        sessionId: m.memory.sessionId,
+        missionId: m.memory.missionId ?? undefined,
+        memoryType: m.memory.memoryType as MemoryType,
+        key: m.memory.key,
+        value: m.memory.value,
+        importance: m.memory.importance,
+        accessCount: m.memory.accessCount,
+        createdAt: m.memory.createdAt?.getTime() || Date.now(),
+        lastAccessed: m.memory.lastAccessed?.getTime() || Date.now(),
+      }));
+    } catch {
+      return [];
+    }
   }
 
   async recallRelevant(limit = 10): Promise<string> {

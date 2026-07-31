@@ -14,7 +14,9 @@ import type {
   GapAnalysisResult,
   StrategyResult,
   SimilarOpportunity,
+  VerificationInfo,
 } from "./types";
+import { sanitizeDeadline, verifyUrl, isLikelyUrl } from "@/lib/agent/tools/validate";
 
 const VALID_TYPES = [
   "scholarship",
@@ -29,7 +31,7 @@ const VALID_TYPES = [
   "hackathon",
 ] as const;
 
-function normalizeType(t: string | null | undefined): string {
+export function normalizeType(t: string | null | undefined): string {
   if (!t) return "scholarship";
   const lower = t.toLowerCase().trim();
   if (VALID_TYPES.includes(lower as (typeof VALID_TYPES)[number])) return lower;
@@ -46,7 +48,7 @@ function normalizeType(t: string | null | undefined): string {
   return "scholarship";
 }
 
-function slugify(title: string): string {
+export function slugify(title: string): string {
   return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -54,7 +56,58 @@ function slugify(title: string): string {
     .slice(0, 60);
 }
 
-function withTimeout<T>(factory: (signal: AbortSignal) => Promise<T>, ms: number, fallback: T): Promise<T> {
+export function validateExtractedDeadline(raw: string | null): { deadline: string | null; deadlineText: string | null } {
+  const text = raw?.trim() || null;
+  if (!text) return { deadline: null, deadlineText: null };
+  if (/^\d{4}$/.test(text)) return { deadline: null, deadlineText: text };
+  const parsed = new Date(text);
+  if (Number.isNaN(parsed.getTime())) return { deadline: null, deadlineText: text };
+  if (parsed.getTime() < Date.now() - 86_400_000) return { deadline: null, deadlineText: text };
+  return { deadline: parsed.toISOString(), deadlineText: text };
+}
+
+export function groundFitScore(
+  evaluation: EvaluationResult,
+  extraction: ExtractedOpportunity,
+  profile: ImportInput["profile"]
+): EvaluationResult {
+  const checklist = Array.isArray(evaluation.eligibilityChecklist) ? evaluation.eligibilityChecklist : [];
+  const checklistRatio = checklist.length > 0 ? checklist.filter((c) => c.met).length / checklist.length : null;
+
+  const profileSkills = (profile.skills ?? []).map((s) => s.toLowerCase());
+  const required = [...(extraction.requiredSkills ?? []), ...(extraction.preferredSkills ?? [])].map((s) => s.toLowerCase());
+  const skillOverlap =
+    required.length > 0 && profileSkills.length > 0
+      ? required.filter((r) => profileSkills.some((p) => r.includes(p) || p.includes(r))).length / required.length
+      : null;
+
+  const aiScore = Math.min(100, Math.max(0, Math.round(evaluation.fitScore || 0)));
+  const hasEvidence = checklistRatio !== null || skillOverlap !== null;
+  const fitScore = hasEvidence
+    ? Math.round(aiScore * 0.5 + (checklistRatio ?? 0.5) * 30 + (skillOverlap ?? 0.5) * 20)
+    : Math.min(aiScore, 55);
+
+  const reasons = [...(Array.isArray(evaluation.reasons) ? evaluation.reasons : [])];
+  if (!hasEvidence) {
+    reasons.push("Limited eligibility evidence — score capped until requirements are verified against the official listing.");
+  } else if (checklistRatio !== null) {
+    reasons.push(`Met ${checklist.filter((c) => c.met).length} of ${checklist.length} eligibility criteria checked.`);
+  }
+  if (skillOverlap !== null) {
+    reasons.push(`Skills overlap ${Math.round(skillOverlap * 100)}% with the requirements listed.`);
+  }
+
+  return {
+    ...evaluation,
+    fitScore,
+    verdict: fitScore >= 65 ? "strong" : fitScore >= 40 ? "possible" : "unlikely",
+    reasons,
+    grounded: hasEvidence,
+    evidence: { checklistRatio, skillOverlap },
+  };
+}
+
+export function withTimeout<T>(factory: (signal: AbortSignal) => Promise<T>, ms: number, fallback: T): Promise<T> {
   const controller = new AbortController();
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
   return Promise.race([
@@ -267,7 +320,22 @@ Return ONLY valid JSON with exactly these fields:
       };
     }
     extraction.type = normalizeType(extraction.type);
-    emitter.emit({ type: "tool_result", data: { tool: "ai_extract", result: { success: true, summary: `Extracted "${extraction.title}" by ${extraction.provider}`, metadata: { title: extraction.title, provider: extraction.provider, type: extraction.type } } } });
+    const validatedDeadline = validateExtractedDeadline(extraction.deadline ?? extraction.deadlineText);
+    extraction.deadline = validatedDeadline.deadline;
+    extraction.deadlineText = validatedDeadline.deadlineText;
+    emitter.emit({ type: "tool_result", data: { tool: "ai_extract", result: { success: true, summary: `Extracted "${extraction.title}" by ${extraction.provider}`, metadata: { title: extraction.title, provider: extraction.provider, type: extraction.type, deadline: extraction.deadline ? extraction.deadline.slice(0, 10) : null } } } });
+
+    const verification: VerificationInfo = {
+      url: isLikelyUrl(extraction.applicationUrl ?? "") ? extraction.applicationUrl : null,
+      urlOk: false,
+      urlStatus: null,
+      deadlineOk: extraction.deadline !== null,
+    };
+    if (verification.url) {
+      const check = await withTimeout(() => verifyUrl(verification.url!, 7000), 9000, { ok: false, status: null, checkedAt: new Date().toISOString() });
+      verification.urlOk = check.ok;
+      verification.urlStatus = check.status;
+    }
 
     // ── Step 3: Evaluate eligibility ───────────────────────────────
     emitter.emit({ type: "phase", data: { phase: "plan", iteration: 1 } });
@@ -307,9 +375,10 @@ Return ONLY valid JSON with exactly:
       evaluation.verdict = evaluation.fitScore >= 65 ? "strong" : evaluation.fitScore >= 40 ? "possible" : "unlikely";
     } catch (e) {
       console.warn("[import] evaluate step failed:", e instanceof Error ? e.message : e);
-      evaluation = { fitScore: 50, verdict: "possible", summary: "Automatic analysis could not be completed — review the eligibility criteria manually.", reasons: [], eligibilityChecklist: [] };
+      evaluation = { fitScore: 50, verdict: "possible", summary: "Automatic analysis could not be completed — review the eligibility criteria manually.", reasons: [], eligibilityChecklist: [], grounded: false, evidence: { checklistRatio: null, skillOverlap: null } };
     }
-    emitter.emit({ type: "tool_result", data: { tool: "ai_evaluate", result: { success: true, summary: `Fit score ${evaluation.fitScore}/100 — ${evaluation.verdict}`, metadata: { fitScore: evaluation.fitScore, verdict: evaluation.verdict } } } });
+    evaluation = groundFitScore(evaluation, extraction, this.input.profile);
+    emitter.emit({ type: "tool_result", data: { tool: "ai_evaluate", result: { success: true, summary: `Fit score ${evaluation.fitScore}/100 — ${evaluation.verdict}${evaluation.grounded ? ` (grounded in ${evaluation.eligibilityChecklist.length} eligibility checks)` : " (limited evidence — capped)"}`, metadata: { fitScore: evaluation.fitScore, verdict: evaluation.verdict, grounded: evaluation.grounded } } } });
 
     // ── Step 4: Gap analysis + learning roadmap ───────────────────
     emitter.emit({ type: "phase", data: { phase: "reason", iteration: 2 } });
@@ -428,65 +497,73 @@ Return ONLY valid JSON with exactly:
     emitter.emit({ type: "phase", data: { phase: "memory", iteration: 2 } });
     emitter.emit({ type: "thought", data: { content: "Persisting the opportunity, tracker entry, reminder, and memories." } });
 
-    let baseSlug = slugify(extraction.title) || `imported-${analysisId.slice(0, 8)}`;
-    let slug = baseSlug;
-    for (let i = 1; ; i++) {
-      const existing = await db.select({ id: opportunities.id }).from(opportunities).where(eq(opportunities.slug, slug)).limit(1);
-      if (existing.length === 0) break;
-      slug = `${baseSlug.slice(0, 52)}-${i}`;
-    }
+    let opportunityId: string | null = null;
+    let slug = "";
+    try {
+      let baseSlug = slugify(extraction.title) || `imported-${analysisId.slice(0, 8)}`;
+      slug = baseSlug;
+      for (let i = 1; ; i++) {
+        const existing = await db.select({ id: opportunities.id }).from(opportunities).where(eq(opportunities.slug, slug)).limit(1);
+        if (existing.length === 0) break;
+        slug = `${baseSlug.slice(0, 52)}-${i}`;
+      }
 
-    const deadlineDate = extraction.deadline ? new Date(extraction.deadline) : null;
-    const oppInsert = await db.insert(opportunities).values({
-      title: extraction.title,
-      slug,
-      type: extraction.type as never,
-      provider: extraction.provider,
-      description: extraction.description,
-      eligibilityCriteria: extraction.eligibilityCriteria,
-      benefits: extraction.benefits,
-      applicationUrl: extraction.applicationUrl,
-      deadline: deadlineDate,
-      location: extraction.location,
-      isRemote: extraction.isRemote,
-      targetAudience: extraction.targetAudience,
-      requiredSkills: extraction.requiredSkills,
-      preferredSkills: extraction.preferredSkills,
-      experienceLevel: extraction.experienceLevel,
-      tags: extraction.tags,
-      isActive: true,
-    }).returning({ id: opportunities.id });
-    const opportunityId = oppInsert[0]?.id ?? null;
-
-    if (opportunityId) {
-      await db.insert(applications).values({
-        sessionId: this.sessionId,
-        opportunityId,
-        status: "saved",
+      const deadlineDate = extraction.deadline ? new Date(extraction.deadline) : null;
+      const oppInsert = await db.insert(opportunities).values({
+        title: extraction.title,
+        slug,
+        type: extraction.type as never,
+        provider: extraction.provider,
+        description: extraction.description,
+        eligibilityCriteria: extraction.eligibilityCriteria,
+        benefits: extraction.benefits,
+        applicationUrl: extraction.applicationUrl,
         deadline: deadlineDate,
-        notes: `Imported for analysis. Fit score ${evaluation.fitScore}/100 — ${evaluation.verdict}.`,
-      });
+        location: extraction.location,
+        isRemote: extraction.isRemote,
+        targetAudience: extraction.targetAudience,
+        requiredSkills: extraction.requiredSkills,
+        preferredSkills: extraction.preferredSkills,
+        experienceLevel: extraction.experienceLevel,
+        tags: extraction.tags,
+        isActive: true,
+      }).returning({ id: opportunities.id });
+      opportunityId = oppInsert[0]?.id ?? null;
 
-      const email = this.input.profile.email;
-      if (deadlineDate && email) {
-        await db.insert(reminders).values({
+      if (opportunityId) {
+        await db.insert(applications).values({
           sessionId: this.sessionId,
           opportunityId,
-          type: "deadline",
-          message: `Deadline approaching: ${extraction.title} closes ${extraction.deadlineText || deadlineDate.toISOString().slice(0, 10)}`,
-          dueAt: deadlineDate,
+          status: "saved",
+          deadline: deadlineDate,
+          notes: `Imported for analysis. Fit score ${evaluation.fitScore}/100 — ${evaluation.verdict}${evaluation.grounded ? " (evidence-based)" : " (limited evidence)"}.`,
         });
-      }
 
-      const memories: Array<{ memoryType: "episodic" | "semantic" | "procedural"; key: string; value: string; importance: number }> = [
-        { memoryType: "semantic", key: `opportunity:${slug}`, value: `${extraction.title} (${extraction.provider}) — fit score ${evaluation.fitScore}/100, ${evaluation.verdict}. Type: ${extraction.type}.`, importance: 0.85 },
-        { memoryType: "episodic", key: `import_analysis_${analysisId}`, value: `Analyzed "${extraction.title}" from ${this.input.url || "pasted text"}. Verdict: ${evaluation.verdict}.`, importance: 0.7 },
-        { memoryType: "procedural", key: `strategy_${slug}`, value: `Application plan: ${strategy.timeline.length} steps over ~${gap.estimatedPrepWeeks} weeks. Checklist: ${strategy.checklist.slice(0, 3).join("; ")}.`, importance: 0.75 },
-      ];
-      for (const m of memories) {
-        await db.insert(agentMemories).values({ sessionId: this.sessionId, memoryType: m.memoryType, key: m.key, value: m.value, importance: m.importance });
+        const email = this.input.profile.email;
+        if (deadlineDate && email) {
+          await db.insert(reminders).values({
+            sessionId: this.sessionId,
+            opportunityId,
+            type: "deadline",
+            message: `Deadline approaching: ${extraction.title} closes ${extraction.deadlineText || deadlineDate.toISOString().slice(0, 10)}`,
+            dueAt: deadlineDate,
+            email,
+          });
+        }
+
+        const memories: Array<{ memoryType: "episodic" | "semantic" | "procedural"; key: string; value: string; importance: number }> = [
+          { memoryType: "semantic", key: `opportunity:${slug}`, value: `${extraction.title} (${extraction.provider}) — fit score ${evaluation.fitScore}/100, ${evaluation.verdict}. Type: ${extraction.type}.`, importance: 0.85 },
+          { memoryType: "episodic", key: `import_analysis_${analysisId}`, value: `Analyzed "${extraction.title}" from ${this.input.url || "pasted text"}. Verdict: ${evaluation.verdict}.`, importance: 0.7 },
+          { memoryType: "procedural", key: `strategy_${slug}`, value: `Application plan: ${strategy.timeline.length} steps over ~${gap.estimatedPrepWeeks} weeks. Checklist: ${strategy.checklist.slice(0, 3).join("; ")}.`, importance: 0.75 },
+        ];
+        for (const m of memories) {
+          await db.insert(agentMemories).values({ sessionId: this.sessionId, memoryType: m.memoryType, key: m.key, value: m.value, importance: m.importance });
+        }
+        emitter.emit({ type: "memory", data: { memories: memories.map((m) => ({ key: m.key, type: m.memoryType, importance: m.importance })) } });
       }
-      emitter.emit({ type: "memory", data: { memories: memories.map((m) => ({ key: m.key, type: m.memoryType, importance: m.importance })) } });
+    } catch (err) {
+      console.warn("[import] persistence failed — continuing with report only:", err);
+      emitter.emit({ type: "thought", data: { content: "Persisting to the workspace failed — the analysis itself is complete and available." } });
     }
 
     // ── Finalize ───────────────────────────────────────────────────
@@ -506,21 +583,26 @@ Return ONLY valid JSON with exactly:
       nextSteps: nextSteps.length ? nextSteps : ["Review the opportunity page", "Prepare your documents", "Submit the application"],
       duration: Math.round((Date.now() - this.startTime) / 1000),
       completedAt: new Date().toISOString(),
+      verification,
     };
 
-    await db.update(importAnalyses)
-      .set({
-        status: "complete",
-        opportunityId,
-        extraction,
-        evaluation,
-        gapAnalysis: gap,
-        research,
-        strategy,
-        report: report as unknown as Record<string, unknown>,
-        updatedAt: new Date(),
-      })
-      .where(eq(importAnalyses.sessionId, analysisId));
+    try {
+      await db.update(importAnalyses)
+        .set({
+          status: "complete",
+          opportunityId,
+          extraction,
+          evaluation,
+          gapAnalysis: gap,
+          research,
+          strategy,
+          report: report as unknown as Record<string, unknown>,
+          updatedAt: new Date(),
+        })
+        .where(eq(importAnalyses.sessionId, analysisId));
+    } catch (err) {
+      console.warn("[import] finalize failed:", err);
+    }
 
     emitter.emit({ type: "phase", data: { phase: "complete", iteration: 2 } });
     emitter.emit({ type: "complete", data: { summary: `Analysis complete — fit score ${evaluation.fitScore}/100`, report } });

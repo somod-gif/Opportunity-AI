@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { AgentTool, ToolResult, ToolContext } from "./base";
 import { deduplicate } from "./dedup";
+import { verifyUrls } from "./validate";
 
 const adviceCache = new Map<string, string>();
 
@@ -74,10 +75,10 @@ export const webSearchTool: AgentTool = {
         for (const topic of topics.slice(0, maxResults)) {
           if (topic.Topics) {
             for (const sub of topic.Topics.slice(0, 3)) {
-              if (sub.Text) results.push({ title: sub.Text.split(" - ")[0] || p.query, url: sub.FirstURL || "https://duckduckgo.com/", description: sub.Text, type: "scholarship", provider: "Web", eligibility: "Check listing for details" });
+              if (sub.Text) results.push({ title: sub.Text.split(" - ")[0] || p.query, url: sub.FirstURL || `https://duckduckgo.com/?q=${encodeURIComponent(p.query)}`, description: sub.Text, type: "scholarship", provider: "Web", eligibility: "Check listing for details" });
             }
           } else if (topic.Text) {
-            results.push({ title: topic.Text.split(" - ")[0] || p.query, url: topic.FirstURL || "https://duckduckgo.com/", description: topic.Text, type: "scholarship", provider: "Web", eligibility: "Check listing for details" });
+            results.push({ title: topic.Text.split(" - ")[0] || p.query, url: topic.FirstURL || `https://duckduckgo.com/?q=${encodeURIComponent(p.query)}`, description: topic.Text, type: "scholarship", provider: "Web", eligibility: "Check listing for details" });
           }
         }
       }
@@ -96,7 +97,8 @@ export const webSearchTool: AgentTool = {
       provider: r.provider,
       description: r.description,
       eligibilityCriteria: r.eligibility,
-      deadline: new Date(Date.now() + 60 * 86400000).toISOString(),
+      deadline: null,
+      deadlineSource: "unknown" as const,
       location: "Multiple",
       isRemote: true,
       tags: ["Web", r.type],
@@ -113,10 +115,16 @@ export const webSearchTool: AgentTool = {
     })));
 
     const deduped = deduplicate(enriched as unknown as Array<{ title?: string; provider?: string }>, ctx.sessionId);
+    const checks = await verifyUrls((deduped as Array<{ applicationUrl: string }>).map((o) => o.applicationUrl), 6000);
+    (deduped as Array<{ applicationUrl: string; urlVerified?: boolean; urlStatus?: number | null }>).forEach((o) => {
+      const check = checks.get(o.applicationUrl);
+      o.urlVerified = check?.ok ?? false;
+      o.urlStatus = check?.status ?? null;
+    });
     return {
       success: true,
       data: deduped,
-      summary: `Found ${deduped.length} opportunities via web search for "${p.query}"`,
+      summary: `Found ${deduped.length} opportunities via web search for "${p.query}" (${deduped.filter((o) => (o as { urlVerified?: boolean }).urlVerified).length} URLs verified)`,
       metadata: { query: p.query, count: enriched.length, source: "web_search" },
     };
   },

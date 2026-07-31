@@ -39,6 +39,8 @@ export interface EvaluationResult {
   summary: string;
   reasons: string[];
   eligibilityChecklist: Array<{ item: string; met: boolean; note: string }>;
+  grounded?: boolean;
+  evidence?: { checklistRatio: number | null; skillOverlap: number | null };
 }
 
 export interface GapAnalysisResult {
@@ -63,6 +65,13 @@ export interface StrategyResult {
   riskFactors: string[];
 }
 
+export interface VerificationInfo {
+  url: string | null;
+  urlOk: boolean;
+  urlStatus: number | null;
+  deadlineOk: boolean;
+}
+
 export interface ImportReport {
   status: "complete" | "failed";
   sourceUrl: string | null;
@@ -78,4 +87,5 @@ export interface ImportReport {
   nextSteps: string[];
   duration: number;
   completedAt: string;
+  verification?: VerificationInfo;
 }

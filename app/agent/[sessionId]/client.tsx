@@ -483,7 +483,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
 
                           {/* Footer */}
                           <div className="border-t border-[#F3EEE1]/[0.04] px-4 py-2.5 flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
                               {daysLeft !== null && (
                                 <span className={`text-[14px] font-mono font-semibold ${
                                   daysLeft <= 30 ? "text-[#C2703D]" : "text-[#F3EEE1]/50"
@@ -495,6 +495,16 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                                 <span className="text-[13px] font-mono text-[#F3EEE1]/35">
                                   {new Date(item.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                                 </span>
+                              )}
+                              {!item.deadline && item.deadlineSource !== "stated" && (
+                                <span className="text-[12px] font-mono text-[#F3EEE1]/30 italic">deadline not stated</span>
+                              )}
+                              {item.urlVerified === true ? (
+                                <span className="text-[12px] font-mono text-[#3FA78E]/60">· url verified</span>
+                              ) : (
+                                hasUrl && item.urlVerified === false && (
+                                  <span className="text-[12px] font-mono text-[#C2703D]/60">· url unverified</span>
+                                )
                               )}
                               {isWebResult && (
                                 <span className="text-[12px] font-mono text-[#3FA78E]/50">· web</span>

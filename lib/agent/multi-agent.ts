@@ -62,7 +62,7 @@ export class MultiAgentCoordinator {
       }
     }
 
-    const memory = new AgentMemory(this.sessionId, missionId);
+    const memory = new AgentMemory(this.sessionId, missionId, this.meta.deviceId);
     const dispatcher = new ToolDispatcher(tools);
     const log = new AgentLogger(this.sessionId, missionId);
     this.subAgents = createDefaultSubAgents();
@@ -228,6 +228,11 @@ Only include agents that are relevant to this specific mission.`;
       state.phase = "reason";
       this.emitter.emitPhase("reason", this.currentIteration);
       const memories = await this.context.memory.recallRelevant(5);
+      const priorMemories = await this.context.memory.recallAcrossSessions(this.mission.goal, 5);
+      if (priorMemories.length > 0) {
+        this.emitter.emitThought(`Recalled ${priorMemories.length} high-importance memories from your earlier missions to guide this run.`);
+        this.emitter.emitMemoryUpdate(priorMemories.map((m) => ({ key: m.key, type: m.memoryType, importance: m.importance })));
+      }
       const lastResult = this.stateHistory[this.stateHistory.length - 1]?.toolResult;
 
       const planCtx: PlanContext = {
@@ -236,7 +241,7 @@ Only include agents that are relevant to this specific mission.`;
         mission: this.mission,
         iteration: this.currentIteration,
         lastResult: lastResult ? JSON.stringify(lastResult).slice(0, 500) : null,
-        memories: await this.context.memory.toEntries(),
+        memories: [...priorMemories, ...(await this.context.memory.toEntries())],
         tools: this.context.tools,
         ai: this.context.ai,
       };

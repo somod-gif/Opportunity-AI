@@ -26,6 +26,7 @@ export const emailReminderTool: AgentTool = {
       type: p.reminderType,
       message: p.message,
       dueAt: new Date(p.dueAt),
+      email: p.email ?? null,
     });
 
     let emailSent = false;

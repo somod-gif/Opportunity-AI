@@ -136,7 +136,9 @@ export const reminders = pgTable("reminders", {
   }).notNull(),
   message: text("message").notNull(),
   dueAt: timestamp("due_at").notNull(),
+  email: text("email"),
   sent: boolean("sent").notNull().default(false),
+  sentAt: timestamp("sent_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

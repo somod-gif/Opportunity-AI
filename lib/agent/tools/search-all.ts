@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { AgentTool, ToolResult, ToolContext } from "./base";
 import { searchOpportunities } from "./search-utils";
 import { deduplicate } from "./dedup";
+import { sanitizeDeadline, verifyUrls } from "./validate";
 
 const opportunityTypeSchema = z.enum([
   "scholarship","fellowship","internship","grant","competition","conference","research","job","bootcamp","accelerator","hackathon","award","exchange","training","volunteer"
@@ -36,6 +37,7 @@ async function generateAdvice(title: string, goal: string, ai: ToolContext["ai"]
 
 function opportunityFromRaw(r: Record<string, unknown>, i: number, types: string[] | undefined, goal: string, source: string): Record<string, unknown> {
   const title = String(r.title || r.name || `Opportunity ${i + 1}`);
+  const deadline = sanitizeDeadline(r.deadline);
   return {
     id: `${source}-${i}-${Date.now()}`,
     title,
@@ -44,11 +46,14 @@ function opportunityFromRaw(r: Record<string, unknown>, i: number, types: string
     provider: String(r.provider || r.organization || r.institution || "Web Source"),
     description: String(r.description || ""),
     eligibilityCriteria: String(r.eligibility || r.eligibilityCriteria || "Varies — check the official listing."),
-    deadline: String(r.deadline || new Date(Date.now() + 60 * 86400000).toISOString()),
+    deadline: deadline.deadline,
+    deadlineSource: deadline.deadlineSource,
     location: String(r.location || "Multiple"),
     isRemote: true,
     tags: [source, ...(types || []).slice(0, 3)],
     applicationUrl: String(r.url || r.applicationUrl || r.link || ""),
+    urlVerified: false,
+    urlStatus: null,
     isActive: true,
     benefits: null,
     targetAudience: [],
@@ -58,6 +63,19 @@ function opportunityFromRaw(r: Record<string, unknown>, i: number, types: string
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+}
+
+async function verifyIfTimeAllows(opportunities: Array<Record<string, unknown>>, timeLeftMs: number): Promise<void> {
+  if (timeLeftMs < 3000) return;
+  const budget = Math.min(7000, Math.max(3000, timeLeftMs - 1500));
+  const checks = await verifyUrls(opportunities.map((o) => String(o.applicationUrl)).filter(Boolean), budget);
+  for (const o of opportunities) {
+    const check = checks.get(String(o.applicationUrl));
+    if (check) {
+      o.urlVerified = check.ok;
+      o.urlStatus = check.status;
+    }
+  }
 }
 
 export const searchOpportunitiesTool: AgentTool = {
@@ -103,12 +121,15 @@ export const searchOpportunitiesTool: AgentTool = {
           advice: await generateAdvice(String(r.title || r.name || `Opportunity ${i + 1}`), goal, ctx.ai, adviceBudget()),
         })));
         const opportunities = deduplicate(raw as Array<{ title?: string; provider?: string }>, ctx.sessionId);
-        if (opportunities.length > 0) return {
-          success: true,
-          data: opportunities,
-          summary: `Found ${opportunities.length} opportunities via Gemma 4 web search matching "${query}"`,
-          metadata: { count: opportunities.length, types, query: p.keywords, source: "gemma4_websearch" },
-        };
+        if (opportunities.length > 0) {
+          await verifyIfTimeAllows(opportunities, timeLeft());
+          return {
+            success: true,
+            data: opportunities,
+            summary: `Found ${opportunities.length} opportunities via Gemma 4 web search matching "${query}"`,
+            metadata: { count: opportunities.length, types, query: p.keywords, source: "gemma4_websearch" },
+          };
+        }
       }
     } catch {
       // Gemma web search failed, try DuckDuckGo
@@ -146,12 +167,15 @@ export const searchOpportunitiesTool: AgentTool = {
             advice: await generateAdvice(String(r.title || `Opportunity ${i + 1}`), goal, ctx.ai, adviceBudget()),
           })));
           const opportunities = deduplicate(raw as Array<{ title?: string; provider?: string }>, ctx.sessionId);
-          if (opportunities.length > 0) return {
-            success: true,
-            data: opportunities,
-            summary: `Found ${opportunities.length} opportunities via web search matching "${query}"`,
-            metadata: { count: opportunities.length, types, query: p.keywords, source: "duckduckgo" },
-          };
+          if (opportunities.length > 0) {
+            await verifyIfTimeAllows(opportunities, timeLeft());
+            return {
+              success: true,
+              data: opportunities,
+              summary: `Found ${opportunities.length} opportunities via web search matching "${query}"`,
+              metadata: { count: opportunities.length, types, query: p.keywords, source: "duckduckgo" },
+            };
+          }
         }
       }
     } catch {
@@ -220,6 +244,7 @@ export const searchOpportunitiesTool: AgentTool = {
       advice: await generateAdvice(r.title, goal, ctx.ai, adviceBudget()),
     })));
     const fallbackOps = deduplicate(rawFallback as Array<{ title?: string; provider?: string }>, ctx.sessionId);
+    await verifyIfTimeAllows(fallbackOps, timeLeft());
 
     return {
       success: true,

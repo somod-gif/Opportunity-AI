@@ -7,7 +7,7 @@ import {
   Bot, Loader2, CheckCircle2, XCircle, ArrowRight, AlertCircle, Sparkles, Clock,
   Brain, Target, Search, Database, FileText, Lightbulb, ChevronRight, Globe, Award,
   Zap, GraduationCap, Link2, ClipboardPaste, Calendar, MapPin, Building2, TrendingUp,
-  ClipboardCheck, AlertTriangle, Cpu,
+  ClipboardCheck, AlertTriangle, Cpu, ShieldCheck,
 } from "lucide-react";
 import { getDeviceId } from "@/lib/utils";
 import type { ImportReport } from "@/lib/import/types";
@@ -437,6 +437,15 @@ function ResultsView({ sessionId, report, elapsed }: { sessionId: string; report
             {r.extraction.deadlineText && (
               <span className="inline-flex items-center gap-1.5 text-[#C2703D]"><Calendar className="h-3.5 w-3.5" /> Deadline: {r.extraction.deadlineText}</span>
             )}
+            {r.verification?.urlOk === true && (
+              <span className="inline-flex items-center gap-1.5 text-[#3FA78E]"><ShieldCheck className="h-3.5 w-3.5" /> URL verified</span>
+            )}
+            {r.verification && r.verification.urlOk === false && (
+              <span className="inline-flex items-center gap-1.5 text-[#F3EEE1]/40"><ShieldCheck className="h-3.5 w-3.5" /> URL not verified</span>
+            )}
+            {!r.verification?.deadlineOk && !r.extraction.deadlineText && (
+              <span className="inline-flex items-center gap-1.5 text-[#F3EEE1]/40"><Calendar className="h-3.5 w-3.5" /> deadline not stated</span>
+            )}
           </p>
           <p className="mt-4 max-w-3xl text-sm text-[#F3EEE1]/60 leading-relaxed">{r.evaluation.summary}</p>
 
@@ -474,6 +483,9 @@ function ResultsView({ sessionId, report, elapsed }: { sessionId: string; report
               <p className="text-4xl font-medium" style={{ fontFamily: "var(--font-display)", color: r.fitScore >= 65 ? SIGNAL : r.fitScore >= 40 ? BRASS : OCHRE }}>
                 {r.fitScore}
                 <span className="text-xl text-[#F3EEE1]/25">/100</span>
+              </p>
+              <p className="mt-2 text-[12px] font-mono text-[#F3EEE1]/35">
+                {r.evaluation.grounded ? "evidence-based" : "limited evidence — verify before applying"}
               </p>
             </div>
             <div className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D] p-5 text-center">

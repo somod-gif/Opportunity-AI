@@ -179,6 +179,35 @@ Every phase is visible: the Mission Control screen streams reasoning text, tool 
 
 ---
 
+## Reliability & Anti-Hallucination
+
+The agent never fabricates opportunity data — everything it reports is either retrieved from a live source or explicitly marked as unverified.
+
+| Guarantee | Implementation |
+|-----------|----------------|
+| No invented deadlines | `sanitizeDeadline()` (`lib/agent/tools/validate.ts`) rejects ambiguous/past/bare-year dates; search results carry `deadline: null` + `deadlineSource: "stated" \| "unknown"` instead of fake dates |
+| URLs are checked live | `verifyUrl()` HEAD/GET probe with timeout; search results and import analyses report `urlVerified` + HTTP status; the UI shows "url verified / unverified" badges |
+| Fit scores are evidence-based | Import analyzer derives fit scores from eligibility-checklist met-ratio + skill overlap (`groundFitScore()`); with no checklist evidence the score is capped at 55/100 and flagged "limited evidence" |
+| Reminders actually fire | `reminders` rows store the recipient email; Vercel cron (`/api/reminders/run`, hourly, `CRON_SECRET`-protected) sends due reminders via Resend and marks them `sent` |
+| Memory is actually recalled | `recallAcrossSessions()` queries high-importance memories from the user's prior missions (scoped by device) and injects them into the planner's context each iteration |
+| Timeouts degrade gracefully | 3-min mission cap and 230s import cap finalize with partial results instead of hard failures; tool timeouts abort the underlying request (`AbortSignal`) |
+| Verified by tests | `npm test` — 12 unit tests covering deadline sanitization, URL validation, grounded scoring, type normalization, and timeout/abort semantics |
+
+### Reminder delivery pipeline
+
+```
+Agent sets reminder (stores email on the row)
+   → Vercel Cron hourly → GET /api/reminders/run (CRON_SECRET)
+   → picks due + unsent reminders → Resend branded email
+   → marks sent_at; failures are retried on the next run
+```
+
+### Import analysis verification
+
+Each import analysis reports a `verification` block: application URL probed live (status code), deadline validity checked (no fabricated dates), and fit score grounded in the eligibility checklist when one exists.
+
+---
+
 ## Demo Guide (2 minutes)
 
 1. **Landing** — click one of the example missions, e.g. *"Find AI internships in Europe for Summer 2027"* (auto-fills the mission builder).
@@ -226,8 +255,6 @@ Set environment variables in the Vercel dashboard (Project → Settings → Envi
 ## Future Improvements
 
 - [ ] CV builder with templates + versioning
-- [ ] Skill-gap learning roadmap generation per opportunity
-- [ ] Reminder delivery pipeline (cron + Resend) for deadline alerts
 - [ ] Multi-language mission support (French, Portuguese, Swahili, Arabic)
 - [ ] WhatsApp / Telegram notification channel
 - [ ] Community opportunity sharing + verification badges
