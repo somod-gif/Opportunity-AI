@@ -144,7 +144,8 @@ function htmlToText(html: string): string {
 
 async function scrapeUrl(url: string): Promise<string> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  // Large pages (5MB+) can take > 30s to download — give 60s budget
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
   try {
     const res = await fetch(url, {
       signal: controller.signal,
@@ -227,7 +228,7 @@ export class ImportAnalyzer {
       emitter.emit({ type: "tool_call", data: { tool: "web_scrape", params: { url: this.input.url } } });
       emitter.emit({ type: "thought", data: { content: `Fetching ${this.input.url} to extract the opportunity details.` } });
       try {
-        sourceText = await withTimeout(() => scrapeUrl(this.input.url!), 18000, "");
+        sourceText = await withTimeout(() => scrapeUrl(this.input.url!), 65000, "");
         if (sourceText) {
           emitter.emit({
             type: "tool_result",

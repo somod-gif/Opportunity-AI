@@ -40,7 +40,7 @@ const body = Inter({
 });
 
 const EXAMPLE_LINKS = [
-  "https://mastercardfdn.org/all/scholarships/",
+  "https://mastercardfdn.org/en/what-we-do/our-programs/mastercard-foundation-scholars-program/",
   "https://www.daad.de/en/study-and-research-in-germany/scholarships/",
   "https://www.ethz.ch/en/the-eth-zurich/working-teaching-and-research/working-at-eth-zurich.html",
   "https://www.agu.org/learn-about-agu/about-agu",
