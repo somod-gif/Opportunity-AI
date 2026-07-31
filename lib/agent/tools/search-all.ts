@@ -9,16 +9,29 @@ const opportunityTypeSchema = z.enum([
 
 const adviceCache = new Map<string, string>();
 
-async function generateAdvice(title: string, goal: string, ai: ToolContext["ai"]): Promise<string> {
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
+  ]);
+}
+
+const GENERIC_ADVICE = (title: string) => `Consider applying to ${title}. Review eligibility criteria carefully.`;
+
+async function generateAdvice(title: string, goal: string, ai: ToolContext["ai"], maxMs = 6000): Promise<string> {
   const cacheKey = `${title}::${goal}`;
   const cached = adviceCache.get(cacheKey);
   if (cached) return cached;
   try {
-    const result = await ai.generateJSON("advice", `Generate personalized advice for an African student applying to "${title}". Mission: "${goal}". Return { advice: "2-3 sentence actionable advice" }`);
-    const advice = (result as { advice?: string })?.advice || `Consider applying to ${title}. Review eligibility criteria carefully.`;
+    const result = await withTimeout(
+      ai.generateJSON("advice", `Generate personalized advice for an African student applying to "${title}". Mission: "${goal}". Return { advice: "2-3 sentence actionable advice" }`),
+      maxMs,
+      { advice: GENERIC_ADVICE(title) }
+    );
+    const advice = (result as { advice?: string })?.advice || GENERIC_ADVICE(title);
     adviceCache.set(cacheKey, advice);
     return advice;
-  } catch { return `Consider applying to ${title}. Review eligibility criteria carefully.`; }
+  } catch { return GENERIC_ADVICE(title); }
 }
 
 function opportunityFromRaw(r: Record<string, unknown>, i: number, types: string[] | undefined, goal: string, source: string): Record<string, unknown> {
@@ -68,16 +81,28 @@ export const searchOpportunitiesTool: AgentTool = {
     const goal = query;
     const limit = p.limit || 20;
 
-    // Step 1: Gemma 4 web search via OpenRouter (primary source)
+    const TOOL_DEADLINE = Date.now() + 42_000;
+    const timeLeft = () => Math.max(0, TOOL_DEADLINE - Date.now());
+    const waitFor = (ms: number) => new Promise<boolean>((resolve) => setTimeout(() => resolve(true), ms));
+
+    const STOPWORDS = new Set(["test","mission","using","curl","i","want","need","a","an","the","to","for","of","and","in","at","my","me","anyone","please","help","can","you","find","looking","am","be","with"]);
+    const compressedQuery = query.toLowerCase().split(/\s+/).filter(w => w.length > 2 && !STOPWORDS.has(w)).join(" ").slice(0, 80) || query;
+
+    const adviceBudget = () => Math.min(5000, Math.max(1000, timeLeft() - 2000));
+
+    // Step 1: Gemma 4 web search (primary source, up to 32s budget)
     try {
-      const searchPrompt = `Search the web for current ${query || "scholarships, fellowships, and internships"} opportunities for African students. Return a JSON array of objects with: title, description, provider, type (scholarship/fellowship/internship/grant), url, eligibility, location, deadline if known. Return up to ${limit} real opportunities from actual web sources. Today is ${new Date().toISOString().split("T")[0]}.`;
-      const aiResult = await ctx.ai.generateJSON("search", searchPrompt) as Array<Record<string, unknown>>;
+      const searchPrompt = `List up to 3 real, current 2026 ${compressedQuery || "scholarships, fellowships, and internships"} opportunities open to African students. Answer immediately with NO reasoning. Return ONLY a JSON array of 3 objects with short fields: title, provider, type, url, deadline, eligibility. Every field under 20 words. Today is ${new Date().toISOString().split("T")[0]}.`;
+      const aiResult = await Promise.race([
+        ctx.ai.generateJSON("search", searchPrompt) as Promise<Array<Record<string, unknown>>>,
+        waitFor(Math.min(38000, timeLeft())).then(() => null),
+      ]);
       if (Array.isArray(aiResult) && aiResult.length > 0) {
-        const raw = await Promise.all(aiResult.slice(0, limit).map(async (r, i) => ({
+        const raw = await Promise.all(aiResult.slice(0, Math.min(limit, 6)).map(async (r, i) => ({
           ...opportunityFromRaw(r, i, types, goal, "AI Discovery"),
-          advice: await generateAdvice(String(r.title || r.name || `Opportunity ${i + 1}`), goal, ctx.ai),
+          advice: await generateAdvice(String(r.title || r.name || `Opportunity ${i + 1}`), goal, ctx.ai, adviceBudget()),
         })));
-        const opportunities = deduplicate(raw as Array<{ title?: string; provider?: string }>);
+        const opportunities = deduplicate(raw as Array<{ title?: string; provider?: string }>, ctx.sessionId);
         if (opportunities.length > 0) return {
           success: true,
           data: opportunities,
@@ -93,7 +118,7 @@ export const searchOpportunitiesTool: AgentTool = {
     try {
       const searchUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query + " scholarship fellowship opportunity 2026")}&format=json&no_html=1&skip_disambig=1`;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), Math.min(8000, timeLeft()));
       const res = await fetch(searchUrl, { signal: controller.signal });
       clearTimeout(timeoutId);
 
@@ -116,11 +141,11 @@ export const searchOpportunitiesTool: AgentTool = {
         }
 
         if (duckResults.length > 0) {
-          const raw = await Promise.all(duckResults.slice(0, limit).map(async (r, i) => ({
+          const raw = await Promise.all(duckResults.slice(0, Math.min(limit, 8)).map(async (r, i) => ({
             ...opportunityFromRaw(r, i, types, goal, "Web"),
-            advice: await generateAdvice(String(r.title || `Opportunity ${i + 1}`), goal, ctx.ai),
+            advice: await generateAdvice(String(r.title || `Opportunity ${i + 1}`), goal, ctx.ai, adviceBudget()),
           })));
-          const opportunities = deduplicate(raw as Array<{ title?: string; provider?: string }>);
+          const opportunities = deduplicate(raw as Array<{ title?: string; provider?: string }>, ctx.sessionId);
           if (opportunities.length > 0) return {
             success: true,
             data: opportunities,
@@ -147,11 +172,11 @@ export const searchOpportunitiesTool: AgentTool = {
     });
 
     if (dbResults.length >= 3) {
-      const raw = await Promise.all(dbResults.map(async (r) => ({
+      const raw = await Promise.all(dbResults.slice(0, 6).map(async (r) => ({
         ...r,
-        advice: await generateAdvice(String(r.title || ""), goal, ctx.ai),
+        advice: await generateAdvice(String(r.title || ""), goal, ctx.ai, adviceBudget()),
       })));
-      const withAdvice = deduplicate(raw as Array<{ title?: string; provider?: string }>);
+      const withAdvice = deduplicate(raw as Array<{ title?: string; provider?: string }>, ctx.sessionId);
       if (withAdvice.length > 0) return {
         success: true,
         data: withAdvice,
@@ -192,9 +217,9 @@ export const searchOpportunitiesTool: AgentTool = {
 
     const rawFallback = await Promise.all(curatedFallback.slice(0, limit).map(async (r, i) => ({
       ...opportunityFromRaw(r as unknown as Record<string, unknown>, i, types, goal, "Curated"),
-      advice: await generateAdvice(r.title, goal, ctx.ai),
+      advice: await generateAdvice(r.title, goal, ctx.ai, adviceBudget()),
     })));
-    const fallbackOps = deduplicate(rawFallback as Array<{ title?: string; provider?: string }>);
+    const fallbackOps = deduplicate(rawFallback as Array<{ title?: string; provider?: string }>, ctx.sessionId);
 
     return {
       success: true,

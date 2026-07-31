@@ -9,16 +9,26 @@ function parseJSONResponse<T>(text: string): T {
     const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (match) text = match[1].trim();
   }
+  const tryParse = (s: string): T | null => {
+    try { return JSON.parse(s) as T; } catch { return null; }
+  };
   const braceStart = text.indexOf("{");
   const braceEnd = text.lastIndexOf("}");
   const bracketStart = text.indexOf("[");
   const bracketEnd = text.lastIndexOf("]");
   if (braceStart !== -1 && braceEnd > braceStart) {
-    text = text.slice(braceStart, braceEnd + 1);
-  } else if (bracketStart !== -1 && bracketEnd > bracketStart) {
-    text = text.slice(bracketStart, bracketEnd + 1);
+    const candidate = text.slice(braceStart, braceEnd + 1);
+    const parsed = tryParse(candidate);
+    if (parsed !== null) return parsed;
   }
-  return JSON.parse(text) as T;
+  if (bracketStart !== -1 && bracketEnd > bracketStart) {
+    const candidate = text.slice(bracketStart, bracketEnd + 1);
+    const parsed = tryParse(candidate);
+    if (parsed !== null) return parsed;
+  }
+  const truncated = tryParse(text);
+  if (truncated !== null) return truncated;
+  throw new Error(`Invalid JSON from model: ${text.slice(0, 200)}`);
 }
 
 export class GemmaProvider implements AIProvider {
@@ -51,7 +61,7 @@ export class GemmaProvider implements AIProvider {
   async generate(prompt: string): Promise<string> {
     const data = await this.request({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.3, maxOutputTokens: 8192 },
+      generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
     });
     const parts = (data as any).candidates?.[0]?.content?.parts || [];
     const texts = parts
@@ -60,12 +70,24 @@ export class GemmaProvider implements AIProvider {
     return texts.join("") || "";
   }
 
-  async generateJSON<T>(_capability: AICapability, prompt: string): Promise<T> {
+  private tokenBudget(capability: AICapability): number {
+    switch (capability) {
+      case "search": return 2048;
+      case "plan":
+      case "tool-select":
+      case "reflect":
+      case "reason": return 1024;
+      case "document-generation": return 8192;
+      default: return 2048;
+    }
+  }
+
+  async generateJSON<T>(capability: AICapability, prompt: string): Promise<T> {
     const data = await this.request({
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
-        temperature: 0.2,
-        maxOutputTokens: 8192,
+        temperature: capability === "search" ? 0.4 : 0.2,
+        maxOutputTokens: this.tokenBudget(capability),
         response_mime_type: "application/json",
       },
     });

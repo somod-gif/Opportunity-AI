@@ -112,7 +112,7 @@ export const webSearchTool: AgentTool = {
       updatedAt: new Date().toISOString(),
     })));
 
-    const deduped = deduplicate(enriched as unknown as Array<{ title?: string; provider?: string }>);
+    const deduped = deduplicate(enriched as unknown as Array<{ title?: string; provider?: string }>, ctx.sessionId);
     return {
       success: true,
       data: deduped,
