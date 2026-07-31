@@ -1,0 +1,18 @@
+{
+  "default_branch": "master",
+  "branches": [
+    "cleanup-polish",
+    "master",
+    "origin"
+  ],
+  "parent": {
+    "cleanup-polish": "master",
+    "master": null,
+    "origin": "master"
+  },
+  "order": [
+    "master",
+    "cleanup-polish",
+    "origin"
+  ]
+}
