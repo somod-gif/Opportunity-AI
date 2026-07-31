@@ -2,233 +2,146 @@
 
 **Autonomous AI Career Intelligence Agent for Africa — powered by Gemma 4**
 
-Built for **Build with Gemma: AI for Africa Hackathon 2026** · Targets **Best Autonomous AI Agent**
+Built for the **Build with Gemma: AI for Africa Hackathon 2026** · Targets **Best Autonomous AI Agent**
 
-Opportunity AI is **not a chatbot** and **not a search engine**. It is a multi-agent autonomous platform: you give it a single **mission**, and Gemma 4 plans, reasons, calls tools, searches the web, evaluates eligibility, ranks opportunities, generates application documents, sets reminders, and delivers a complete mission report — all on its own, streamed live to your screen.
+> Give it a mission. Watch it work. Get a result.
+
+Opportunity AI is **not a chatbot** and **not a search engine**. It is an autonomous AI employee: you hand it a single mission — *"Find AI scholarships I qualify for, prepare my documents, and track the deadlines"* — and Gemma 4 plans, reasons, searches the web, evaluates eligibility, ranks opportunities, writes application documents, sets reminders, and delivers a complete mission report. **No human intervention between input and output.** Every step streams live to the screen over SSE, so the agent's autonomy is not claimed — it is *watched*.
 
 ---
 
-## Problem Statement
+## The Problem
 
-African students and early-career professionals are massively underserved when it comes to discovering global opportunities:
+African students and early-career professionals lose real opportunities every cycle:
 
-- **Fragmented sources** — scholarships, internships, fellowships and grants are scattered across hundreds of portals, PDFs, and mailing lists.
-- **Missed deadlines** — there is no central, deadline-aware tracking system.
-- **Generic applications** — candidates lack personalized documents (CVs, cover letters, statements) tuned to each opportunity.
-- **No eligibility clarity** — candidates waste weeks applying to opportunities they do not qualify for.
+- **Fragmented sources** — scholarships, internships, fellowships, and grants are scattered across hundreds of portals, PDFs, and mailing lists.
+- **Missed deadlines** — no centralized, deadline-aware tracking exists for most applicants.
+- **Generic applications** — most candidates cannot afford personalized CVs, cover letters, and statements tuned to each opportunity.
+- **No eligibility clarity** — students spend weeks applying to programs they do not qualify for, and never apply to ones they do.
 
-Opportunity AI replaces this manual, error-prone workflow with an autonomous AI employee that does the discovery, eligibility analysis, document generation, and deadline tracking on the user's behalf.
+Opportunity AI replaces this manual, error-prone workflow with an agent that does discovery, eligibility analysis, document generation, and deadline tracking **on the user's behalf**.
+
+---
+
+## Why It's Autonomous (the rubric story)
+
+| Judge's question | What the system does |
+|---|---|
+| Who drives the loop? | **Gemma 4** drives every phase: mission decomposition, reasoning, tool selection, reflection, and memory updates. No scripted paths, no canned answers. |
+| What can it actually do alone? | 9 tools, 4 sourcing tiers, 6 autonomous iterations, 3-minute mission cap, full mission report generated end-to-end. |
+| What if tools fail? | Every tool has a fallback chain (Gemma web search → DuckDuckGo → database → curated catalog) and a timeout; the loop degrades gracefully instead of crashing. |
+| How do we know it isn't faking? | Full transparency: reasoning, tool calls, inputs/outputs, and confidence stream live; search results carry `urlVerified` and `deadlineSource` markers; fit scores are grounded in evidence. |
+| Does it learn across missions? | Yes — episodic/semantic/procedural memory persisted per user, and recalled at the start of every new mission. |
+
+### The Agent Loop
+
+```
+User Mission ──► Perceive ──► Reason ──► Plan ──► Tool Select
+     ──► Execute ──► Observe ──► Reflect ──► Memory Update ──► (repeat)
+     ──► Mission Complete ──► Dashboard ──► Workspace ──► Tracker ──► Report (PDF)
+```
+
+Orchestrated by a **Mission Commander** with specialized sub-agents: Search, Eligibility Evaluation, Ranking, Documents, Reflection, and Memory. Every iteration is persisted to `agent_iterations` — the full audit trail is replayable.
+
+### The Toolset (Gemma function calling)
+
+| Tool | What it does |
+|---|---|
+| `search_opportunities` | 4-tier sourcing: Gemma 4 web search → DuckDuckGo API → PostgreSQL catalog → curated fallback |
+| `web_search` | Live web search with AI-analyzed results |
+| `analyze_eligibility` | Gemma 4 scores candidate fit against real eligibility criteria |
+| `rank_opportunities` | Match scoring and sorting |
+| `generate_document` | Cover letters, resumes, personal statements, checklists |
+| `gap_analysis` | Skill gaps + learning roadmap |
+| `email_reminder` / `set_reminder` | Deadline tracking with real email delivery |
+| `memory_recall` / `memory_store` | Episodic, semantic, procedural memory |
+
+### Analyze Any Opportunity (URL → full analysis in one pass)
+
+Beyond search, the **Import Agent** consumes a single URL or pasted listing and autonomously produces a complete intelligence package:
+
+```
+URL ──► scrape ──► structured extraction ──► eligibility scoring (evidence-based)
+    ──► skill-gap roadmap ──► week-by-week application strategy
+    ──► similar opportunities research ──► persisted to workspace + tracker + memory
+```
+
+Each import is verified: the application URL is probed live, the deadline is validated (never fabricated), and the fit score is grounded in the eligibility checklist when one exists.
+
+---
+
+## Gemma 4 Integration (native, not bolted on)
+
+- **`gemma-4-31b-it` is the entire decision-making engine** — reasoning, tool choices, eligibility judgments, documents, and advice are all generated by Gemma, served via **Google AI Studio** (free, no credit card) with OpenRouter as an optional fallback.
+- **Native function calling** — the Google AI API `functionCall`/`functionResponse` protocol drives tool selection and execution (`lib/ai/gemma-provider.ts`).
+- **JSON mode** (`response_mime_type: "application/json"`) guarantees parseable structured output for rankings, scores, and plans.
+- **Web search capability** — Gemma's `web_search` plugin surfaces live, current opportunities; DuckDuckGo API is the resilience fallback.
+- **Per-capability token budgets** — search, planning, and document generation each get tuned budgets (up to 8k for long-form docs), and all calls are **abortable** so the agent's 3-minute cap is never violated by a stalled model.
+- **Runtime personalization** — every discovered opportunity receives Gemma-generated advice tuned to the user's profile, mission, and country.
+
+---
+
+## Reliability & Anti-Hallucination
+
+The agent **never fabricates opportunity data** — anything it reports is either retrieved from a live source or explicitly marked as unverified. This is enforced in code and proven by tests.
+
+| Guarantee | Implementation |
+|---|---|
+| No invented deadlines | `sanitizeDeadline()` rejects ambiguous/past/bare-year dates; results carry `deadline: null` + `deadlineSource: "stated" \| "unknown"` instead of fake dates |
+| URLs are checked live | `verifyUrl()` HEAD/GET probe with timeout; results report `urlVerified` + HTTP status; UI shows "url verified / unverified" badges |
+| Fit scores are evidence-based | `groundFitScore()` blends eligibility-checklist met-ratio + skill overlap into the AI score; with no evidence the score is **capped at 55/100** and flagged "limited evidence" |
+| Reminders actually fire | Rows store the recipient email; a Vercel cron (`/api/reminders/run`, hourly, `CRON_SECRET`-protected) sends due reminders via Resend and marks them sent |
+| Memory is actually recalled | `recallAcrossSessions()` pulls high-importance memories from the user's prior missions and injects them into the planner each iteration |
+| Timeouts degrade gracefully | 3-min mission cap and 230s import cap finalize with partial results instead of hard failures; tool timeouts abort the underlying request |
+| Proven by tests | **12 passing unit tests** (`npm test`) — deadline sanitization, URL validation, grounded scoring, type normalization, timeout/abort semantics |
+
+```
+Reminder pipeline:  Agent sets reminder (email stored on row)
+   → Vercel Cron (hourly) → /api/reminders/run (CRON_SECRET)
+   → due + unsent reminders → branded Resend email → marked sent (retried on failure)
+```
+
+---
+
+## The Demo (2-minute judge script)
+
+1. **Landing (0:10)** — *"Give it a mission — watch it work — get a result."* Click an example mission: **"Find AI internships in Europe for Summer 2027"**.
+2. **Mission Builder (0:10)** — profile fills in (skills, education, country). Hit **Launch Mission**.
+3. **Mission Control (1:00)** — the money shot. The agent streams live: *Mission Commander decomposing the mission… Search Agent querying Gemma's web search… Evaluation Agent comparing eligibility… Document Agent drafting…* Tool calls appear with inputs, outputs, and durations — the judge is literally watching the agent think and act.
+4. **Dashboard + Workspace (0:20)** — mission stats, source distribution, discovered opportunities with verified URLs and real deadlines.
+5. **Application Tracker + Report (0:20)** — drag a saved opportunity into "Preparing", show the deadline reminder row, then open the printable mission report.
+
+**Screenshot checklist for the submission:** landing hero · Mission Control live timeline · dashboard charts · AI-scored opportunity detail · Kanban tracker · mission report · settings (system status + reminders) · `npm test` output.
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  Next.js 16 App Router (TypeScript, Tailwind v4)            │
-│  app/agent/[sessionId]  ←─ SSE live stream ──  API route    │
-└───────────────┬──────────────────────────────┬──────────────┘
-                │                              │
-        ┌───────▼────────┐            ┌────────▼─────────┐
-        │   AI Core      │            │   PostgreSQL     │
-        │  (Gemma 4)     │            │  (Neon + Drizzle)│
-        └───────┬────────┘            └────────▲─────────┘
-                │                              │
-    ┌───────────▼──────────────────────────────┘
-    │  Multi-Agent Loop (max 6 iterations, 3 min)
-    │  Perceive → Reason → Plan → Tool Select
-    │  → Execute → Observe → Reflect → Memory
-    └───────┬──────────────────────────────────
-            │  Tools (Gemma function calling)
-            ├─ search_opportunities  (web → DB → curated)
-            ├─ web_search            (Gemma web_search plugin)
-            ├─ analyze_eligibility   (Gemma evaluates fit)
-            ├─ rank_opportunities    (scoring + sorting)
-            ├─ generate_document     (CV, cover letter, checklist)
-            ├─ gap_analysis          (skill gaps + learning path)
-            ├─ email_reminder        (Resend emails)
-            ├─ memory_recall/store   (episodic/semantic/procedural)
-            └─ set_reminder          (deadline tracking)
+┌──────────────────────────────────────────────────────────────┐
+│ Next.js 16 App Router · TypeScript strict · Tailwind v4      │
+│ app/agent/[sessionId]  ◄── SSE live stream ──  API route      │
+└───────────────┬───────────────────────────────┬──────────────┘
+        ┌───────▼────────┐              ┌────────▼─────────┐
+        │  Gemma 4 Core  │              │  PostgreSQL      │
+        │ function calls │              │ (Neon + Drizzle) │
+        └───────┬────────┘              └────────▲─────────┘
+    ┌───────────▼────────────────────────────────┘
+    │ Multi-Agent Loop (≤6 iterations · 3-min cap)
+    │ Perceive → Reason → Plan → Tool Select
+    │ → Execute → Observe → Reflect → Memory
+    └───────┬────────────────────────────────────
+            │ Tools: search · web_search · eligibility
+            │ · rank · document · gap · reminder · memory
 ```
 
-### Multi-Agent Design
+**Stack:** Next.js 16 App Router · React 19 · TypeScript (strict) · Tailwind CSS v4 · shadcn/ui · Drizzle ORM · PostgreSQL (Neon) · Server-Sent Events · Framer Motion · Resend.
 
-The agent loop is orchestrated by a **Mission Commander** with specialized sub-agents:
+**Data model** (Neon + Drizzle): `opportunities` · `user_sessions` · `agent_missions` · `agent_iterations` (full audit trail) · `agent_memories` (importance-ranked, embedded) · `applications` (Kanban) · `reminders` · `import_analyses` · `notification_log`.
 
-| Agent | Responsibility |
-|---|---|
-| **Mission Commander** | Mission understanding, planning, orchestration, final report |
-| **Search Agent** | Sources opportunities via Gemma 4 web search → PostgreSQL → curated fallback |
-| **Evaluation Agent** | Eligibility analysis against the user's profile |
-| **Ranking Agent** | Match scoring and sorting by quality |
-| **Document Agent** | Cover letters, CVs, personal statements, checklists, timelines |
-| **Reflection Agent** | Confidence scoring, skill gap analysis, proactive recommendations |
-| **Memory Agent** | Episodic / semantic / procedural memory across missions |
+**Key endpoints:** `/api/agent/[sessionId]/stream` (SSE) · `/api/import/[sessionId]/stream` (SSE import agent) · `/api/missions` · `/api/reminders` · `/api/reminders/run` (cron) · `/api/chat`.
 
-Every step streams to the UI via **Server-Sent Events** — the user watches the agent reason, decide, and act in real time.
-
-### Gemma Integration
-
-- **Gemma 4 (`gemma-4-31b-it`)** is the decision-making engine — every reasoning step, tool choice, eligibility judgment, and document is produced by Gemma, served through **Google AI Studio** (free, no credit card) with OpenRouter as an optional fallback.
-- **Native function calling** — the Google AI API `functionCall` / `functionResponse` protocol drives tool selection and execution (`lib/ai/gemma-provider.ts`).
-- **JSON mode** (`response_mime_type: "application/json"`) guarantees parseable structured output for rankings, eligibility scores, and analyses.
-- **Web search capability** — Gemma 4 performs live web searches for current opportunities (via OpenRouter's `web_search` plugin when configured; DuckDuckGo API as fallback).
-
-### Opportunity Sourcing (3-Tier)
-
-| Tier | Source | When |
-|---|---|---|
-| 1 | Gemma 4 web search / DuckDuckGo API | Always tried first (8s timeout) |
-| 2 | PostgreSQL opportunity catalog | Fallback if web returns nothing |
-| 3 | Curated fallback catalog | Last resort |
-
-Every discovered opportunity receives **AI-generated advice** from Gemma 4 at runtime, including match score, success probability, competition level, and recommended action.
-
----
-
-## Database Schema
-
-PostgreSQL via Neon, managed with Drizzle ORM (`lib/db/schema.ts`):
-
-| Table | Purpose |
-|---|---|
-| `opportunities` | Sourced opportunities (type, eligibility, deadline, location, skills) |
-| `user_sessions` | Per-user session, profile, analysis results |
-| `agent_missions` | Mission goal, status, preferences, metadata |
-| `agent_iterations` | Every loop phase (reasoning, tool used, params, results) |
-| `agent_memories` | Episodic / semantic / procedural memories with importance scores |
-| `applications` | Application tracker (saved → drafting → submitted → interview → offer) |
-| `reminders` | Deadline / follow-up / document reminders |
-| `notification_log` | Email send history |
-
----
-
-## Folder Structure
-
-```
-app/
-  page.tsx                  # Landing (hero, features, example missions)
-  mission/                  # Mission builder (goal + profile)
-  agent/[sessionId]/        # Mission Control — live agent execution (SSE)
-  dashboard/[sessionId]/    # Mission dashboard with charts
-  workspace/[sessionId]/    # Opportunity grid
-  opportunity/[sessionId]/[slug]/  # AI-scored opportunity detail
-  applications/[sessionId]/ # Application Kanban tracker
-  report/[sessionId]/       # Printable / PDF mission report
-  memory/[sessionId]/       # Agent memory viewer
-  settings/[sessionId]/     # System status + reminder preferences
-  history/                  # All past missions
-  api/
-    agent/[sessionId]/stream/  # SSE endpoint (live agent loop)
-    agent/[sessionId]/         # Mission CRUD
-    chat/                      # AI assistant with web search
-    missions/                  # Mission history API
-    reminders/                 # Reminders + Resend email API
-
-lib/
-  agent/                   # Agent loop, personas, planner, reflection
-    tools/                 # 9 Gemma-powered tools
-  ai/                      # Gemma 4 provider + OpenRouter fallback
-  db/                      # Drizzle schema + client
-  actions/                 # Server actions (CRUD)
-  hooks/                   # useSSE, useStreamingText
-```
-
----
-
-## Environment Variables
-
-| Variable | Required | Description |
-|---|---|---|
-| `GOOGLE_AI_API_KEY` | ✅ | Google AI Studio key — https://aistudio.google.com/apikey |
-| `AI_PROVIDER` | ✅ | `gemma` (default) or `openrouter` |
-| `AI_MODEL` | ✅ | `gemma-4-31b-it` |
-| `DATABASE_URL` | ✅ | PostgreSQL connection string (Neon) |
-| `OPENROUTER_API_KEY` | ⬜ | Fallback provider (optional) |
-| `RESEND_API_KEY` | ⬜ | Email reminders (Resend) |
-| `RESEND_FROM` | ⬜ | Email sender address |
-| `CRON_SECRET` | ⬜ | Cron-protected jobs |
-
----
-
-## API Architecture
-
-| Endpoint | Method | Purpose |
-|---|---|---|
-| `/api/agent/[sessionId]` | GET/POST | Mission state + launch |
-| `/api/agent/[sessionId]/stream` | GET (SSE) | Live agent loop stream |
-| `/api/chat` | POST | AI assistant (web search capable) |
-| `/api/missions` | GET | Mission history |
-| `/api/reminders` | GET/POST/DELETE | Reminders + Resend email |
-
-All streaming uses **Server-Sent Events** with heartbeat keep-alive and graceful shutdown. Client state syncs via `useSSE` hook.
-
----
-
-## Mission Lifecycle
-
-```
-User Mission ──► Mission Understanding ──► Reasoning ──► Planning
-      ──► Tool Selection ──► Tool Calling ──► Observation
-      ──► Reflection ──► Memory Update ──► Decision ──► (repeat)
-      ──► Mission Complete ──► Dashboard ──► Workspace
-      ──► Application Tracker ──► Mission Report (PDF)
-```
-
-Every phase is visible: the Mission Control screen streams reasoning text, tool calls (name, purpose, input, output, duration, status), and confidence scores in real time.
-
----
-
-## Reliability & Anti-Hallucination
-
-The agent never fabricates opportunity data — everything it reports is either retrieved from a live source or explicitly marked as unverified.
-
-| Guarantee | Implementation |
-|-----------|----------------|
-| No invented deadlines | `sanitizeDeadline()` (`lib/agent/tools/validate.ts`) rejects ambiguous/past/bare-year dates; search results carry `deadline: null` + `deadlineSource: "stated" \| "unknown"` instead of fake dates |
-| URLs are checked live | `verifyUrl()` HEAD/GET probe with timeout; search results and import analyses report `urlVerified` + HTTP status; the UI shows "url verified / unverified" badges |
-| Fit scores are evidence-based | Import analyzer derives fit scores from eligibility-checklist met-ratio + skill overlap (`groundFitScore()`); with no checklist evidence the score is capped at 55/100 and flagged "limited evidence" |
-| Reminders actually fire | `reminders` rows store the recipient email; Vercel cron (`/api/reminders/run`, hourly, `CRON_SECRET`-protected) sends due reminders via Resend and marks them `sent` |
-| Memory is actually recalled | `recallAcrossSessions()` queries high-importance memories from the user's prior missions (scoped by device) and injects them into the planner's context each iteration |
-| Timeouts degrade gracefully | 3-min mission cap and 230s import cap finalize with partial results instead of hard failures; tool timeouts abort the underlying request (`AbortSignal`) |
-| Verified by tests | `npm test` — 12 unit tests covering deadline sanitization, URL validation, grounded scoring, type normalization, and timeout/abort semantics |
-
-### Reminder delivery pipeline
-
-```
-Agent sets reminder (stores email on the row)
-   → Vercel Cron hourly → GET /api/reminders/run (CRON_SECRET)
-   → picks due + unsent reminders → Resend branded email
-   → marks sent_at; failures are retried on the next run
-```
-
-### Import analysis verification
-
-Each import analysis reports a `verification` block: application URL probed live (status code), deadline validity checked (no fabricated dates), and fit score grounded in the eligibility checklist when one exists.
-
----
-
-## Demo Guide (2 minutes)
-
-1. **Landing** — click one of the example missions, e.g. *"Find AI internships in Europe for Summer 2027"* (auto-fills the mission builder).
-2. **Mission Builder** — add your profile (skills, education, country), then **Launch Mission**.
-3. **Mission Control** — watch Gemma 4 reason and act: *Mission Commander analyzing mission… Search Agent searching official portals… Evaluation Agent comparing eligibility…* — each tool call streams live with input, output, and duration.
-4. **Dashboard** — mission stats, iteration chart, source distribution, top opportunities.
-5. **Opportunity Detail** — AI match score with per-factor breakdown (education, country, experience, skills, funding), success probability, competition level, recommended action.
-6. **Application Tracker** — drag applications across Draft → Preparing → Applied → Interview → Offer; set email reminders.
-7. **Mission Report** — one-click printable / PDF report with summary, reasoning steps, tools invoked, skill gaps, and learning path.
-
-### Screenshots for submission
-
-Capture these screens on a live demo mission:
-
-1. Landing page hero + example missions
-2. Mission Control with live SSE agent timeline (tool calls visible)
-3. Dashboard stats + charts
-4. Opportunity detail with AI match score bars
-5. Application Kanban tracker
-6. Mission Report (print preview)
-7. Settings page (system status + reminders)
+**Env:** `GOOGLE_AI_API_KEY` · `AI_PROVIDER=gemma` · `AI_MODEL=gemma-4-31b-it` · `DATABASE_URL` · `RESEND_API_KEY` (optional) · `CRON_SECRET` (optional).
 
 ---
 
@@ -236,42 +149,24 @@ Capture these screens on a live demo mission:
 
 ```bash
 npm install
-# 1. Copy .env.example → .env and fill GOOGLE_AI_API_KEY + DATABASE_URL
-npm run seed     # optional: pre-populate opportunity catalog
-npm run dev      # http://localhost:3000
+# copy .env.example → .env; fill GOOGLE_AI_API_KEY + DATABASE_URL
+npm run seed      # optional: pre-populate opportunity catalog
+npm run dev       # http://localhost:3000
+npm test          # 12 reliability tests
+npm run build
 ```
 
-## Deployment (Vercel)
-
-```bash
-npm i -g vercel
-vercel
-```
-
-Set environment variables in the Vercel dashboard (Project → Settings → Environment Variables), then **Redeploy**. `vercel.json` is included with region and framework presets.
+Deploys to Vercel in one command (`vercel.json` ships with the cron schedule).
 
 ---
 
 ## Future Improvements
 
 - [ ] CV builder with templates + versioning
-- [ ] Multi-language mission support (French, Portuguese, Swahili, Arabic)
+- [ ] Multi-language missions (French, Portuguese, Swahili, Arabic)
 - [ ] WhatsApp / Telegram notification channel
 - [ ] Community opportunity sharing + verification badges
 
 ---
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feat/amazing`)
-3. Commit your changes (`git commit -m "Add amazing feature"`)
-4. Push and open a Pull Request
-
-Please ensure `npm run build` passes before submitting.
-
----
-
-## License
-
-MIT
+MIT License · Built with **Gemma 4** for the AI for Africa Hackathon 2026
