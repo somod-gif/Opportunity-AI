@@ -1,6 +1,14 @@
 # Opportunity AI
 
 **Autonomous AI Career Intelligence Agent for Africa — powered by Gemma 4**
+# 🚀 Opportunity AI
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![Gemma](https://img.shields.io/badge/Gemma-4-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-12%20passing-success)
 
 <p align="center">
   <img src="/public/image1.png" alt="Mission Control — Opportunity AI in action" width="880" />
@@ -11,6 +19,22 @@
 Built for the **Build with Gemma: AI for Africa Minna Hackathon 2026** · Targets **Autonomous AI Agent**
 
 > Give it a mission. Watch it work. Get a result.
+
+## 🚀 Live Demo
+
+🌐 https://opportunity-ai-snowy.vercel.app
+
+📹 Demo Video
+
+(Add your YouTube link)
+
+📝 Kaggle Submission
+
+(Add your Kaggle notebook)
+
+📂 Repository
+
+https://github.com/somod-gif/Opportunity-AI
 
 ---
 
