@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
+import { getDeviceId } from "@/lib/utils";
 import { Fraunces, JetBrains_Mono, Inter } from "next/font/google";
 import {
   Bot,
@@ -57,7 +58,7 @@ const EXAMPLES = [
     experienceLevel: "entry",
   },
   {
-    goal: "test mission using curl I want a fully-funded Masters in Data Science anywhere in the world",
+    goal: "I want a fully-funded Masters in Data Science anywhere in the world",
     education: "BSc Mathematics",
     skills: ["Statistics", "R", "Python"],
     country: "Ghana",
@@ -217,7 +218,7 @@ export default function MissionPage() {
     if (!goal.trim()) return;
     setLoading(true);
     const sessionId = uuidv4();
-    const params = new URLSearchParams({ goal: goal.trim() });
+    const params = new URLSearchParams({ goal: goal.trim(), deviceId: getDeviceId() });
     if (education.trim()) params.set("education", education.trim());
     if (skills.length > 0) params.set("skills", skills.join(","));
     if (country.trim()) params.set("country", country.trim());

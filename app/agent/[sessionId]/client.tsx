@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { AGENT_PERSONAS, resolvePersonaForTool, resolvePersona } from "@/lib/agent/personas";
 import type { MissionReport, SubAgentStatus } from "@/lib/types";
+import { getDeviceId } from "@/lib/utils";
 
 const BRASS = "#C9A227";
 const SIGNAL = "#3FA78E";
@@ -74,7 +75,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
     setConnecting(true);
     addLog("Initializing agent pipeline...", "info");
 
-    const source = new EventSource(`/api/agent/${sessionId}/stream?goal=${encodeURIComponent(goal)}`);
+    const source = new EventSource(`/api/agent/${sessionId}/stream?goal=${encodeURIComponent(goal)}&deviceId=${encodeURIComponent(getDeviceId())}`);
     source.onopen = () => {
       setConnecting(false);
       addLog("Connected to Gemma 4 autonomous engine", "done");

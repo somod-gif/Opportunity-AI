@@ -3,13 +3,14 @@
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Crosshair, Cpu, Briefcase, FileText, Clock, History, Settings, ChevronRight,
-  Menu, X, Sparkles, Stamp, CheckCircle2, Award,
+  Menu, X, Sparkles, Stamp, CheckCircle2, Award, Link2,
 } from "lucide-react";
 import { useState } from "react";
 
 const NAV = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/mission", icon: Crosshair, label: "Mission Builder" },
+  { href: "/import", icon: Link2, label: "Import Opportunity" },
   { href: "/history", icon: History, label: "Mission History" },
 ];
 
@@ -20,7 +21,7 @@ export function AppSidebar() {
 
   if (pathname === "/" || pathname === "/mission") return null;
 
-  const sessionMatch = pathname.match(/\/(?:agent|dashboard|workspace|memory|applications|report|opportunity|settings)\/([^/]+)/);
+  const sessionMatch = pathname.match(/\/(?:agent|dashboard|workspace|memory|applications|report|opportunity|settings|import)\/([^/]+)/);
   const sessionId = sessionMatch?.[1];
 
   const sessionNav = sessionId ? [

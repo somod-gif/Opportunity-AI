@@ -84,10 +84,14 @@ export class OpenRouterProvider implements AIProvider {
     };
   }
 
-  private async request(body: Record<string, unknown>, retries = 2, timeout = 30000, plugins?: Array<Record<string, unknown>>): Promise<OpenRouterResponse> {
+  private async request(body: Record<string, unknown>, retries = 2, timeout = 30000, plugins?: Array<Record<string, unknown>>, externalSignal?: AbortSignal): Promise<OpenRouterResponse> {
     if (plugins) body.plugins = plugins;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
+    if (externalSignal) {
+      if (externalSignal.aborted) controller.abort();
+      else externalSignal.addEventListener("abort", () => controller.abort(), { once: true });
+    }
 
     let lastError: Error | null = null;
     for (let attempt = 0; attempt <= retries; attempt++) {
@@ -123,7 +127,7 @@ export class OpenRouterProvider implements AIProvider {
     return data.choices?.[0]?.message?.content || "";
   }
 
-  async generateJSON<T>(capability: AICapability, prompt: string): Promise<T> {
+  async generateJSON<T>(capability: AICapability, prompt: string, signal?: AbortSignal): Promise<T> {
     const plugins = capability === "search" ? [{ id: "web_search" }] : undefined;
     const systemMsg = capability === "search"
       ? "You are an AI assistant with web search capability. Use web search results to find current opportunities. Return ONLY valid JSON."
@@ -137,7 +141,7 @@ export class OpenRouterProvider implements AIProvider {
       temperature: capability === "search" ? 0.3 : 0.1,
       max_tokens: 8192,
       response_format: { type: "json_object" },
-    }, 2, 45000, plugins);
+    }, 2, 45000, plugins, signal);
     const text = data.choices?.[0]?.message?.content || "{}";
     return parseJSONFromText<T>(text);
   }

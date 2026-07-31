@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
+import { getDeviceId } from "@/lib/utils";
 import {
   Bot, ArrowRight, Sparkles, Search, Brain, Eye, FileText, CheckCircle2, Loader2,
   Cpu, Target, Clock, BarChart3, Globe, GraduationCap, Award, Star, Zap, Lightbulb,
@@ -86,7 +87,7 @@ export function LandingClient() {
     if (!goal.trim()) return;
     setLoading(true);
     const sessionId = uuidv4();
-    router.push(`/agent/${sessionId}?goal=${encodeURIComponent(goal)}`);
+    router.push(`/agent/${sessionId}?goal=${encodeURIComponent(goal)}&deviceId=${encodeURIComponent(getDeviceId())}`);
   }
 
   return (
@@ -263,7 +264,7 @@ export function LandingClient() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {[
                     { emoji: "🎓", title: "CS scholarships in Germany", goal: "Find fully funded Computer Science scholarships in Germany" },
-                    { emoji: "📊", title: "Masters in Data Science", goal: "test mission using curl I want a fully-funded Masters in Data Science anywhere in the world" },
+                    { emoji: "📊", title: "Masters in Data Science", goal: "I want a fully-funded Masters in Data Science anywhere in the world" },
                     { emoji: "💼", title: "Remote AI internships 2027", goal: "Find remote AI internships for Summer 2027" },
                     { emoji: "🚀", title: "Grants for African founders", goal: "Find startup grants for African founders" },
                     { emoji: "🧬", title: "Health innovation fellowships", goal: "Find healthcare innovation fellowships" },

@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { SSEEmitter } from "@/lib/agent/emit";
-import { MultiAgentCoordinator } from "@/lib/agent/multi-agent";
-import type { Mission } from "@/lib/types";
+import { ImportAnalyzer } from "@/lib/import/analyzer";
+import type { ImportInput } from "@/lib/import/types";
 
 export async function GET(
   req: NextRequest,
@@ -9,22 +9,28 @@ export async function GET(
 ): Promise<Response> {
   const { sessionId } = await params;
   const url = new URL(req.url);
-  const goal = url.searchParams.get("goal") || "";
+  const sourceUrl = url.searchParams.get("url") || undefined;
+  const text = url.searchParams.get("text") || undefined;
+  const deviceId = url.searchParams.get("deviceId") || undefined;
   const education = url.searchParams.get("education") || undefined;
   const skills = url.searchParams.get("skills")?.split(",").filter(Boolean) || undefined;
   const country = url.searchParams.get("country") || undefined;
   const careerGoal = url.searchParams.get("careerGoal") || undefined;
   const experienceLevel = url.searchParams.get("experienceLevel") || undefined;
   const email = url.searchParams.get("email") || undefined;
-  const deviceId = url.searchParams.get("deviceId") || undefined;
 
-  if (!goal) {
-    return new Response("Missing goal parameter", { status: 400 });
+  if (!sourceUrl && !text) {
+    return new Response("Missing url or text parameter", { status: 400 });
   }
 
-  const mission: Mission = { goal, education, skills, country, careerGoal, experienceLevel, email };
+  const input: ImportInput = {
+    url: sourceUrl,
+    text: text || undefined,
+    profile: { education, skills, country, careerGoal, experienceLevel, email },
+  };
+
   const emitter = new SSEEmitter();
-  const coordinator = new MultiAgentCoordinator(sessionId, mission, emitter, { deviceId });
+  const analyzer = new ImportAnalyzer(sessionId, input, emitter, { deviceId });
 
   let cleanup = false;
   let hadError = false;
@@ -32,10 +38,8 @@ export async function GET(
   const stream = new ReadableStream({
     async start(controller) {
       emitter.connect(controller);
-
       try {
-        await coordinator.initialize();
-        await coordinator.run();
+        await analyzer.run();
       } catch (error) {
         hadError = true;
         if (!cleanup) {

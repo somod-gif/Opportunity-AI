@@ -33,7 +33,7 @@ export interface ToolConfig {
 
 export interface AIProvider {
   readonly name: string;
-  generateJSON<T>(capability: AICapability, prompt: string): Promise<T>;
+  generateJSON<T>(capability: AICapability, prompt: string, signal?: AbortSignal): Promise<T>;
   generate(prompt: string): Promise<string>;
   generateStream?(prompt: string, onChunk: (text: string) => void): Promise<string>;
   generateWithTools(

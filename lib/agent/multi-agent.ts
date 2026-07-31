@@ -43,7 +43,8 @@ export class MultiAgentCoordinator {
   constructor(
     private sessionId: string,
     private mission: Mission,
-    private emitter: SSEEmitter
+    private emitter: SSEEmitter,
+    private meta: { deviceId?: string; source?: string } = {}
   ) {
     this.planner = new AgentPlanner();
     this.reflector = new AgentReflector();
@@ -88,6 +89,8 @@ export class MultiAgentCoordinator {
         skills: this.mission.skills,
         country: this.mission.country,
         careerGoal: this.mission.careerGoal,
+        deviceId: this.meta.deviceId ?? null,
+        source: this.meta.source ?? "mission",
       },
     });
 

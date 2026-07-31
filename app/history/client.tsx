@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Bot, ChevronRight, Clock, CheckCircle2, XCircle, Loader2, RefreshCw, ArrowRight, Sparkles } from "lucide-react";
 import { GrainOverlay } from "@/components/shared/GrainOverlay";
+import { getDeviceId } from "@/lib/utils";
 
 interface Mission {
   id: string;
@@ -30,7 +31,7 @@ export function HistoryClient() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/missions");
+      const res = await fetch(`/api/missions?deviceId=${encodeURIComponent(getDeviceId())}`);
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
       setMissions(data);
@@ -59,7 +60,7 @@ export function HistoryClient() {
       <div className="pointer-events-none fixed -bottom-40 left-0 z-0 h-[400px] w-[400px] rounded-full bg-[#3FA78E]/[0.04] blur-[120px]" />
 
       <div className="fixed top-0 z-50 w-full border-b border-[#F3EEE1]/10 bg-[#0B0E13]/90 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-6">
           <a href="/" className="flex items-center gap-3 group">
             <div className="flex h-8 w-8 items-center justify-center rounded-sm border-[1.5px] border-[#C9A227] text-[#C9A227] transition-transform group-hover:-rotate-6">
               <Bot className="h-4 w-4" strokeWidth={1.75} />
@@ -77,8 +78,7 @@ export function HistoryClient() {
         </div>
       </div>
 
-      <main className="relative z-10 mx-auto max-w-4xl px-4 pt-28 pb-16 sm:px-6">
-        <h1 className="text-2xl font-medium tracking-tight mb-2" style={{ fontFamily: "var(--font-display)" }}>Mission History</h1>
+      <main className="relative z-10 mx-auto max-w-4xl px-4 pt-28 pb-16 sm:px-6">        <h1 className="text-2xl font-medium tracking-tight mb-2" style={{ fontFamily: "var(--font-display)" }}>Mission History</h1>
         <p className="text-sm text-[#F3EEE1]/40 mb-8">All your past and current autonomous agent missions</p>
 
         {loading && (

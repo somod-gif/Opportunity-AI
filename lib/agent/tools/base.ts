@@ -5,7 +5,7 @@ import type { DB } from "@/lib/db";
 export type { ToolResult };
 
 export interface AIAdapter {
-  generateJSON<T>(capability: string, prompt: string): Promise<T>;
+  generateJSON<T>(capability: string, prompt: string, signal?: AbortSignal): Promise<T>;
   generate(prompt: string): Promise<string>;
 }
 

@@ -140,6 +140,27 @@ export const reminders = pgTable("reminders", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const importAnalyses = pgTable("import_analyses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sessionId: text("session_id").notNull(),
+  deviceId: text("device_id"),
+  sourceUrl: text("source_url"),
+  rawText: text("raw_text"),
+  status: text("status", {
+    enum: ["running", "complete", "failed"],
+  }).notNull().default("running"),
+  opportunityId: uuid("opportunity_id").references(() => opportunities.id),
+  extraction: jsonb("extraction"),
+  evaluation: jsonb("evaluation"),
+  gapAnalysis: jsonb("gap_analysis"),
+  research: jsonb("research"),
+  strategy: jsonb("strategy"),
+  documents: jsonb("documents"),
+  report: jsonb("report"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export type Opportunity = typeof opportunities.$inferSelect;
 export type NewOpportunity = typeof opportunities.$inferInsert;
 export type UserSession = typeof userSessions.$inferSelect;
@@ -154,3 +175,5 @@ export type Application = typeof applications.$inferSelect;
 export type NewApplication = typeof applications.$inferInsert;
 export type Reminder = typeof reminders.$inferSelect;
 export type NewReminder = typeof reminders.$inferInsert;
+export type ImportAnalysis = typeof importAnalyses.$inferSelect;
+export type NewImportAnalysis = typeof importAnalyses.$inferInsert;

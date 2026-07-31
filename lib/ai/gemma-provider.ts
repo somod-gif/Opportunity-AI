@@ -45,11 +45,12 @@ export class GemmaProvider implements AIProvider {
     return `${GOOGLE_AI_BASE}/models/${this.model}:generateContent?key=${this.apiKey}`;
   }
 
-  private async request(body: Record<string, unknown>): Promise<Record<string, unknown>> {
+  private async request(body: Record<string, unknown>, signal?: AbortSignal): Promise<Record<string, unknown>> {
     const res = await fetch(this.getEndpoint(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+      signal,
     });
     if (!res.ok) {
       const err = await res.text();
@@ -76,13 +77,13 @@ export class GemmaProvider implements AIProvider {
       case "plan":
       case "tool-select":
       case "reflect":
-      case "reason": return 1024;
+      case "reason": return 4096;
       case "document-generation": return 8192;
-      default: return 2048;
+      default: return 4096;
     }
   }
 
-  async generateJSON<T>(capability: AICapability, prompt: string): Promise<T> {
+  async generateJSON<T>(capability: AICapability, prompt: string, signal?: AbortSignal): Promise<T> {
     const data = await this.request({
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
@@ -90,7 +91,7 @@ export class GemmaProvider implements AIProvider {
         maxOutputTokens: this.tokenBudget(capability),
         response_mime_type: "application/json",
       },
-    });
+    }, signal);
     const parts = (data as any).candidates?.[0]?.content?.parts || [];
     const texts = parts
       .filter((p: Record<string, unknown>) => !p.thought)
