@@ -16,6 +16,8 @@ export function getProvider(name?: string): AIProvider {
   return factory();
 }
 
+export const DEFAULT_MODEL = process.env.OPENROUTER_MODEL || "google/gemma-4-31b-it:free";
+
 export function getDefaultModel(): string {
-  return process.env.OPENROUTER_MODEL || "google/gemma-4-26b-a4b-it:free";
+  return DEFAULT_MODEL;
 }

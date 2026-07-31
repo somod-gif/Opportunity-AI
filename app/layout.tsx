@@ -4,6 +4,8 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { QueryProvider, AgentProvider } from "@/components/providers";
 import { ErrorBoundary } from "@/components/shared";
+import { SupportChat } from "@/components/chat/SupportChat";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 const display = Fraunces({
   subsets: ["latin"],
@@ -47,7 +49,8 @@ export default function RootLayout({
         <ErrorBoundary>
           <QueryProvider>
             <AgentProvider>
-              {children}
+              <AppLayout>{children}</AppLayout>
+              <SupportChat />
               <Toaster
                 position="top-right"
                 richColors

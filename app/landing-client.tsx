@@ -10,6 +10,7 @@ import {
   Database, Shield, Menu, X, Rocket, Stamp as StampIcon, Briefcase,
   Trophy, TrendingUp, Activity, AlertCircle, Layers,
 } from "lucide-react";
+import { GrainOverlay } from "@/components/shared/GrainOverlay";
 
 const AGENTS = [
   { icon: Bot, name: "Mission Commander", role: "Orchestrator", desc: "Coordinates the entire mission. Assigns work. Tracks progress. Combines results." },
@@ -33,15 +34,6 @@ const PHASES = [
   { icon: Database, label: "Remember", desc: "Store findings in persistent memory" },
   { icon: CheckCircle2, label: "Complete", desc: "Deliver mission report with all findings" },
 ];
-
-function GrainOverlay() {
-  return (
-    <svg className="pointer-events-none fixed inset-0 z-[1] h-full w-full opacity-[0.025] mix-blend-overlay" aria-hidden="true">
-      <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch" /></filter>
-      <rect width="100%" height="100%" filter="url(#grain)" />
-    </svg>
-  );
-}
 
 function Stamp({ label, tone = "brass", pulse = false }: { label: string; tone?: "brass" | "signal"; pulse?: boolean }) {
   const c = tone === "signal" ? "border-[#3FA78E] text-[#3FA78E]" : "border-[#C9A227] text-[#C9A227]";
@@ -124,8 +116,13 @@ export function LandingClient() {
                   <span className="absolute -bottom-1 left-0 h-px w-0 bg-[#C9A227] transition-all duration-300 group-hover:w-full" />
                 </a>
               ))}
+              <a href="/history" className="relative text-[13px] text-[#F3EEE1]/50 transition-colors hover:text-[#F3EEE1] group">
+                History
+                <span className="absolute -bottom-1 left-0 h-px w-0 bg-[#C9A227] transition-all duration-300 group-hover:w-full" />
+              </a>
             </nav>
             <div className="hidden md:flex items-center gap-3">
+              <a href="/history" className="inline-flex items-center gap-1.5 rounded-sm border border-[#F3EEE1]/15 px-3.5 py-2 text-[12px] font-mono text-[#F3EEE1]/50 hover:text-[#F3EEE1] transition-colors"><Clock className="h-3 w-3" /> History</a>
               <a href="/mission" className="inline-flex items-center gap-2 rounded-sm bg-[#C9A227] px-5 py-2.5 text-[13px] font-semibold text-[#0B0E13] transition-transform hover:-translate-y-0.5">Start mission <Rocket className="h-3.5 w-3.5" /></a>
             </div>
             <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden flex h-9 w-9 items-center justify-center rounded-sm border border-[#F3EEE1]/10 text-[#F3EEE1]/60">
@@ -140,6 +137,8 @@ export function LandingClient() {
                     <a key={label} href={`#${label.toLowerCase().replace(/\s+/g, '-')}`} onClick={() => setMobileOpen(false)}
                       className="block rounded-sm px-3 py-2 text-[13px] text-[#F3EEE1]/50 hover:bg-[#F3EEE1]/5 hover:text-[#F3EEE1]">{label}</a>
                   ))}
+                  <a href="/history" onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 rounded-sm px-3 py-2 text-[13px] text-[#F3EEE1]/50 hover:bg-[#F3EEE1]/5 hover:text-[#F3EEE1]"><Clock className="h-3.5 w-3.5" /> History</a>
                   <a href="/mission" onClick={() => setMobileOpen(false)} className="mt-2 flex items-center justify-center gap-2 rounded-sm bg-[#C9A227] px-4 py-2.5 text-[13px] font-semibold text-[#0B0E13]">Start mission <ArrowRight className="h-3.5 w-3.5" /></a>
                 </div>
               </motion.div>
@@ -152,6 +151,10 @@ export function LandingClient() {
         {/* HERO */}
         <section className="relative min-h-screen flex items-center pt-24 pb-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 w-full">
+            <div className="flex items-center justify-center gap-1.5 bg-[#C9A227]/[0.06] border border-[#C9A227]/15 rounded-sm px-4 py-2 font-mono text-[12px] text-[#C9A227]/70 mb-8">
+              <Zap className="h-3.5 w-3.5 text-[#C9A227]" />
+              <span>Built with <strong className="text-[#C9A227]">Gemma 4</strong> for <strong>AI for Africa Hackathon</strong> — Minna 2026</span>
+            </div>
             <div className="grid lg:grid-cols-5 gap-10 lg:gap-14 items-start">
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }} className="lg:col-span-2 space-y-7 lg:sticky lg:top-28">
                 <h1 className="text-[2.6rem] sm:text-5xl lg:text-[3.4rem] font-medium tracking-tight leading-[1.05]" style={{ fontFamily: "var(--font-display)" }}>
@@ -163,19 +166,19 @@ export function LandingClient() {
                   <label className="block">
                     <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">Mission brief</span>
                     <textarea value={goal} onChange={e => setGoal(e.target.value)} placeholder="Describe your mission — e.g. Find fully funded AI Master's scholarships in Europe..." rows={2}
-                      className="w-full resize-none border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[15px] text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors" />
+                      className="w-full resize-none border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[16px] text-[#F3EEE1] placeholder:text-[16px] placeholder:text-[#F3EEE1]/30 focus:border-[#C9A227] focus:outline-none transition-colors" />
                   </label>
                   <button type="submit" disabled={!goal.trim() || loading}
                     className="w-full inline-flex items-center justify-center gap-2 rounded-sm bg-[#C9A227] px-6 py-3.5 text-sm font-semibold text-[#0B0E13] transition-all hover:-translate-y-0.5 disabled:opacity-30 disabled:hover:translate-y-0 disabled:cursor-not-allowed">
                     {loading ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Launching...</span> : <span className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> Launch autonomous AI</span>}
                   </button>
                 </form>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[#F3EEE1]/10 pt-4 font-mono text-[11px] text-[#F3EEE1]/30">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[#F3EEE1]/10 pt-4 font-mono text-[13px] text-[#F3EEE1]/30">
                   <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3 text-[#C9A227]/70" /> 9 specialized agents</span>
                   <span className="flex items-center gap-1.5"><Cpu className="h-3 w-3 text-[#3FA78E]/70" /> 16+ tools</span>
                   <span className="flex items-center gap-1.5"><Clock className="h-3 w-3 text-[#C2703D]/70" /> 3-minute results</span>
                 </div>
-                <div className="rounded-sm bg-[#C9A227]/[0.04] border border-[#C9A227]/15 px-3 py-2 font-mono text-[11px] text-[#C9A227]/60">
+                <div className="rounded-sm bg-[#C9A227]/[0.04] border border-[#C9A227]/15 px-3 py-[10px] font-mono text-[13px] text-[#C9A227]/60 leading-relaxed">
                   <span className="font-semibold">For judges:</span> Pick an example mission → watch the agent reason, search, analyze, and generate documents in real-time. Results appear in under 3 minutes.
                 </div>
               </motion.div>
@@ -257,18 +260,25 @@ export function LandingClient() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
-                  {AGENTS.slice(0, 10).map((agent, i) => {
-                    const isActive = activeAgentIdx === i + 1;
-                    const isDone = activeAgentIdx > i + 1;
-                    const Icon = agent.icon;
-                    return (
-                      <div key={agent.name} className={`rounded-sm border px-2 py-2 text-center transition-colors ${isActive ? "border-[#C9A227]/50 bg-[#C9A227]/[0.08]" : isDone ? "border-[#3FA78E]/25 bg-[#3FA78E]/[0.05]" : "border-[#F3EEE1]/[0.06] opacity-40"}`}>
-                        <Icon className={`h-4 w-4 mx-auto mb-1 ${isActive ? "text-[#C9A227]" : isDone ? "text-[#3FA78E]" : "text-[#F3EEE1]/30"}`} />
-                        <p className={`font-mono text-[9px] uppercase tracking-wide ${isActive ? "text-[#F3EEE1]/80" : isDone ? "text-[#3FA78E]/60" : "text-[#F3EEE1]/20"}`}>{agent.role}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {[
+                    { emoji: "🎓", title: "CS scholarships in Germany", goal: "Find fully funded Computer Science scholarships in Germany" },
+                    { emoji: "💼", title: "Remote AI internships 2027", goal: "Find remote AI internships for Summer 2027" },
+                    { emoji: "🚀", title: "Grants for African founders", goal: "Find startup grants for African founders" },
+                    { emoji: "🧬", title: "Health innovation fellowships", goal: "Find healthcare innovation fellowships" },
+                  ].map((ex) => (
+                    <button
+                      key={ex.title}
+                      onClick={() => setGoal(ex.goal)}
+                      className="flex items-center gap-3 rounded-sm border border-[#F3EEE1]/[0.08] bg-[#12161D]/50 px-4 py-3 text-left transition-all hover:border-[#C9A227]/30 hover:bg-[#C9A227]/[0.04] group"
+                    >
+                      <span className="text-lg">{ex.emoji}</span>
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-medium text-[#F3EEE1]/70 group-hover:text-[#F3EEE1] transition-colors truncate">{ex.title}</p>
+                        <p className="text-[11px] text-[#F3EEE1]/30 truncate mt-0.5">Click to try →</p>
                       </div>
-                    );
-                  })}
+                    </button>
+                  ))}
                 </div>
               </motion.div>
             </div>

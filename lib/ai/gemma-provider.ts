@@ -28,7 +28,7 @@ export class GemmaProvider implements AIProvider {
 
   constructor(config?: AIProviderConfig) {
     this.apiKey = config?.apiKey || process.env.GOOGLE_AI_API_KEY || "";
-    this.model = config?.model || process.env.AI_MODEL || "gemma-4-26b-a4b-it";
+    this.model = config?.model || process.env.AI_MODEL || "gemma-4-31b-it";
   }
 
   private getEndpoint(): string {
