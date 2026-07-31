@@ -30,7 +30,7 @@ Built for the **Build with Gemma: AI for Africa Minna Hackathon 2026** · Target
 
 📝 Kaggle Submission
 
-(Add your Kaggle notebook)
+[Opportunity AI — Autonomous Career Intelligence Agent](https://kaggle.com/competitions/build-with-gemma-ai-for-africa-hackathon-minna-2026/writeups/opportunity-ai-autonomous-career-intelligence-ag)
 
 📂 Repository
 
