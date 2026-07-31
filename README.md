@@ -3,7 +3,7 @@
 **Autonomous AI Career Intelligence Agent for Africa — powered by Gemma 4**
 
 <p align="center">
-  <img src="/image1.png" alt="Mission Control — Opportunity AI in action" width="880" />
+  <img src="/public/image1.png" alt="Mission Control — Opportunity AI in action" width="880" />
 </p>
 
 <p align="center"><em>Mission Control — Opportunity AI autonomously reasons, plans, executes tools, and delivers complete opportunity workflows.</em></p>
@@ -36,6 +36,10 @@ Opportunity AI then:
 
 Every step — from the agent's internal reasoning to tool calls, search results, and confidence scores — streams live to the screen over **Server-Sent Events (SSE)**. The agent's autonomy is not claimed; it is *watched* in real time.
 
+
+<p align="center">
+  <img src="/public/image2.png" alt="Mission Control — Opportunity AI in action" width="880" />
+</p>
 ### Key Capabilities
 
 | Capability | Description |
