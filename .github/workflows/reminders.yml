@@ -1,0 +1,202 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Reminder Scheduler — GitHub Actions
+# ──────────────────────────────────────────────────────────────────────────────
+# Replaces Vercel Cron for opportunity reminder delivery.
+#
+# Why GitHub Actions?
+#   - Free tier includes 2,000+ min/month — more than enough for daily runs
+#   - Rich retry/backoff, timeout, and logging built in
+#   - No Vercel Pro plan required (Cron requires Pro)
+#   - Full audit trail, workflow dispatch, and Slack/email notifications
+#
+# Required Secrets (set in GitHub repo → Settings → Secrets and Variables → Actions):
+#   VERCEL_URL    — e.g. opportunity-ai-snowy.vercel.app (no https://)
+#   CRON_SECRET   — matches the CRON_SECRET env var in your Vercel deployment
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: Reminder Scheduler
+
+on:
+  schedule:
+    # Run daily at 8:00 AM WAT (7:00 AM UTC) — African business hours
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+    # Allow manual trigger for testing and immediate execution
+    inputs:
+      dry_run:
+        description: "Log only — do not send emails"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+# ── Permissions ──────────────────────────────────────────────────────────────
+permissions:
+  contents: read       # Minimal — workflow only needs to call an external API
+
+# ── Concurrency ──────────────────────────────────────────────────────────────
+concurrency:
+  group: reminder-scheduler
+  cancel-in-progress: false    # Never cancel a running reminder dispatch
+
+# ── Jobs ─────────────────────────────────────────────────────────────────────
+jobs:
+  dispatch-reminders:
+    name: Dispatch Reminder Processing
+    runs-on: ubuntu-latest
+    timeout-minutes: 5         # Hard cap — never exceed 5 minutes
+
+    steps:
+      - name: 🔍 Validate Secrets
+        id: validate
+        env:
+          VERCEL_URL: ${{ secrets.VERCEL_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "${VERCEL_URL}" ]; then
+            echo "::error::VERCEL_URL secret is not set. Set it in GitHub repo → Settings → Secrets and Variables → Actions."
+            exit 1
+          fi
+          echo "✓ VERCEL_URL is set"
+          if [ -z "${CRON_SECRET}" ]; then
+            echo "::warning::CRON_SECRET is not set. The endpoint will allow unauthenticated requests."
+          else
+            echo "✓ CRON_SECRET is set"
+          fi
+
+      - name: 📤 Dispatch Reminder Endpoint
+        id: dispatch
+        env:
+          VERCEL_URL: ${{ secrets.VERCEL_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          # ── Build endpoint URL ──────────────────────────────────────────
+          ENDPOINT="https://${VERCEL_URL}/api/reminders/run"
+          echo "endpoint=${ENDPOINT}" >> "${GITHUB_OUTPUT}"
+
+          # ── Build curl arguments ────────────────────────────────────────
+          CURL_ARGS=(
+            --request GET
+            --url "${ENDPOINT}"
+            --header "Content-Type: application/json"
+            --max-time 120                  # 2-minute request timeout
+            --write-out "\n%{http_code}"    # Append HTTP status code on last line
+            --silent
+          )
+
+          # Authenticate via Bearer token (preferred) OR query param fallback
+          if [ -n "${CRON_SECRET}" ]; then
+            CURL_ARGS+=(
+              --header "Authorization: Bearer ${CRON_SECRET}"
+              --data-urlencode "secret=${CRON_SECRET}"
+            )
+          fi
+
+          # ── Retry loop with exponential backoff ─────────────────────────
+          MAX_RETRIES=3
+          RETRY_DELAY=5   # seconds, doubled each attempt
+
+          for attempt in $(seq 1 $((MAX_RETRIES + 1))); do
+            echo "─── Attempt ${attempt} / $((MAX_RETRIES + 1)) ───"
+
+            # Execute curl and split body from HTTP status code
+            HTTP_RESPONSE=$(curl "${CURL_ARGS[@]}" 2>&1)
+            CURL_EXIT_CODE=$?
+
+            HTTP_CODE=$(echo "${HTTP_RESPONSE}" | tail -n1)
+            BODY=$(echo "${HTTP_RESPONSE}" | sed '$d')
+
+            echo "Curl exit code: ${CURL_EXIT_CODE}"
+            echo "HTTP status:    ${HTTP_CODE}"
+
+            # ── Success ──────────────────────────────────────────────────
+            if [ "${HTTP_CODE}" = "200" ] && [ "${CURL_EXIT_CODE}" -eq 0 ]; then
+              echo "status=success" >> "${GITHUB_OUTPUT}"
+              echo "✓ Reminder processing succeeded"
+
+              # Parse JSON response for summary
+              SENT=$(echo "${BODY}" | python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+    print(d.get('sent', 'N/A'), d.get('failed', 'N/A'), d.get('skipped', 'N/A'))
+except Exception:
+    print('N/A', 'N/A', 'N/A')
+" 2>/dev/null)
+
+              read -r SENT_COUNT FAILED_COUNT SKIPPED_COUNT <<< "${SENT}"
+              echo "sent=${SENT_COUNT}" >> "${GITHUB_OUTPUT}"
+              echo "failed=${FAILED_COUNT}" >> "${GITHUB_OUTPUT}"
+              echo "skipped=${SKIPPED_COUNT}" >> "${GITHUB_OUTPUT}"
+
+              echo ""
+              echo "╔══════════════════════════════════════════╗"
+              echo "║         REMINDER DISPATCH SUMMARY        ║"
+              echo "╠══════════════════════════════════════════╣"
+              printf "║  Sent:    %-30s ║\n" "${SENT_COUNT}"
+              printf "║  Failed:  %-30s ║\n" "${FAILED_COUNT}"
+              printf "║  Skipped: %-30s ║\n" "${SKIPPED_COUNT}"
+              echo "╚══════════════════════════════════════════╝"
+              echo ""
+
+              # Write detailed body to summary
+              echo "### Response Payload" >> "${GITHUB_STEP_SUMMARY}"
+              echo '```json' >> "${GITHUB_STEP_SUMMARY}"
+              echo "${BODY}" >> "${GITHUB_STEP_SUMMARY}"
+              echo '```' >> "${GITHUB_STEP_SUMMARY}"
+
+              exit 0
+            fi
+
+            # ── Failure ──────────────────────────────────────────────────
+            echo "status=failure" >> "${GITHUB_OUTPUT}"
+            echo "✗ Attempt ${attempt} failed"
+
+            if [ -n "${BODY}" ]; then
+              echo "Response body:"
+              echo "${BODY}" | head -c 2000
+              echo ""
+            fi
+
+            # Retry or fail
+            if [ "${attempt}" -le "${MAX_RETRIES}" ]; then
+              echo "Retrying in ${RETRY_DELAY}s..."
+              sleep "${RETRY_DELAY}"
+              RETRY_DELAY=$((RETRY_DELAY * 2))
+            else
+              echo "::error::All ${MAX_RETRIES} retries exhausted. Reminder dispatch failed."
+              exit 1
+            fi
+          done
+
+      - name: 📋 Log Execution Summary
+        if: always()
+        env:
+          STATUS: ${{ steps.dispatch.outputs.status }}
+          SENT: ${{ steps.dispatch.outputs.sent }}
+          FAILED: ${{ steps.dispatch.outputs.failed }}
+          SKIPPED: ${{ steps.dispatch.outputs.skipped }}
+          ENDPOINT: ${{ steps.dispatch.outputs.endpoint }}
+        run: |
+          {
+            echo "## ⏰ Reminder Scheduler — Execution Summary"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| **Timestamp** | $(date -u '+%Y-%m-%d %H:%M:%S UTC') |"
+            echo "| **Trigger** | ${{ github.event_name }} |"
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              echo "| **Dry Run** | ${{ inputs.dry_run || 'false' }} |"
+            fi
+            echo "| **Endpoint** | ${ENDPOINT:-N/A} |"
+            echo "| **Status** | ${STATUS:-unknown} |"
+            echo "| **Sent** | ${SENT:-N/A} |"
+            echo "| **Failed** | ${FAILED:-N/A} |"
+            echo "| **Skipped** | ${SKIPPED:-N/A} |"
+            echo ""
+            echo "---"
+            echo "_Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}_"
+          } >> "${GITHUB_STEP_SUMMARY}"
