@@ -126,7 +126,7 @@ export function AnalysisForm() {
               {...register("name")}
             />
             {errors.name && (
-              <p className="text-xs text-destructive">{errors.name.message}</p>
+              <p className="text-sm text-destructive">{errors.name.message}</p>
             )}
           </div>
 
@@ -147,7 +147,7 @@ export function AnalysisForm() {
               </SelectContent>
             </Select>
             {errors.education && (
-              <p className="text-xs text-destructive">{errors.education.message}</p>
+              <p className="text-sm text-destructive">{errors.education.message}</p>
             )}
           </div>
 
@@ -169,7 +169,7 @@ export function AnalysisForm() {
               {...register("careerGoal")}
             />
             {errors.careerGoal && (
-              <p className="text-xs text-destructive">{errors.careerGoal.message}</p>
+              <p className="text-sm text-destructive">{errors.careerGoal.message}</p>
             )}
           </div>
 
@@ -190,7 +190,7 @@ export function AnalysisForm() {
               </SelectContent>
             </Select>
             {errors.country && (
-              <p className="text-xs text-destructive">{errors.country.message}</p>
+              <p className="text-sm text-destructive">{errors.country.message}</p>
             )}
           </div>
         </div>

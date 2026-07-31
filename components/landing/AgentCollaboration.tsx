@@ -67,7 +67,7 @@ export function AgentCollaboration() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 mb-4">
             <Bot className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-medium text-primary">Multi-Agent System</span>
+            <span className="text-sm font-medium text-primary">Multi-Agent System</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
             AI Agent{" "}
@@ -146,10 +146,10 @@ export function AgentCollaboration() {
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold text-foreground/90">{agent.name}</span>
                           {isActive && (
-                            <span className="text-[10px] font-mono text-primary animate-pulse">ACTIVE</span>
+                            <span className="text-[12px] font-mono text-primary animate-pulse">ACTIVE</span>
                           )}
                         </div>
-                        <p className={`text-xs mt-0.5 ${
+                        <p className={`text-sm mt-0.5 ${
                           isActive ? "text-primary/60" : status === "done" ? "text-ash-400/50" : "text-muted-foreground/40"
                         }`}>
                           {agent.tool}
@@ -166,10 +166,10 @@ export function AgentCollaboration() {
                             transition={{ duration: 1, delay: 0.3 }}
                           />
                         </div>
-                        <span className="text-[10px] font-mono text-muted-foreground/40">{agent.confidence}%</span>
+                        <span className="text-[12px] font-mono text-muted-foreground/40">{agent.confidence}%</span>
                       </div>
 
-                      <div className="text-xs text-muted-foreground/50 truncate">
+                      <div className="text-sm text-muted-foreground/50 truncate">
                         {isActive && status !== "done" ? (
                           <span className="flex items-center gap-1.5 text-primary/60">
                             <Loader2 className="h-3 w-3 animate-spin" />

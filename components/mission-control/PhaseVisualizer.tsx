@@ -35,8 +35,8 @@ export function PhaseVisualizer({
     <div className="glass rounded-xl p-5">
       <div className="flex items-center gap-2 mb-4">
         <Target className="h-4 w-4 text-primary" />
-        <h3 className="text-xs font-semibold text-foreground/70 uppercase tracking-wider">Agent Loop</h3>
-        <span className="ml-auto text-[10px] text-muted-foreground/50 font-mono">Iteration {iteration}</span>
+        <h3 className="text-sm font-semibold text-foreground/70 uppercase tracking-wider">Agent Loop</h3>
+        <span className="ml-auto text-[12px] text-muted-foreground/50 font-mono">Iteration {iteration}</span>
       </div>
       <div className="relative">
         {/* Progress bar */}

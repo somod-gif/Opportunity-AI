@@ -47,18 +47,18 @@ export function RoadmapView({ data }: RoadmapViewProps) {
         <div className="space-y-3">
           {data.steps.map((step) => (
             <div key={step.step} className="relative pl-8">
-              <div className="absolute left-0 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+              <div className="absolute left-0 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
                 {step.step}
               </div>
               <div className="rounded-lg border p-3">
                 <div className="flex items-start justify-between gap-2">
                   <h5 className="text-sm font-medium">{step.title}</h5>
-                  <Badge variant="outline" className="shrink-0 text-xs">
+                  <Badge variant="outline" className="shrink-0 text-sm">
                     {step.estimatedHours}h
                   </Badge>
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">{step.description}</p>
-                <p className="mt-1.5 text-xs text-muted-foreground">
+                <p className="mt-1.5 text-sm text-muted-foreground">
                   Deadline: {step.deadline}
                 </p>
               </div>

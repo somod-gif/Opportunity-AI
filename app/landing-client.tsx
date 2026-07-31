@@ -40,7 +40,7 @@ function Stamp({ label, tone = "brass", pulse = false }: { label: string; tone?:
   return (
     <motion.span initial={{ scale: 0.85, rotate: -8, opacity: 0 }} animate={{ scale: 1, rotate: -3, opacity: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 16 }}
-      className={`inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-dashed px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] ${c}`}>
+      className={`inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-dashed px-2.5 py-1 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] ${c}`}>
       {pulse && (
         <span className="relative flex h-1.5 w-1.5">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-60" />
@@ -122,7 +122,7 @@ export function LandingClient() {
               </a>
             </nav>
             <div className="hidden md:flex items-center gap-3">
-              <a href="/history" className="inline-flex items-center gap-1.5 rounded-sm border border-[#F3EEE1]/15 px-3.5 py-2 text-[12px] font-mono text-[#F3EEE1]/50 hover:text-[#F3EEE1] transition-colors"><Clock className="h-3 w-3" /> History</a>
+              <a href="/history" className="inline-flex items-center gap-1.5 rounded-sm border border-[#F3EEE1]/15 px-3.5 py-2 text-[14px] font-mono text-[#F3EEE1]/50 hover:text-[#F3EEE1] transition-colors"><Clock className="h-3 w-3" /> History</a>
               <a href="/mission" className="inline-flex items-center gap-2 rounded-sm bg-[#C9A227] px-5 py-2.5 text-[13px] font-semibold text-[#0B0E13] transition-transform hover:-translate-y-0.5">Start mission <Rocket className="h-3.5 w-3.5" /></a>
             </div>
             <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden flex h-9 w-9 items-center justify-center rounded-sm border border-[#F3EEE1]/10 text-[#F3EEE1]/60">
@@ -151,7 +151,7 @@ export function LandingClient() {
         {/* HERO */}
         <section className="relative min-h-screen flex items-center pt-24 pb-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 w-full">
-            <div className="flex items-center justify-center gap-1.5 bg-[#C9A227]/[0.06] border border-[#C9A227]/15 rounded-sm px-4 py-2 font-mono text-[12px] text-[#C9A227]/70 mb-8">
+            <div className="flex items-center justify-center gap-1.5 bg-[#C9A227]/[0.06] border border-[#C9A227]/15 rounded-sm px-4 py-2 font-mono text-[14px] text-[#C9A227]/70 mb-8">
               <Zap className="h-3.5 w-3.5 text-[#C9A227]" />
               <span>Built with <strong className="text-[#C9A227]">Gemma 4</strong> for <strong>AI for Africa Hackathon</strong> — Minna 2026</span>
             </div>
@@ -164,7 +164,7 @@ export function LandingClient() {
                 <p className="text-sm sm:text-[15px] text-[#F3EEE1]/45 leading-relaxed max-w-md">Opportunity AI is an <strong className="text-[#F3EEE1]/70">autonomous multi-agent system</strong> powered by Google Gemma 4. Unlike chatbots that wait for instructions, it independently plans, searches, evaluates, and generates applications — exactly like hiring a full-time AI career assistant. Give it a mission, it handles the rest.</p>
                 <form onSubmit={launchAgent} className="space-y-3">
                   <label className="block">
-                    <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">Mission brief</span>
+                    <span className="mb-1.5 block font-mono text-[12px] uppercase tracking-[0.18em] text-[#F3EEE1]/35">Mission brief</span>
                     <textarea value={goal} onChange={e => setGoal(e.target.value)} placeholder="Describe your mission — e.g. Find fully funded AI Master's scholarships in Europe..." rows={2}
                       className="w-full resize-none border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-[16px] text-[#F3EEE1] placeholder:text-[16px] placeholder:text-[#F3EEE1]/30 focus:border-[#C9A227] focus:outline-none transition-colors" />
                   </label>
@@ -194,7 +194,7 @@ export function LandingClient() {
                         <div className={`flex items-center gap-1.5 px-2.5 py-1 ${isActive ? "text-[#C9A227]" : isDone ? "text-[#3FA78E]/70" : "text-[#F3EEE1]/25"}`}>
                           <span className="font-mono text-[9px]">{String(i + 1).padStart(2, "0")}</span>
                           <Icon className="h-3 w-3" strokeWidth={1.75} />
-                          <span className="text-[11px] font-medium">{phase.label}</span>
+                          <span className="text-[13px] font-medium">{phase.label}</span>
                         </div>
                         {i < PHASES.length - 1 && <span className={`h-px w-4 ${isDone ? "bg-[#3FA78E]/40" : "bg-[#F3EEE1]/10"}`} />}
                       </div>
@@ -213,7 +213,7 @@ export function LandingClient() {
                   <div className="px-5 py-2.5 border-b border-[#F3EEE1]/[0.06] flex items-center gap-2.5">
                     <Target className="h-3.5 w-3.5 text-[#C2703D] shrink-0" strokeWidth={1.75} />
                     <span className="text-[12.5px] text-[#F3EEE1]/50 truncate">Find fully funded AI Master's scholarships in Europe</span>
-                    <span className="ml-auto font-mono text-[10px] text-[#F3EEE1]/25 shrink-0">{activeAgentIdx}/{AGENTS.length}</span>
+                    <span className="ml-auto font-mono text-[12px] text-[#F3EEE1]/25 shrink-0">{activeAgentIdx}/{AGENTS.length}</span>
                   </div>
                   <div className="px-2 py-1 min-h-[260px] max-h-[320px] overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                     {demoLog.map((entry, i) => {
@@ -222,13 +222,13 @@ export function LandingClient() {
                       return (
                         <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}
                           className="flex items-center gap-3 px-3 py-2.5 border-b border-[#F3EEE1]/[0.05] last:border-0">
-                          <span className="w-5 shrink-0 font-mono text-[10px] text-[#F3EEE1]/20">{String(i + 1).padStart(2, "0")}</span>
+                          <span className="w-5 shrink-0 font-mono text-[12px] text-[#F3EEE1]/20">{String(i + 1).padStart(2, "0")}</span>
                           <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border ${entry.status === "done" ? "border-[#3FA78E]/30 bg-[#3FA78E]/10" : entry.status === "active" ? "border-[#C9A227]/40 bg-[#C9A227]/10" : "border-[#F3EEE1]/10"}`}>
                             {entry.status === "done" ? <CheckCircle2 className="h-3.5 w-3.5 text-[#3FA78E]" /> : <Icon className="h-3.5 w-3.5 text-[#C9A227]" />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className={`text-[13px] ${entry.status === "active" ? "text-[#F3EEE1]/95" : "text-[#F3EEE1]/55"}`} style={{ fontFamily: "var(--font-display)" }}>{entry.name}</p>
-                            {entry.status === "active" && <p className="text-[11px] text-[#F3EEE1]/35 truncate mt-0.5">{entry.action}</p>}
+                            {entry.status === "active" && <p className="text-[13px] text-[#F3EEE1]/35 truncate mt-0.5">{entry.action}</p>}
                           </div>
                           <span className={`shrink-0 font-mono text-[9px] uppercase tracking-wider ${entry.status === "done" ? "text-[#3FA78E]/60" : entry.status === "active" ? "text-[#C9A227]" : "text-[#F3EEE1]/25"}`}>
                             {entry.status === "active" ? <Loader2 className="h-3 w-3 animate-spin" /> : entry.status}
@@ -248,12 +248,12 @@ export function LandingClient() {
                     {demoLog.length === 0 && (
                       <div className="flex flex-col items-center justify-center py-10 text-center">
                         <Bot className="h-9 w-9 text-[#F3EEE1]/10 mb-3" strokeWidth={1.25} />
-                        <p className="text-xs text-[#F3EEE1]/30">Agent team initializing...</p>
-                        <p className="text-[11px] text-[#F3EEE1]/20 mt-1">Decomposing mission, allocating sub-agents</p>
+                        <p className="text-sm text-[#F3EEE1]/30">Agent team initializing...</p>
+                        <p className="text-[13px] text-[#F3EEE1]/20 mt-1">Decomposing mission, allocating sub-agents</p>
                       </div>
                     )}
                   </div>
-                  <div className="border-t border-[#F3EEE1]/10 px-5 py-2.5 flex items-center justify-between font-mono text-[10px] text-[#F3EEE1]/30">
+                  <div className="border-t border-[#F3EEE1]/10 px-5 py-2.5 flex items-center justify-between font-mono text-[12px] text-[#F3EEE1]/30">
                     <span>agents {activeAgentIdx}/{AGENTS.length}</span>
                     <span>confidence {activeAgentIdx > 0 ? Math.min(95, 50 + activeAgentIdx * 4) : 0}%</span>
                     <span>sources {Math.min(27, activeAgentIdx * 3)}</span>
@@ -263,6 +263,7 @@ export function LandingClient() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {[
                     { emoji: "🎓", title: "CS scholarships in Germany", goal: "Find fully funded Computer Science scholarships in Germany" },
+                    { emoji: "📊", title: "Masters in Data Science", goal: "test mission using curl I want a fully-funded Masters in Data Science anywhere in the world" },
                     { emoji: "💼", title: "Remote AI internships 2027", goal: "Find remote AI internships for Summer 2027" },
                     { emoji: "🚀", title: "Grants for African founders", goal: "Find startup grants for African founders" },
                     { emoji: "🧬", title: "Health innovation fellowships", goal: "Find healthcare innovation fellowships" },
@@ -274,8 +275,8 @@ export function LandingClient() {
                     >
                       <span className="text-lg">{ex.emoji}</span>
                       <div className="min-w-0">
-                        <p className="text-[12px] font-medium text-[#F3EEE1]/70 group-hover:text-[#F3EEE1] transition-colors truncate">{ex.title}</p>
-                        <p className="text-[11px] text-[#F3EEE1]/30 truncate mt-0.5">Click to try →</p>
+                        <p className="text-[14px] font-medium text-[#F3EEE1]/70 group-hover:text-[#F3EEE1] transition-colors truncate">{ex.title}</p>
+                        <p className="text-[13px] text-[#F3EEE1]/30 truncate mt-0.5">Click to try →</p>
                       </div>
                     </button>
                   ))}
@@ -290,7 +291,7 @@ export function LandingClient() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <div className="grid lg:grid-cols-2 gap-14 items-start">
               <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-                <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#C2703D]/50 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C2703D] -rotate-1">The problem</span>
+                <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#C2703D]/50 px-2.5 py-1 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#C2703D] -rotate-1">The problem</span>
                 <h2 className="text-4xl sm:text-5xl font-medium tracking-tight mb-4" style={{ fontFamily: "var(--font-display)" }}>Opportunity is <span className="italic text-[#C2703D]">fragmented</span></h2>
                 <p className="text-[#F3EEE1]/40 text-sm leading-relaxed mb-6">Every year, millions of talented people — especially across Africa and other developing regions — miss valuable opportunities because the application process is fragmented and overwhelming.</p>
                 <div className="space-y-3">
@@ -301,7 +302,7 @@ export function LandingClient() {
                 <p className="mt-6 text-sm text-[#F3EEE1]/30 italic">This process takes days or weeks. Most applicants give up or miss deadlines.</p>
               </motion.div>
               <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }}>
-                <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#3FA78E]/50 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#3FA78E] -rotate-1">Our solution</span>
+                <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#3FA78E]/50 px-2.5 py-1 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#3FA78E] -rotate-1">Our solution</span>
                 <h2 className="text-4xl sm:text-5xl font-medium tracking-tight mb-4" style={{ fontFamily: "var(--font-display)" }}>One mission. <span className="italic text-[#3FA78E]">Everything handled.</span></h2>
                 <p className="text-[#F3EEE1]/40 text-sm leading-relaxed mb-6">Opportunity AI transforms that entire workflow into a single autonomous mission. Instead of a chatbot that waits for instructions, it behaves like an intelligent AI employee — planning, reasoning, collaborating, and executing from start to finish.</p>
                 <div className="space-y-3">
@@ -318,7 +319,7 @@ export function LandingClient() {
         <section id="how-it-works" className="relative py-28 border-t border-[#F3EEE1]/[0.06]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mb-16 max-w-2xl">
-              <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#C9A227]/50 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A227] -rotate-1">Eight-step process</span>
+              <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#C9A227]/50 px-2.5 py-1 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#C9A227] -rotate-1">Eight-step process</span>
               <h2 className="text-4xl sm:text-5xl font-medium tracking-tight mb-4" style={{ fontFamily: "var(--font-display)" }}>How the agent <span className="italic text-[#C9A227]">thinks</span></h2>
               <p className="text-[#F3EEE1]/40 text-sm leading-relaxed">Every decision is transparent, in this order — from perceiving your mission to delivering results.</p>
             </motion.div>
@@ -330,10 +331,10 @@ export function LandingClient() {
                     className="group border-b border-r border-[#F3EEE1]/[0.06] p-6 hover:bg-[#F3EEE1]/[0.02] transition-colors">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex h-9 w-9 items-center justify-center rounded-sm border border-[#F3EEE1]/10 group-hover:border-[#C9A227]/40 transition-colors"><Icon className="h-4 w-4 text-[#C9A227]" /></div>
-                      <span className="font-mono text-[11px] text-[#F3EEE1]/20">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="font-mono text-[13px] text-[#F3EEE1]/20">{String(i + 1).padStart(2, "0")}</span>
                     </div>
                     <p className="text-sm font-medium text-[#F3EEE1] mb-1.5" style={{ fontFamily: "var(--font-display)" }}>{phase.label}</p>
-                    <p className="text-xs text-[#F3EEE1]/40 leading-relaxed">{phase.desc}</p>
+                    <p className="text-sm text-[#F3EEE1]/40 leading-relaxed">{phase.desc}</p>
                   </motion.div>
                 );
               })}
@@ -345,7 +346,7 @@ export function LandingClient() {
         <section className="relative py-28 border-t border-[#F3EEE1]/[0.06]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mb-14 max-w-2xl">
-              <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#C9A227]/50 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A227] -rotate-1">Engineering</span>
+              <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#C9A227]/50 px-2.5 py-1 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#C9A227] -rotate-1">Engineering</span>
               <h2 className="text-4xl sm:text-5xl font-medium tracking-tight mb-4" style={{ fontFamily: "var(--font-display)" }}>Architecture & <span className="italic text-[#C9A227]">technology</span></h2>
             </motion.div>
 
@@ -368,7 +369,7 @@ export function LandingClient() {
                 <motion.div key={name} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.02 }}
                   className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D] px-4 py-2.5 text-center min-w-[100px]">
                   <p className="text-[13px] font-medium text-[#F3EEE1]" style={{ fontFamily: "var(--font-display)" }}>{name}</p>
-                  <p className="text-[11px] text-[#F3EEE1]/40 mt-0.5">{desc}</p>
+                  <p className="text-[13px] text-[#F3EEE1]/40 mt-0.5">{desc}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -386,10 +387,10 @@ export function LandingClient() {
                 <motion.div key={block.title} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.04, duration: 0.4 }}
                   className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D] p-5">
                   <h3 className="text-sm font-medium text-[#C9A227] mb-2" style={{ fontFamily: "var(--font-display)" }}>{block.title}</h3>
-                  <p className="text-xs text-[#F3EEE1]/50 leading-relaxed mb-3">{block.desc}</p>
+                  <p className="text-sm text-[#F3EEE1]/50 leading-relaxed mb-3">{block.desc}</p>
                   <ul className="space-y-1.5">
                     {block.items.map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-[12px] text-[#F3EEE1]/40">
+                      <li key={item} className="flex items-start gap-2 text-[14px] text-[#F3EEE1]/40">
                         <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-[#C9A227]/50" />
                         {item}
                       </li>
@@ -402,7 +403,7 @@ export function LandingClient() {
             {/* Gemma 4 badge */}
             <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mt-10 text-center">
               <a href="https://ai.google.dev/gemma" target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-[#C9A227]/30 bg-[#C9A227]/5 px-5 py-2 text-xs text-[#C9A227] hover:bg-[#C9A227]/10 transition-colors">
+                className="inline-flex items-center gap-2 rounded-full border border-[#C9A227]/30 bg-[#C9A227]/5 px-5 py-2 text-sm text-[#C9A227] hover:bg-[#C9A227]/10 transition-colors">
                 <Sparkles className="h-3.5 w-3.5" /> Built with <strong>Gemma 4</strong> — AI for Africa Hackathon 2026
               </a>
             </motion.div>
@@ -413,7 +414,7 @@ export function LandingClient() {
         <section id="agents" className="relative py-28 border-t border-[#F3EEE1]/[0.06]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mb-14 max-w-xl">
-              <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#3FA78E]/50 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#3FA78E] -rotate-1">Multi-agent system</span>
+              <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#3FA78E]/50 px-2.5 py-1 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#3FA78E] -rotate-1">Multi-agent system</span>
               <h2 className="text-4xl sm:text-5xl font-medium tracking-tight mb-4" style={{ fontFamily: "var(--font-display)" }}>9 specialized <span className="italic text-[#C9A227]">AI agents</span></h2>
               <p className="text-[#F3EEE1]/40 text-sm leading-relaxed">Each with its own role, tools, and decision-making capabilities. They collaborate autonomously to complete your mission.</p>
             </motion.div>
@@ -426,7 +427,7 @@ export function LandingClient() {
                     <div className="flex items-center gap-3 mb-3">
                       <div className="flex h-9 w-9 items-center justify-center rounded-sm border border-[#F3EEE1]/10"><Icon className="h-4 w-4 text-[#C9A227]" /></div>
                       <div className="min-w-0">
-                        <p className="text-xs font-medium text-[#F3EEE1] truncate" style={{ fontFamily: "var(--font-display)" }}>{agent.name}</p>
+                        <p className="text-sm font-medium text-[#F3EEE1] truncate" style={{ fontFamily: "var(--font-display)" }}>{agent.name}</p>
                         <p className="font-mono text-[9px] uppercase tracking-wide text-[#F3EEE1]/30">{agent.role}</p>
                       </div>
                     </div>
@@ -462,7 +463,7 @@ export function LandingClient() {
                     className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D] p-5 hover:border-[#F3EEE1]/25 transition-colors">
                     <div className="flex h-9 w-9 items-center justify-center rounded-sm border border-[#C9A227]/30 bg-[#C9A227]/10 mb-4"><Icon className="h-4 w-4 text-[#C9A227]" /></div>
                     <h3 className="text-sm font-medium text-[#F3EEE1] mb-1.5" style={{ fontFamily: "var(--font-display)" }}>{feature.title}</h3>
-                    <p className="text-xs text-[#F3EEE1]/40 leading-relaxed">{feature.desc}</p>
+                    <p className="text-sm text-[#F3EEE1]/40 leading-relaxed">{feature.desc}</p>
                   </motion.div>
                 );
               })}
@@ -474,7 +475,7 @@ export function LandingClient() {
         <section className="relative py-28 border-t border-[#F3EEE1]/[0.06]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
             <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="mb-14 max-w-xl">
-              <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#C9A227]/50 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#C9A227] -rotate-1">Best autonomous AI agent</span>
+              <span className="mb-4 inline-block rounded-full border-[1.5px] border-dashed border-[#C9A227]/50 px-2.5 py-1 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] text-[#C9A227] -rotate-1">Best autonomous AI agent</span>
               <h2 className="text-4xl sm:text-5xl font-medium tracking-tight mb-4" style={{ fontFamily: "var(--font-display)" }}>What makes this <span className="italic text-[#C9A227]">different</span></h2>
               <p className="text-[#F3EEE1]/40 text-sm leading-relaxed">Not a chatbot. Not a pipeline. A true autonomous AI agent that plans, reasons, uses tools, remembers, and delivers end-to-end results — entirely on its own.</p>
             </motion.div>
@@ -493,7 +494,7 @@ export function LandingClient() {
                     className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D] p-5 hover:border-[#C9A227]/30 transition-colors">
                     <div className="flex h-10 w-10 items-center justify-center rounded-sm border border-[#C9A227]/30 bg-[#C9A227]/10 mb-4"><Icon className="h-5 w-5 text-[#C9A227]" /></div>
                     <h3 className="text-sm font-medium text-[#F3EEE1] mb-2" style={{ fontFamily: "var(--font-display)" }}>{item.title}</h3>
-                    <p className="text-xs text-[#F3EEE1]/45 leading-relaxed">{item.desc}</p>
+                    <p className="text-sm text-[#F3EEE1]/45 leading-relaxed">{item.desc}</p>
                   </motion.div>
                 );
               })}
@@ -537,11 +538,11 @@ export function LandingClient() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <StampIcon className="h-4 w-4 text-[#C9A227]" strokeWidth={1.75} />
-              <span className="text-xs font-medium text-[#F3EEE1]" style={{ fontFamily: "var(--font-display)" }}>Opportunity AI</span>
-              <span className="font-mono text-[10px] text-[#F3EEE1]/25 uppercase tracking-wide">Est. 2026 · Powered by Gemma 4</span>
+              <span className="text-sm font-medium text-[#F3EEE1]" style={{ fontFamily: "var(--font-display)" }}>Opportunity AI</span>
+              <span className="font-mono text-[12px] text-[#F3EEE1]/25 uppercase tracking-wide">Est. 2026 · Powered by Gemma 4</span>
             </div>
-            <a href="https://github.com/somod-gif/Opportunity-AI" target="_blank" rel="noopener noreferrer" className="font-mono text-[10px] text-[#F3EEE1]/25 hover:text-[#C9A227]/70 transition-colors">View on GitHub →</a>
-            <p className="font-mono text-[10px] text-[#F3EEE1]/25 text-center uppercase tracking-wide">Built for Build with Gemma: AI for Africa Hackathon 2026 — Best Autonomous AI Agent</p>
+            <a href="https://github.com/somod-gif/Opportunity-AI" target="_blank" rel="noopener noreferrer" className="font-mono text-[12px] text-[#F3EEE1]/25 hover:text-[#C9A227]/70 transition-colors">View on GitHub →</a>
+            <p className="font-mono text-[12px] text-[#F3EEE1]/25 text-center uppercase tracking-wide">Built for Build with Gemma: AI for Africa Hackathon 2026 — Best Autonomous AI Agent</p>
           </div>
         </div>
       </footer>

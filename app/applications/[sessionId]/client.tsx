@@ -96,7 +96,7 @@ export function KanbanClient({ sessionId, applications: initialApps, opportuniti
             </div>
           </div>
           <Link href={`/workspace/${sessionId}`}
-            className="flex items-center gap-1.5 rounded-sm bg-[#C9A227] px-3.5 py-2 text-[12px] font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all">
+            className="flex items-center gap-1.5 rounded-sm bg-[#C9A227] px-3.5 py-2 text-[14px] font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all">
             <ExternalLink className="h-3.5 w-3.5" /> Browse Opportunities
           </Link>
         </div>
@@ -121,9 +121,9 @@ export function KanbanClient({ sessionId, applications: initialApps, opportuniti
                 <div className="flex items-center justify-between px-3 py-2.5 border-b border-[#F3EEE1]/[0.06]">
                   <div className="flex items-center gap-2">
                     <span className={`h-2 w-2 rounded-full ${colors.dot}`} />
-                    <span className={`text-[12px] font-medium font-mono ${colors.text}`}>{col.label}</span>
+                    <span className={`text-[14px] font-medium font-mono ${colors.text}`}>{col.label}</span>
                   </div>
-                  <span className={`text-[11px] font-mono ${colors.text} opacity-50`}>{colApps.length}</span>
+                  <span className={`text-[13px] font-mono ${colors.text} opacity-50`}>{colApps.length}</span>
                 </div>
 
                 <div className="p-2 space-y-2 min-h-[120px]">
@@ -149,21 +149,21 @@ export function KanbanClient({ sessionId, applications: initialApps, opportuniti
                           <div className="flex-1 min-w-0">
                             <Link
                               href={`/opportunity/${sessionId}/${opp?.slug || ""}`}
-                              className="text-[12px] font-medium text-[#F3EEE1]/80 hover:text-[#C9A227] transition-colors line-clamp-2 block"
+                              className="text-[14px] font-medium text-[#F3EEE1]/80 hover:text-[#C9A227] transition-colors line-clamp-2 block"
                             >
                               {opp?.title || "Unknown opportunity"}
                             </Link>
-                            <p className="text-[11px] text-[#F3EEE1]/30 mt-0.5">{opp?.provider || ""}</p>
+                            <p className="text-[13px] text-[#F3EEE1]/30 mt-0.5">{opp?.provider || ""}</p>
                             {daysLeft !== null && (
                               <div className="flex items-center gap-1 mt-1.5">
                                 <Clock className="h-3 w-3 text-[#C2703D]/50" strokeWidth={1.5} />
-                                <span className={`text-[10px] font-mono ${daysLeft <= 7 ? "text-[#C2703D]" : "text-[#F3EEE1]/30"}`}>
+                                <span className={`text-[12px] font-mono ${daysLeft <= 7 ? "text-[#C2703D]" : "text-[#F3EEE1]/30"}`}>
                                   {daysLeft <= 0 ? "Due!" : `${daysLeft}d`}
                                 </span>
                                 <button
                                   onClick={() => handleReminder(app, 1)}
                                   title="Email reminder 1 day before deadline"
-                                  className="ml-1 flex items-center gap-1 rounded-sm border border-[#C9A227]/20 px-1.5 py-0.5 text-[10px] text-[#C9A227] hover:bg-[#C9A227]/10 transition-colors"
+                                  className="ml-1 flex items-center gap-1 rounded-sm border border-[#C9A227]/20 px-1.5 py-0.5 text-[12px] text-[#C9A227] hover:bg-[#C9A227]/10 transition-colors"
                                 >
                                   <Bell className="h-2.5 w-2.5" strokeWidth={1.75} /> Remind
                                 </button>
@@ -181,7 +181,7 @@ export function KanbanClient({ sessionId, applications: initialApps, opportuniti
                     );
                   })}
                   {colApps.length === 0 && (
-                    <p className="text-[11px] text-[#F3EEE1]/20 text-center py-4 font-mono">Drop here</p>
+                    <p className="text-[13px] text-[#F3EEE1]/20 text-center py-4 font-mono">Drop here</p>
                   )}
                 </div>
               </div>

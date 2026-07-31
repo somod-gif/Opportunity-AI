@@ -116,7 +116,7 @@ export function WorkspaceClient({ sessionId, opportunities: initialOpps, applica
               return (
                 <div key={opp.id} className="rounded-sm border border-[#F3EEE1]/[0.06] bg-[#F3EEE1]/[0.02] p-4 hover:border-[#C9A227]/20 transition-all group">
                   <div className="flex items-start justify-between mb-2">
-                    <span className="inline-flex items-center rounded-sm bg-[#C9A227]/10 px-2 py-0.5 text-xs font-medium text-[#C9A227] uppercase font-mono">{opp.type}</span>
+                    <span className="inline-flex items-center rounded-sm bg-[#C9A227]/10 px-2 py-0.5 text-sm font-medium text-[#C9A227] uppercase font-mono">{opp.type}</span>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Link href={`/opportunity/${sessionId}/${opp.slug}`} className="p-1 rounded-sm hover:bg-[#F3EEE1]/[0.03] text-[#F3EEE1]/30 hover:text-[#C9A227]/60">
                         <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.75} />
@@ -127,22 +127,22 @@ export function WorkspaceClient({ sessionId, opportunities: initialOpps, applica
                   </div>
                   <Link href={`/opportunity/${sessionId}/${opp.slug}`} className="block">
                     <h3 className="font-semibold text-sm mb-1 line-clamp-2 text-[#F3EEE1]/90 hover:text-[#C9A227] transition-colors">{opp.title}</h3>
-                    <p className="text-xs text-[#F3EEE1]/40 mb-3">{opp.provider}</p>
-                    <p className="text-xs text-[#F3EEE1]/30 line-clamp-2 mb-3">{opp.description}</p>
+                    <p className="text-sm text-[#F3EEE1]/40 mb-3">{opp.provider}</p>
+                    <p className="text-sm text-[#F3EEE1]/30 line-clamp-2 mb-3">{opp.description}</p>
                   </Link>
                   <div className="flex gap-2">
                     {opp.applicationUrl && (
-                      <a href={opp.applicationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-[#C9A227]/70 hover:text-[#C9A227] transition-colors">
+                      <a href={opp.applicationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-[#C9A227]/70 hover:text-[#C9A227] transition-colors">
                         Apply <ExternalLink className="h-3 w-3" strokeWidth={1.75} />
                       </a>
                     )}
                     {!app && (
-                      <button onClick={() => handleCreateApp(opp.id)} className="inline-flex items-center gap-1 text-xs text-[#F3EEE1]/40 hover:text-[#F3EEE1]/70 ml-auto transition-colors">
+                      <button onClick={() => handleCreateApp(opp.id)} className="inline-flex items-center gap-1 text-sm text-[#F3EEE1]/40 hover:text-[#F3EEE1]/70 ml-auto transition-colors">
                         <Briefcase className="h-3 w-3" strokeWidth={1.75} /> Track
                       </button>
                     )}
                     {app && (
-                      <Link href={`/applications/${sessionId}`} className="inline-flex items-center gap-1 text-xs text-[#3FA78E] ml-auto hover:text-[#3FA78E]/80 transition-colors">
+                      <Link href={`/applications/${sessionId}`} className="inline-flex items-center gap-1 text-sm text-[#3FA78E] ml-auto hover:text-[#3FA78E]/80 transition-colors">
                         <CheckCircle2 className="h-3 w-3" strokeWidth={2} /> {app.status}
                       </Link>
                     )}
@@ -183,7 +183,7 @@ export function WorkspaceClient({ sessionId, opportunities: initialOpps, applica
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-[#F3EEE1]/80 truncate">{opp?.title || "Unknown opportunity"}</p>
-                    <span className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[10px] font-medium font-mono ${statusColors[app.status] || statusColors.saved}`}>{app.status}</span>
+                    <span className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[12px] font-medium font-mono ${statusColors[app.status] || statusColors.saved}`}>{app.status}</span>
                   </div>
                   <button onClick={() => { setEditingApp(app); setForm({ ...form, type: app.status }); }}
                     className="p-1.5 rounded-sm hover:bg-[#F3EEE1]/[0.03] text-[#F3EEE1]/30 hover:text-[#F3EEE1]/60 opacity-0 group-hover:opacity-100 transition-all">

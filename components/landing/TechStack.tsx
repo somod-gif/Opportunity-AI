@@ -44,7 +44,7 @@ export function TechStack() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 mb-4">
             <Cpu className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-medium text-primary">Architecture</span>
+            <span className="text-sm font-medium text-primary">Architecture</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
             Built with Modern <span className="text-gradient">AI Stack</span>
@@ -73,7 +73,7 @@ export function TechStack() {
                   </div>
                   <span className="text-sm font-semibold text-foreground/80">{tech.name}</span>
                 </div>
-                <p className="text-[10px] text-muted-foreground/50 leading-relaxed">
+                <p className="text-[12px] text-muted-foreground/50 leading-relaxed">
                   {tech.description}
                 </p>
               </motion.div>
@@ -89,7 +89,7 @@ export function TechStack() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2">
             <Zap className="h-3 w-3 text-stone-400" />
-            <span className="text-[10px] text-muted-foreground/50">
+            <span className="text-[12px] text-muted-foreground/50">
               Full tech stack —
               <span className="text-foreground/60"> 12 core technologies • 20+ tools • 7 agents • 8 database tables</span>
             </span>

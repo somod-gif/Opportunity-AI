@@ -68,7 +68,7 @@ export function Nav({ session }: NavProps) {
             {session ? (
               <Link
                 href="/profile"
-                className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs text-muted-foreground/60 hover:text-foreground hover:border-white/20 transition-all"
+                className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-sm text-muted-foreground/60 hover:text-foreground hover:border-white/20 transition-all"
               >
                 <User className="h-3.5 w-3.5" />
                 {session.name || session.email}
@@ -76,7 +76,7 @@ export function Nav({ session }: NavProps) {
             ) : (
               <Link
                 href="/login"
-                className="text-xs text-muted-foreground/60 hover:text-foreground transition-colors"
+                className="text-sm text-muted-foreground/60 hover:text-foreground transition-colors"
               >
                 Sign in
               </Link>

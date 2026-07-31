@@ -77,7 +77,7 @@ export function KnowledgeGraph() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-iron-500/20 bg-iron-500/10 px-4 py-1.5 mb-4">
             <GitBranch className="h-3.5 w-3.5 text-iron-400" />
-            <span className="text-xs font-medium text-iron-400">Knowledge Graph</span>
+            <span className="text-sm font-medium text-iron-400">Knowledge Graph</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
             Live Knowledge <span className="text-gradient">Graph</span>
@@ -189,7 +189,7 @@ export function KnowledgeGraph() {
               {createElement(nodes[activeNode].icon, {
                 className: `h-4 w-4 ${nodes[activeNode].color}`,
               })}
-              <span className="text-xs text-foreground/70 font-mono">
+              <span className="text-sm text-foreground/70 font-mono">
                 Processing: <span className="text-foreground/90 font-semibold">{nodes[activeNode].label}</span>
               </span>
               {activeNode < nodes.length - 1 && (

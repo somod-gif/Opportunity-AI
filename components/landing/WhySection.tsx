@@ -40,7 +40,7 @@ export function WhySection() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 mb-4">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-medium text-primary">Why Opportunity AI</span>
+            <span className="text-sm font-medium text-primary">Why Opportunity AI</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
             Traditional Search vs.{" "}
@@ -58,13 +58,13 @@ export function WhySection() {
             <div className="text-center">
               <div className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2">
                 <XCircle className="h-4 w-4 text-destructive/60" />
-                <span className="text-xs font-medium text-destructive/60">Traditional</span>
+                <span className="text-sm font-medium text-destructive/60">Traditional</span>
               </div>
             </div>
             <div className="text-center">
               <div className="inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-4 py-2">
                 <Bot className="h-4 w-4 text-primary" />
-                <span className="text-xs font-medium text-primary">Opportunity AI</span>
+                <span className="text-sm font-medium text-primary">Opportunity AI</span>
               </div>
             </div>
           </div>
@@ -86,15 +86,15 @@ export function WhySection() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5">
                       <Icon className={`h-4 w-4 ${item.color}`} />
                     </div>
-                    <span className="text-xs text-muted-foreground/60 font-medium">{item.traditional.split(" ")[0]}</span>
+                    <span className="text-sm text-muted-foreground/60 font-medium">{item.traditional.split(" ")[0]}</span>
                   </div>
                   <div className="flex items-center gap-2 justify-center">
                     <XCircle className="h-3.5 w-3.5 text-destructive/40 shrink-0" />
-                    <span className="text-[11px] text-destructive/50 text-center">{item.traditional}</span>
+                    <span className="text-[13px] text-destructive/50 text-center">{item.traditional}</span>
                   </div>
                   <div className="flex items-center gap-2 justify-center">
                     <CheckCircle2 className="h-3.5 w-3.5 text-ash-400 shrink-0" />
-                    <span className="text-[11px] text-ash-400/80 text-center">{item.ai}</span>
+                    <span className="text-[13px] text-ash-400/80 text-center">{item.ai}</span>
                   </div>
                 </motion.div>
               );

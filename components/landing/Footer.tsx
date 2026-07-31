@@ -25,7 +25,7 @@ export function Footer() {
               </div>
               <span className="text-sm font-semibold">Opportunity AI</span>
             </div>
-            <p className="text-[11px] text-muted-foreground/50 leading-relaxed max-w-xs">
+            <p className="text-[13px] text-muted-foreground/50 leading-relaxed max-w-xs">
               An autonomous AI career agent that discovers, evaluates, and applies to opportunities across Africa.
             </p>
             <div className="flex items-center gap-3">
@@ -42,13 +42,13 @@ export function Footer() {
 
           {/* Links */}
           <div>
-            <h4 className="text-xs font-semibold text-foreground/60 mb-3">Product</h4>
+            <h4 className="text-sm font-semibold text-foreground/60 mb-3">Product</h4>
             <ul className="space-y-2">
               {footerLinks.slice(0, 4).map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-[11px] text-muted-foreground/40 hover:text-foreground transition-colors"
+                    className="text-[13px] text-muted-foreground/40 hover:text-foreground transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -58,13 +58,13 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-xs font-semibold text-foreground/60 mb-3">Links</h4>
+            <h4 className="text-sm font-semibold text-foreground/60 mb-3">Links</h4>
             <ul className="space-y-2">
               {footerLinks.slice(4).map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-[11px] text-muted-foreground/40 hover:text-foreground transition-colors"
+                    className="text-[13px] text-muted-foreground/40 hover:text-foreground transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -75,7 +75,7 @@ export function Footer() {
 
           {/* Built with */}
           <div className="space-y-3">
-            <h4 className="text-xs font-semibold text-foreground/60 mb-3">Built with</h4>
+            <h4 className="text-sm font-semibold text-foreground/60 mb-3">Built with</h4>
             <div className="flex flex-wrap gap-2">
               {["Gemma 4", "Next.js", "TypeScript", "Neon", "Tailwind", "Framer"].map((tech) => (
                 <span
@@ -86,20 +86,20 @@ export function Footer() {
                 </span>
               ))}
             </div>
-            <p className="flex items-center gap-1 text-[10px] text-muted-foreground/30 pt-2">
+            <p className="flex items-center gap-1 text-[12px] text-muted-foreground/30 pt-2">
               Built with <Heart className="h-3 w-3 text-ash-400/60" /> for the
             </p>
-            <p className="text-[10px] text-muted-foreground/30">
+            <p className="text-[12px] text-muted-foreground/30">
               Build with Gemma: AI for Africa Hackathon 2026
             </p>
           </div>
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[10px] text-muted-foreground/30">
+          <p className="text-[12px] text-muted-foreground/30">
             © 2026 Opportunity AI. All rights reserved.
           </p>
-          <p className="text-[10px] text-muted-foreground/30">
+          <p className="text-[12px] text-muted-foreground/30">
             Best Autonomous AI Agent — Build with Gemma: AI for Africa
           </p>
         </div>

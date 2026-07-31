@@ -44,7 +44,7 @@ function ScoreBar({ label, value, color }: { label: string; value: number; color
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
-        <span className="text-[12px] font-medium text-[#F3EEE1]/70">{label}</span>
+        <span className="text-[14px] font-medium text-[#F3EEE1]/70">{label}</span>
         <span className="text-[13px] font-bold font-mono" style={{ color: barColor }}>{value}%</span>
       </div>
       <div className="h-1.5 w-full rounded-full bg-[#F3EEE1]/[0.06] overflow-hidden">
@@ -107,19 +107,19 @@ export function OppDetailClient({ sessionId, opportunity: opp, application: init
                 <select
                   value={app.status}
                   onChange={(e) => handleStatusChange(e.target.value)}
-                  className="rounded-sm border border-[#F3EEE1]/15 bg-[#12161D] px-2.5 py-1.5 text-[12px] text-[#F3EEE1] font-mono focus:outline-none focus:border-[#C9A227]"
+                  className="rounded-sm border border-[#F3EEE1]/15 bg-[#12161D] px-2.5 py-1.5 text-[14px] text-[#F3EEE1] font-mono focus:outline-none focus:border-[#C9A227]"
                 >
                   {["saved", "drafting", "submitted", "accepted", "rejected", "missed"].map(s => (
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
-                <button onClick={handleUntrack} className="flex items-center gap-1 rounded-sm border border-[#C2703D]/30 px-2.5 py-1.5 text-[12px] text-[#C2703D]/70 hover:bg-[#C2703D]/10 transition-all">
+                <button onClick={handleUntrack} className="flex items-center gap-1 rounded-sm border border-[#C2703D]/30 px-2.5 py-1.5 text-[14px] text-[#C2703D]/70 hover:bg-[#C2703D]/10 transition-all">
                   <Trash2 className="h-3 w-3" /> Untrack
                 </button>
               </div>
             ) : (
               <button onClick={handleTrack} disabled={saving}
-                className="flex items-center gap-1.5 rounded-sm bg-[#C9A227] px-3.5 py-1.5 text-[12px] font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all disabled:opacity-50">
+                className="flex items-center gap-1.5 rounded-sm bg-[#C9A227] px-3.5 py-1.5 text-[14px] font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all disabled:opacity-50">
                 {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />} Track Application
               </button>
             )}
@@ -135,11 +135,11 @@ export function OppDetailClient({ sessionId, opportunity: opp, application: init
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[11px] font-semibold font-mono uppercase tracking-wider border ${CATEGORY_COLORS[opp.type] || CATEGORY_COLORS.scholarship}`}>
+                  <span className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[13px] font-semibold font-mono uppercase tracking-wider border ${CATEGORY_COLORS[opp.type] || CATEGORY_COLORS.scholarship}`}>
                     {opp.type}
                   </span>
                   {opp.isRemote && (
-                    <span className="text-[11px] font-mono text-[#3FA78E]/60 border border-[#3FA78E]/20 px-1.5 py-0.5 rounded-sm">Remote</span>
+                    <span className="text-[13px] font-mono text-[#3FA78E]/60 border border-[#3FA78E]/20 px-1.5 py-0.5 rounded-sm">Remote</span>
                   )}
                 </div>
                 <h1 className="text-xl font-bold text-[#F3EEE1] leading-snug" style={{ fontFamily: "var(--font-display)" }}>{opp.title}</h1>
@@ -147,7 +147,7 @@ export function OppDetailClient({ sessionId, opportunity: opp, application: init
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[12px] text-[#F3EEE1]/40">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[14px] text-[#F3EEE1]/40">
               {opp.location && <span className="flex items-center gap-1.5"><MapPin className="h-3 w-3" /> {opp.location}</span>}
               {opp.deadline && (
                 <span className={`flex items-center gap-1.5 ${daysLeft !== null && daysLeft <= 30 ? "text-[#C2703D]" : ""}`}>
@@ -165,7 +165,7 @@ export function OppDetailClient({ sessionId, opportunity: opp, application: init
               <Target className="h-4 w-4 text-[#C9A227]" strokeWidth={1.75} />
               <span className="text-[13px] text-[#F3EEE1]/60">AI Match Score</span>
               <span className="text-lg font-bold text-[#3FA78E]" style={{ fontFamily: "var(--font-mono)" }}>{overallScore}%</span>
-              <span className="text-[12px] text-[#F3EEE1]/50">{overallScore >= 85 ? "Strong match" : overallScore >= 65 ? "Good match" : "Possible match"}</span>
+              <span className="text-[14px] text-[#F3EEE1]/50">{overallScore >= 85 ? "Strong match" : overallScore >= 65 ? "Good match" : "Possible match"}</span>
             </div>
             {opp.applicationUrl && (
               <a href={opp.applicationUrl} target="_blank" rel="noopener noreferrer"
@@ -203,7 +203,7 @@ export function OppDetailClient({ sessionId, opportunity: opp, application: init
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {["CV / Resume", "Cover Letter", "Personal Statement", "Checklist"].map((doc) => (
                   <button key={doc}
-                    className="flex items-center justify-center gap-1.5 rounded-sm border border-[#F3EEE1]/10 bg-[#0B0E13]/50 px-3 py-2.5 text-[12px] text-[#F3EEE1]/60 hover:border-[#C9A227]/30 hover:text-[#C9A227] transition-all"
+                    className="flex items-center justify-center gap-1.5 rounded-sm border border-[#F3EEE1]/10 bg-[#0B0E13]/50 px-3 py-2.5 text-[14px] text-[#F3EEE1]/60 hover:border-[#C9A227]/30 hover:text-[#C9A227] transition-all"
                   >
                     <FileText className="h-3.5 w-3.5" strokeWidth={1.75} /> {doc}
                   </button>
@@ -226,13 +226,13 @@ export function OppDetailClient({ sessionId, opportunity: opp, application: init
               </div>
               <div className="mt-4 pt-3 border-t border-[#F3EEE1]/[0.06]">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[12px] text-[#F3EEE1]/50">Competition Level</span>
+                  <span className="text-[14px] text-[#F3EEE1]/50">Competition Level</span>
                   <span className={`text-[13px] font-bold font-mono ${overallScore >= 80 ? "text-[#3FA78E]" : overallScore >= 60 ? "text-[#C9A227]" : "text-[#C2703D]"}`}>
                     {overallScore >= 80 ? "Low" : overallScore >= 60 ? "Medium" : "High"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[12px] text-[#F3EEE1]/50">Recommendation</span>
+                  <span className="text-[14px] text-[#F3EEE1]/50">Recommendation</span>
                   <span className={`text-[13px] font-bold font-mono ${overallScore >= 80 ? "text-[#3FA78E]" : "text-[#C9A227]"}`}>
                     {overallScore >= 80 ? "Apply Immediately" : overallScore >= 60 ? "Consider Applying" : "Evaluate Further"}
                   </span>
@@ -246,7 +246,7 @@ export function OppDetailClient({ sessionId, opportunity: opp, application: init
                 <h2 className="text-sm font-semibold text-[#F3EEE1] mb-3" style={{ fontFamily: "var(--font-display)" }}>Tags</h2>
                 <div className="flex flex-wrap gap-1.5">
                   {opp.tags.map((tag, i) => (
-                    <span key={i} className="text-[11px] font-mono text-[#C9A227]/60 bg-[#C9A227]/[0.06] px-2.5 py-1 rounded-sm border border-[#C9A227]/10">{tag}</span>
+                    <span key={i} className="text-[13px] font-mono text-[#C9A227]/60 bg-[#C9A227]/[0.06] px-2.5 py-1 rounded-sm border border-[#C9A227]/10">{tag}</span>
                   ))}
                 </div>
               </div>
@@ -259,7 +259,7 @@ export function OppDetailClient({ sessionId, opportunity: opp, application: init
                   <TrendingUp className="h-4 w-4" strokeWidth={1.75} /> Application Status
                 </h2>
                 <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[12px] font-medium font-mono ${
+                  <span className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[14px] font-medium font-mono ${
                     app.status === "accepted" ? "text-[#3FA78E] bg-[#3FA78E]/10" :
                     app.status === "submitted" ? "text-[#C9A227] bg-[#C9A227]/10" :
                     app.status === "drafting" ? "text-[#C9A227] bg-[#C9A227]/10" :
@@ -269,7 +269,7 @@ export function OppDetailClient({ sessionId, opportunity: opp, application: init
                     {app.status}
                   </span>
                   {app.createdAt && (
-                    <span className="text-[11px] text-[#F3EEE1]/30 font-mono">Added {new Date(app.createdAt).toLocaleDateString()}</span>
+                    <span className="text-[13px] text-[#F3EEE1]/30 font-mono">Added {new Date(app.createdAt).toLocaleDateString()}</span>
                   )}
                 </div>
               </div>

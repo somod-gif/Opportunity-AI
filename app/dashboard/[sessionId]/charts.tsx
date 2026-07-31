@@ -65,7 +65,7 @@ export function DashboardCharts({
       >
         <div className="flex items-center gap-2 mb-4">
           <PieIcon className="h-4 w-4 text-primary" />
-          <h3 className="text-xs font-semibold text-foreground/70 uppercase tracking-wider">Phase Distribution</h3>
+          <h3 className="text-sm font-semibold text-foreground/70 uppercase tracking-wider">Phase Distribution</h3>
         </div>
         <div className="flex justify-center">
           <ResponsiveContainer width="100%" height={200}>
@@ -96,7 +96,7 @@ export function DashboardCharts({
         </div>
         <div className="flex flex-wrap gap-2 justify-center mt-2">
           {phaseData.slice(0, 5).map((d, i) => (
-            <span key={d.name} className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
+            <span key={d.name} className="flex items-center gap-1 text-[12px] text-muted-foreground/60">
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
               {d.name}
             </span>
@@ -113,7 +113,7 @@ export function DashboardCharts({
       >
         <div className="flex items-center gap-2 mb-4">
           <Activity className="h-4 w-4 text-ash-400" />
-          <h3 className="text-xs font-semibold text-foreground/70 uppercase tracking-wider">Tool Usage</h3>
+          <h3 className="text-sm font-semibold text-foreground/70 uppercase tracking-wider">Tool Usage</h3>
         </div>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={toolData} layout="vertical" margin={{ left: 20 }}>
@@ -135,7 +135,7 @@ export function DashboardCharts({
           </BarChart>
         </ResponsiveContainer>
         {toolData.length === 0 && (
-          <p className="text-xs text-muted-foreground/50 text-center">No tools executed yet</p>
+          <p className="text-sm text-muted-foreground/50 text-center">No tools executed yet</p>
         )}
       </motion.div>
 
@@ -148,7 +148,7 @@ export function DashboardCharts({
       >
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="h-4 w-4 text-iron-400" />
-          <h3 className="text-xs font-semibold text-foreground/70 uppercase tracking-wider">Performance Trend</h3>
+          <h3 className="text-sm font-semibold text-foreground/70 uppercase tracking-wider">Performance Trend</h3>
         </div>
         <ResponsiveContainer width="100%" height={200}>
           <AreaChart data={trendData}>

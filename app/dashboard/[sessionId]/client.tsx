@@ -72,7 +72,7 @@ export function DashboardClient({ sessionId, mission, memories, iterations, tota
           </div>
           <div className="flex items-center gap-2">
             <Link href={`/agent/${sessionId}?goal=${encodeURIComponent(mission.goal)}`}
-              className="inline-flex items-center gap-1.5 rounded-sm bg-[#C9A227]/10 px-3 py-1.5 text-xs font-medium text-[#C9A227] hover:bg-[#C9A227]/20 transition-all">
+              className="inline-flex items-center gap-1.5 rounded-sm bg-[#C9A227]/10 px-3 py-1.5 text-sm font-medium text-[#C9A227] hover:bg-[#C9A227]/20 transition-all">
               <RotateCcw className="h-3 w-3" strokeWidth={1.75} /> Re-run
             </Link>
             <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${statusColor}`}>
@@ -95,7 +95,7 @@ export function DashboardClient({ sessionId, mission, memories, iterations, tota
               </div>
               <div>
                 <p className="text-2xl font-bold font-mono text-[#C9A227]">{iterations.length}</p>
-                <p className="text-xs font-mono text-[#F3EEE1]/40">ITERATIONS</p>
+                <p className="text-sm font-mono text-[#F3EEE1]/40">ITERATIONS</p>
               </div>
             </div>
           </div>
@@ -106,7 +106,7 @@ export function DashboardClient({ sessionId, mission, memories, iterations, tota
               </div>
               <div>
                 <p className="text-2xl font-bold font-mono text-[#C9A227]">{uniqueTools.length}</p>
-                <p className="text-xs font-mono text-[#F3EEE1]/40">TOOLS USED</p>
+                <p className="text-sm font-mono text-[#F3EEE1]/40">TOOLS USED</p>
               </div>
             </div>
           </div>
@@ -117,7 +117,7 @@ export function DashboardClient({ sessionId, mission, memories, iterations, tota
               </div>
               <div>
                 <p className="text-2xl font-bold font-mono text-[#3FA78E]">{totalMemories}</p>
-                <p className="text-xs font-mono text-[#F3EEE1]/40">MEMORIES</p>
+                <p className="text-sm font-mono text-[#F3EEE1]/40">MEMORIES</p>
               </div>
             </div>
           </div>
@@ -128,7 +128,7 @@ export function DashboardClient({ sessionId, mission, memories, iterations, tota
               </div>
               <div>
                 <p className="text-2xl font-bold font-mono text-[#C2703D] capitalize">{mission.status}</p>
-                <p className="text-xs font-mono text-[#F3EEE1]/40">STATUS</p>
+                <p className="text-sm font-mono text-[#F3EEE1]/40">STATUS</p>
               </div>
             </div>
           </div>
@@ -141,13 +141,13 @@ export function DashboardClient({ sessionId, mission, memories, iterations, tota
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {iterations.slice(0, 20).map((it) => (
                 <div key={it.id} className="flex items-center gap-3 rounded-sm border border-[#F3EEE1]/[0.06] bg-[#F3EEE1]/[0.02] p-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-[#C9A227]/10 text-xs font-mono font-bold text-[#C9A227]">{it.iterationNumber}</div>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-sm bg-[#C9A227]/10 text-sm font-mono font-bold text-[#C9A227]">{it.iterationNumber}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium capitalize truncate text-[#F3EEE1]/80">{it.phase.replace(/_/g, " ")}</p>
-                    {it.toolUsed && <p className="text-xs text-[#F3EEE1]/40 truncate">Tool: {it.toolUsed}</p>}
-                    {it.reasoning && <p className="text-xs text-[#F3EEE1]/30 line-clamp-1 mt-0.5">{it.reasoning}</p>}
+                    {it.toolUsed && <p className="text-sm text-[#F3EEE1]/40 truncate">Tool: {it.toolUsed}</p>}
+                    {it.reasoning && <p className="text-sm text-[#F3EEE1]/30 line-clamp-1 mt-0.5">{it.reasoning}</p>}
                   </div>
-                  <span className="text-xs text-[#F3EEE1]/30 shrink-0 font-mono">
+                  <span className="text-sm text-[#F3EEE1]/30 shrink-0 font-mono">
                     {it.timestamp ? new Date(it.timestamp).toLocaleTimeString() : ""}
                   </span>
                 </div>
@@ -164,12 +164,12 @@ export function DashboardClient({ sessionId, mission, memories, iterations, tota
                   <div className="flex items-center gap-2">
                     <Database className="h-3.5 w-3.5 text-[#3FA78E]/50 shrink-0" strokeWidth={1.75} />
                     <span className="text-sm font-medium truncate text-[#F3EEE1]/80">{mem.key}</span>
-                    <span className="ml-auto text-xs text-[#F3EEE1]/30 shrink-0 font-mono">{Math.round(mem.importance * 100)}%</span>
+                    <span className="ml-auto text-sm text-[#F3EEE1]/30 shrink-0 font-mono">{Math.round(mem.importance * 100)}%</span>
                   </div>
-                  <p className="mt-1 text-xs text-[#F3EEE1]/50 line-clamp-2">{mem.value}</p>
+                  <p className="mt-1 text-sm text-[#F3EEE1]/50 line-clamp-2">{mem.value}</p>
                   <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-xs text-[#F3EEE1]/30 capitalize">{mem.memoryType}</span>
-                    {mem.createdAt && <span className="text-xs text-[#F3EEE1]/30">{new Date(mem.createdAt).toLocaleDateString()}</span>}
+                    <span className="text-sm text-[#F3EEE1]/30 capitalize">{mem.memoryType}</span>
+                    {mem.createdAt && <span className="text-sm text-[#F3EEE1]/30">{new Date(mem.createdAt).toLocaleDateString()}</span>}
                   </div>
                 </div>
               ))}

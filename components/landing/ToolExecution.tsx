@@ -56,7 +56,7 @@ export function ToolExecution() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-ash-500/20 bg-ash-500/10 px-4 py-1.5 mb-4">
             <Terminal className="h-3.5 w-3.5 text-ash-400" />
-            <span className="text-xs font-medium text-ash-400">Live Execution</span>
+            <span className="text-sm font-medium text-ash-400">Live Execution</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
             Live Tool <span className="text-gradient">Execution</span>
@@ -82,7 +82,7 @@ export function ToolExecution() {
               </div>
               <div className="flex items-center gap-2 mx-auto">
                 <Terminal className="h-3.5 w-3.5 text-ash-400/60" />
-                <span className="text-[10px] font-mono text-muted-foreground/40">agent@opportunity:~/tools</span>
+                <span className="text-[12px] font-mono text-muted-foreground/40">agent@opportunity:~/tools</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <motion.div
@@ -95,7 +95,7 @@ export function ToolExecution() {
             </div>
 
             {/* Terminal body */}
-            <div className="px-5 py-4 font-mono text-xs space-y-0.5 min-h-[320px]">
+            <div className="px-5 py-4 font-mono text-sm space-y-0.5 min-h-[320px]">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -172,9 +172,9 @@ export function ToolExecution() {
                 >
                   <div className="flex items-center gap-2 text-ash-400">
                     <CheckCircle2 className="h-3.5 w-3.5" />
-                    <span className="text-xs font-medium">All tools executed successfully</span>
+                    <span className="text-sm font-medium">All tools executed successfully</span>
                   </div>
-                  <p className="text-[10px] text-ash-400/50 mt-1">
+                  <p className="text-[12px] text-ash-400/50 mt-1">
                     13 tool calls completed in 12.4s · 27 opportunities found
                   </p>
                 </motion.div>

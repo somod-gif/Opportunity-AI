@@ -141,7 +141,7 @@ export function OpportunityCard({ match, index, analysisInput, autoGenerate, onA
               <Badge
                 variant="secondary"
                 className={cn(
-                  "flex-shrink-0 whitespace-nowrap text-xs",
+                  "flex-shrink-0 whitespace-nowrap text-sm",
                   typeColors[match.type] || ""
                 )}
               >
@@ -153,7 +153,7 @@ export function OpportunityCard({ match, index, analysisInput, autoGenerate, onA
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               {match.deadline && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-sm text-muted-foreground">
                   Deadline:{" "}
                   {new Date(match.deadline).toLocaleDateString("en-US", {
                     month: "short",
@@ -163,7 +163,7 @@ export function OpportunityCard({ match, index, analysisInput, autoGenerate, onA
                 </span>
               )}
               {match.competitiveness && (
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1 text-sm text-muted-foreground">
                   <AlertCircle className="h-3 w-3" />
                   {match.competitiveness === "high"
                     ? "Highly Competitive"
@@ -247,7 +247,7 @@ export function OpportunityCard({ match, index, analysisInput, autoGenerate, onA
                   key={i}
                   className="flex items-start gap-2 text-sm text-muted-foreground"
                 >
-                  <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
+                  <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
                     {i + 1}
                   </span>
                   {step}
@@ -327,11 +327,11 @@ export function OpportunityCard({ match, index, analysisInput, autoGenerate, onA
           </div>
 
           {roadmapError && (
-            <p className="mt-2 text-xs text-destructive">{roadmapError}</p>
+            <p className="mt-2 text-sm text-destructive">{roadmapError}</p>
           )}
 
           {docError && (
-            <p className="mt-2 text-xs text-destructive">{docError}</p>
+            <p className="mt-2 text-sm text-destructive">{docError}</p>
           )}
 
           {roadmap && (

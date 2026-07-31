@@ -118,7 +118,7 @@ export function SkillsInput({ value, onChange, error }: SkillsInputProps) {
           className="min-w-[120px] flex-1 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-muted-foreground"
         />
       </div>
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
       {showSuggestions && filtered.length > 0 && input.length > 0 && (
         <div className="z-50 max-h-48 overflow-y-auto rounded-lg border bg-popover p-1 shadow-md">

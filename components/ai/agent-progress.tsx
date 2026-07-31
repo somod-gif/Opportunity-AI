@@ -15,7 +15,7 @@ export function AgentProgress({ currentStep }: AgentProgressProps) {
         </div>
         <div>
           <h3 className="text-sm font-semibold">Gemma is working...</h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Autonomous agent analyzing your profile
           </p>
         </div>

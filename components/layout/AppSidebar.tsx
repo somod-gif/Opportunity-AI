@@ -68,7 +68,7 @@ export function AppSidebar() {
           </div>
 
           <div className="flex-1 overflow-y-auto px-2 py-4 space-y-1">
-            <p className="px-2 mb-2 font-mono text-[10px] uppercase tracking-[0.15em] text-[#F3EEE1]/25">Main</p>
+            <p className="px-2 mb-2 font-mono text-[12px] uppercase tracking-[0.15em] text-[#F3EEE1]/25">Main</p>
             {NAV.map(item => (
               <button
                 key={item.href}
@@ -88,7 +88,7 @@ export function AppSidebar() {
             {sessionNav.length > 0 && (
               <>
                 <div className="pt-4 pb-1">
-                  <p className="px-2 font-mono text-[10px] uppercase tracking-[0.15em] text-[#F3EEE1]/25">Current Mission</p>
+                  <p className="px-2 font-mono text-[12px] uppercase tracking-[0.15em] text-[#F3EEE1]/25">Current Mission</p>
                 </div>
                 {sessionNav.map(item => (
                   <button
@@ -112,7 +112,7 @@ export function AppSidebar() {
           <div className="border-t border-[#F3EEE1]/10 px-3 py-3">
             <a
               href="/mission"
-              className="flex items-center justify-center gap-2 rounded-sm bg-[#C9A227] px-3 py-2 text-[12px] font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all"
+              className="flex items-center justify-center gap-2 rounded-sm bg-[#C9A227] px-3 py-2 text-[14px] font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all"
             >
               <Sparkles className="h-3.5 w-3.5" /> New Mission
             </a>

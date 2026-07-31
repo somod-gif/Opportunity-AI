@@ -6,7 +6,7 @@ interface MatchScoreProps {
 }
 
 const sizeClasses = {
-  sm: "h-8 w-8 text-xs",
+  sm: "h-8 w-8 text-sm",
   md: "h-12 w-12 text-sm",
   lg: "h-16 w-16 text-lg",
 };

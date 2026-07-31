@@ -85,7 +85,7 @@ export function Hero() {
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5">
               <Bot className="h-3.5 w-3.5 text-primary" />
-              <span className="text-xs font-medium text-primary">Powered by Gemma 4</span>
+              <span className="text-sm font-medium text-primary">Powered by Gemma 4</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1]">
@@ -128,13 +128,13 @@ export function Hero() {
 
             {/* Example missions */}
             <div className="space-y-1.5">
-              <p className="text-[10px] text-muted-foreground/40 font-medium uppercase tracking-wider">Try an example</p>
+              <p className="text-[12px] text-muted-foreground/40 font-medium uppercase tracking-wider">Try an example</p>
               <div className="flex flex-wrap gap-1.5">
                 {EXAMPLES.map((ex, i) => (
                   <button
                     key={i}
                     onClick={() => setGoal(ex)}
-                    className="rounded-full border border-white/5 bg-white/[0.02] px-3 py-1 text-[10px] text-muted-foreground/50 hover:bg-white/[0.05] hover:text-foreground/70 hover:border-white/10 transition-all"
+                    className="rounded-full border border-white/5 bg-white/[0.02] px-3 py-1 text-[12px] text-muted-foreground/50 hover:bg-white/[0.05] hover:text-foreground/70 hover:border-white/10 transition-all"
                   >
                     {ex.length > 35 ? ex.slice(0, 35) + "..." : ex}
                   </button>
@@ -143,7 +143,7 @@ export function Hero() {
             </div>
 
             {/* Stats line */}
-            <div className="flex items-center gap-4 text-[10px] text-muted-foreground/40">
+            <div className="flex items-center gap-4 text-[12px] text-muted-foreground/40">
               <span className="flex items-center gap-1">
                 <CheckCircle2 className="h-3 w-3 text-emerald-400/60" /> 14 specialized agents
               </span>
@@ -191,7 +191,7 @@ export function Hero() {
                   <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/20">
                     <Bot className="h-3.5 w-3.5 text-primary" />
                   </div>
-                  <span className="text-xs font-semibold">Live Agent Activity</span>
+                  <span className="text-sm font-semibold">Live Agent Activity</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <motion.div
@@ -232,7 +232,7 @@ export function Hero() {
                             ACTIVE
                           </motion.span>
                         </div>
-                        <p className="text-xs text-primary/60 mt-0.5">
+                        <p className="text-sm text-primary/60 mt-0.5">
                           {activityLog[currentAgentIdx]?.action || "Initializing..."}
                         </p>
                       </div>
@@ -282,7 +282,7 @@ export function Hero() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className={`text-[11px] font-medium ${
+                          <span className={`text-[13px] font-medium ${
                             entry.status === "active" ? "text-foreground" : entry.status === "done" ? "text-ash-400/70" : "text-muted-foreground/40"
                           }`}>
                             {entry.persona.name}
@@ -308,8 +308,8 @@ export function Hero() {
                 {activityLog.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <Bot className="h-8 w-8 text-muted-foreground/20 mb-3" />
-                    <p className="text-xs text-muted-foreground/40">Agent activity will appear here</p>
-                    <p className="text-[10px] text-muted-foreground/30 mt-1">Start typing a mission to begin</p>
+                    <p className="text-sm text-muted-foreground/40">Agent activity will appear here</p>
+                    <p className="text-[12px] text-muted-foreground/30 mt-1">Start typing a mission to begin</p>
                   </div>
                 )}
 
@@ -318,7 +318,7 @@ export function Hero() {
                   <motion.div
                     animate={{ opacity: [1, 0, 1] }}
                     transition={{ duration: 1, repeat: Infinity }}
-                    className="text-[10px] text-muted-foreground/30 font-mono px-1"
+                    className="text-[12px] text-muted-foreground/30 font-mono px-1"
                   >
                     _
                   </motion.div>

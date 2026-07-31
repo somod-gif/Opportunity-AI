@@ -11,7 +11,7 @@ export function AgentLog({ log, isRunning }: AgentLogProps) {
     <div className="rounded-lg border bg-muted/30 p-4">
       <div className="mb-3 flex items-center gap-2">
         <Bot className="h-4 w-4 text-primary" />
-        <span className="text-xs font-semibold text-foreground">Gemma Decision Log</span>
+        <span className="text-sm font-semibold text-foreground">Gemma Decision Log</span>
       </div>
       <div className="space-y-1.5">
         {log.map((step, i) => (

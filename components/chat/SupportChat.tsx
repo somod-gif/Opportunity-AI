@@ -80,7 +80,7 @@ export function SupportChat() {
               <div className="flex justify-start">
                 <div className="bg-white/5 rounded-lg px-3 py-2 flex items-center gap-2">
                   <Loader2 className="h-3 w-3 animate-spin text-[#C9A227]" />
-                  <span className="text-xs text-white/40">Thinking...</span>
+                  <span className="text-sm text-white/40">Thinking...</span>
                 </div>
               </div>
             )}

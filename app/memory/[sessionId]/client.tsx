@@ -79,11 +79,11 @@ export function MemoryClient({ sessionId, memories: initialMemories, missionGoal
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[10px] font-medium font-mono ${color}`}>
+                      <span className={`inline-flex items-center rounded-sm px-2 py-0.5 text-[12px] font-medium font-mono ${color}`}>
                         {mem.memoryType}
                       </span>
                       <span className="text-sm text-[#F3EEE1]/60 truncate">{mem.key}</span>
-                      <span className="ml-auto flex items-center gap-1 text-xs text-[#F3EEE1]/40 font-mono">
+                      <span className="ml-auto flex items-center gap-1 text-sm text-[#F3EEE1]/40 font-mono">
                         <Hash className="h-3 w-3" strokeWidth={1.75} />
                         {Math.round(mem.importance * 100)}%
                       </span>
@@ -97,7 +97,7 @@ export function MemoryClient({ sessionId, memories: initialMemories, missionGoal
                       </div>
                     </div>
                     <p className="text-sm text-[#F3EEE1]/70 leading-relaxed">{mem.value}</p>
-                    <div className="mt-2 flex items-center gap-3 text-xs text-[#F3EEE1]/30">
+                    <div className="mt-2 flex items-center gap-3 text-sm text-[#F3EEE1]/30">
                       {mem.createdAt && (
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" strokeWidth={1.75} />
@@ -137,7 +137,7 @@ export function MemoryClient({ sessionId, memories: initialMemories, missionGoal
               <input value={form.key} onChange={e => setForm({ ...form, key: e.target.value })} placeholder="Key" className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-sm text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors" />
               <textarea value={form.value} onChange={e => setForm({ ...form, value: e.target.value })} placeholder="Value" rows={4} className="w-full border-0 border-b-[1.5px] border-[#F3EEE1]/15 bg-transparent py-2 text-sm text-[#F3EEE1] placeholder:text-[#F3EEE1]/20 focus:border-[#C9A227] focus:outline-none transition-colors resize-none" />
               <div>
-                <label className="text-xs text-[#F3EEE1]/40 mb-1 block font-mono">Importance: {Math.round(form.importance * 100)}%</label>
+                <label className="text-sm text-[#F3EEE1]/40 mb-1 block font-mono">Importance: {Math.round(form.importance * 100)}%</label>
                 <input type="range" min="0" max="1" step="0.05" value={form.importance} onChange={e => setForm({ ...form, importance: parseFloat(e.target.value) })} className="w-full accent-[#C9A227]" />
               </div>
               <button onClick={handleUpdate}

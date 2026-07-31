@@ -122,7 +122,7 @@ export function SettingsClient({ sessionId, missionGoal, status }: Props) {
                   <span className="flex items-center gap-1.5 font-mono">
                     {row.ok ? <CheckCircle2 className="h-3.5 w-3.5 text-[#3FA78E]" strokeWidth={2} /> : <XCircle className="h-3.5 w-3.5 text-[#C2703D]" strokeWidth={2} />}
                     {row.ok ? "Online" : "Not configured"}
-                    {row.extra && <span className="text-[#F3EEE1]/25 text-[11px]">{row.extra}</span>}
+                    {row.extra && <span className="text-[#F3EEE1]/25 text-[13px]">{row.extra}</span>}
                   </span>
                 </div>
               ))}
@@ -135,7 +135,7 @@ export function SettingsClient({ sessionId, missionGoal, status }: Props) {
             <Bell className="h-4 w-4 text-[#C9A227]" strokeWidth={1.75} />
             <h2 className="text-sm font-medium" style={{ fontFamily: "var(--font-display)" }}>Deadline Reminders</h2>
           </div>
-          <p className="text-[12px] text-[#F3EEE1]/35 mb-4">
+          <p className="text-[14px] text-[#F3EEE1]/35 mb-4">
             Email reminders are sent by the agent via Resend. Choose when to be alerted before a deadline.
           </p>
 
@@ -151,13 +151,13 @@ export function SettingsClient({ sessionId, missionGoal, status }: Props) {
             <button
               onClick={sendTest}
               disabled={!email.trim()}
-              className="rounded-sm border border-[#C9A227]/30 px-3.5 py-2 text-[12px] font-medium text-[#C9A227] hover:bg-[#C9A227]/10 disabled:opacity-30 transition-colors"
+              className="rounded-sm border border-[#C9A227]/30 px-3.5 py-2 text-[14px] font-medium text-[#C9A227] hover:bg-[#C9A227]/10 disabled:opacity-30 transition-colors"
             >
               Send test
             </button>
           </div>
           {testSent !== null && (
-            <p className={`text-[12px] mb-3 ${testSent ? "text-[#3FA78E]" : "text-[#C2703D]"}`}>
+            <p className={`text-[14px] mb-3 ${testSent ? "text-[#3FA78E]" : "text-[#C2703D]"}`}>
               {testSent ? "Test reminder sent to your inbox." : "Email failed — check RESEND_API_KEY."}
             </p>
           )}
@@ -172,7 +172,7 @@ export function SettingsClient({ sessionId, missionGoal, status }: Props) {
               <button
                 key={t.key}
                 onClick={() => setTimings((prev) => ({ ...prev, [t.key]: !prev[t.key as keyof typeof prev] }))}
-                className={`rounded-sm border px-3 py-2 text-[12px] transition-colors ${
+                className={`rounded-sm border px-3 py-2 text-[14px] transition-colors ${
                   timings[t.key as keyof typeof timings]
                     ? "border-[#3FA78E]/40 bg-[#3FA78E]/10 text-[#3FA78E]"
                     : "border-[#F3EEE1]/10 text-[#F3EEE1]/40 hover:text-[#F3EEE1]/70"
@@ -186,14 +186,14 @@ export function SettingsClient({ sessionId, missionGoal, status }: Props) {
           <div className="flex items-center gap-3">
             <button
               onClick={save}
-              className="rounded-sm bg-[#C9A227] px-4 py-2 text-[12px] font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all"
+              className="rounded-sm bg-[#C9A227] px-4 py-2 text-[14px] font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all"
             >
               Save preferences
             </button>
-            {saved && <span className="text-[12px] text-[#3FA78E] flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Saved</span>}
+            {saved && <span className="text-[14px] text-[#3FA78E] flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Saved</span>}
             <button
               onClick={clear}
-              className="rounded-sm border border-[#C2703D]/30 px-4 py-2 text-[12px] text-[#C2703D] hover:bg-[#C2703D]/10 transition-colors"
+              className="rounded-sm border border-[#C2703D]/30 px-4 py-2 text-[14px] text-[#C2703D] hover:bg-[#C2703D]/10 transition-colors"
             >
               Reset
             </button>
@@ -205,16 +205,16 @@ export function SettingsClient({ sessionId, missionGoal, status }: Props) {
             <Shield className="h-4 w-4 text-[#C2703D]" strokeWidth={1.75} />
             <h2 className="text-sm font-medium text-[#C2703D]" style={{ fontFamily: "var(--font-display)" }}>Danger Zone</h2>
           </div>
-          <p className="text-[12px] text-[#F3EEE1]/35 mb-3">Clear locally stored preferences on this device. Mission data in the database is not affected.</p>
+          <p className="text-[14px] text-[#F3EEE1]/35 mb-3">Clear locally stored preferences on this device. Mission data in the database is not affected.</p>
           <button
             onClick={clear}
-            className="rounded-sm border border-[#C2703D]/40 px-4 py-2 text-[12px] font-medium text-[#C2703D] hover:bg-[#C2703D]/10 transition-colors"
+            className="rounded-sm border border-[#C2703D]/40 px-4 py-2 text-[14px] font-medium text-[#C2703D] hover:bg-[#C2703D]/10 transition-colors"
           >
             <Trash2 className="h-3.5 w-3.5 inline mr-1.5" /> Clear local data
           </button>
         </div>
 
-        <div className="mt-6 flex items-center gap-2 text-[11px] font-mono text-[#F3EEE1]/20">
+        <div className="mt-6 flex items-center gap-2 text-[13px] font-mono text-[#F3EEE1]/20">
           <Database className="h-3.5 w-3.5" /> Session: {sessionId.slice(0, 8)}…
         </div>
       </div>

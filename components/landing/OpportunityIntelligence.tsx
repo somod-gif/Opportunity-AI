@@ -72,7 +72,7 @@ export function OpportunityIntelligence() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-stone-500/20 bg-stone-500/10 px-4 py-1.5 mb-4">
             <Brain className="h-3.5 w-3.5 text-stone-400" />
-            <span className="text-xs font-medium text-stone-400">Opportunity Intelligence</span>
+            <span className="text-sm font-medium text-stone-400">Opportunity Intelligence</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
             Intelligent <span className="text-gradient">Matching</span>
@@ -103,7 +103,7 @@ export function OpportunityIntelligence() {
                     <h3 className="text-sm font-semibold text-foreground/90 leading-snug line-clamp-2">
                       {opp.title}
                     </h3>
-                    <p className="text-xs text-muted-foreground/50 mt-1">{opp.provider}</p>
+                    <p className="text-sm text-muted-foreground/50 mt-1">{opp.provider}</p>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
                     {opp.verified && (
@@ -141,18 +141,18 @@ export function OpportunityIntelligence() {
 
                 {/* Details */}
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[10px]">
+                  <div className="flex items-center justify-between text-[12px]">
                     <span className="text-muted-foreground/40">Competition</span>
                     <span className="font-medium text-stone-400/80">{opp.competitionLevel}</span>
                   </div>
-                  <div className="flex items-center justify-between text-[10px]">
+                  <div className="flex items-center justify-between text-[12px]">
                     <span className="text-muted-foreground/40">
                       <Clock className="h-2.5 w-2.5 inline mr-1" />
                       Deadline
                     </span>
                     <span className="font-medium text-foreground/60">{opp.deadline}</span>
                   </div>
-                  <div className="flex items-center justify-between text-[10px]">
+                  <div className="flex items-center justify-between text-[12px]">
                     <span className="text-muted-foreground/40">
                       <DollarSign className="h-2.5 w-2.5 inline mr-1" />
                       Funding
@@ -165,7 +165,7 @@ export function OpportunityIntelligence() {
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     <FileText className="h-3 w-3 text-muted-foreground/40" />
-                    <span className="text-[10px] font-medium text-muted-foreground/50">Required Documents</span>
+                    <span className="text-[12px] font-medium text-muted-foreground/50">Required Documents</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {opp.documents.map((doc) => (
@@ -187,12 +187,12 @@ export function OpportunityIntelligence() {
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="h-3 w-3 text-ash-400 mt-0.5 shrink-0" />
-                    <p className="text-[10px] text-ash-400/70">{opp.whyQualify}</p>
+                    <p className="text-[12px] text-ash-400/70">{opp.whyQualify}</p>
                   </div>
                   {opp.missing.length > 0 && (
                     <div className="flex items-start gap-2">
                       <AlertCircle className="h-3 w-3 text-stone-400 mt-0.5 shrink-0" />
-                      <p className="text-[10px] text-stone-400/70">{opp.missing.join(", ")}</p>
+                      <p className="text-[12px] text-stone-400/70">{opp.missing.join(", ")}</p>
                     </div>
                   )}
                   <div className="mt-1.5 pt-1.5 border-t border-primary/10">
@@ -215,7 +215,7 @@ export function OpportunityIntelligence() {
           viewport={{ once: true }}
           className="mt-8 text-center"
         >
-          <p className="text-xs text-muted-foreground/40">
+          <p className="text-sm text-muted-foreground/40">
             Matches based on skills, education, experience, and preferences · Updated in real time
           </p>
         </motion.div>

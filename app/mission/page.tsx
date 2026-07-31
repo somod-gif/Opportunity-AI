@@ -57,7 +57,7 @@ const EXAMPLES = [
     experienceLevel: "entry",
   },
   {
-    goal: "I want a fully-funded Masters in Data Science anywhere in the world",
+    goal: "test mission using curl I want a fully-funded Masters in Data Science anywhere in the world",
     education: "BSc Mathematics",
     skills: ["Statistics", "R", "Python"],
     country: "Ghana",
@@ -100,7 +100,7 @@ function Stamp({
       initial={{ scale: 0.85, rotate: -8, opacity: 0 }}
       animate={{ scale: 1, rotate: -3, opacity: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 16 }}
-      className={`inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-dashed px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] ${c}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border-[1.5px] border-dashed px-2.5 py-1 font-mono text-[12px] font-semibold uppercase tracking-[0.18em] ${c}`}
     >
       {pulse && (
         <span className="relative flex h-1.5 w-1.5">
@@ -246,12 +246,12 @@ export default function MissionPage() {
               </div>
               <div className="leading-none">
                 <span
-                  className="block text-xs sm:text-sm font-medium tracking-tight text-[#F3EEE1]"
+                  className="block text-sm sm:text-sm font-medium tracking-tight text-[#F3EEE1]"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
                   Opportunity AI
                 </span>
-                <span className="mt-0.5 hidden sm:block font-mono text-xs uppercase tracking-[0.2em] text-[#F3EEE1]/35">
+                <span className="mt-0.5 hidden sm:block font-mono text-sm uppercase tracking-[0.2em] text-[#F3EEE1]/35">
                   Mission intake
                 </span>
               </div>
@@ -544,7 +544,7 @@ export default function MissionPage() {
                 >
                   <ArrowRight className="h-4 w-4 -rotate-180" /> Back to home
                 </a>
-                <span className="font-mono text-xs text-[#F3EEE1]/25">
+                <span className="font-mono text-sm text-[#F3EEE1]/25">
                   powered by Gemma 4
                 </span>
               </div>
@@ -578,7 +578,7 @@ export default function MissionPage() {
                   className="group text-left rounded-sm border border-[#F3EEE1]/[0.06] bg-[#F3EEE1]/[0.02] px-5 py-3 text-sm text-[#F3EEE1]/35 hover:border-[#C9A227]/30 hover:bg-[#C9A227]/[0.04] hover:text-[#F3EEE1]/60 transition-all"
                 >
                   <span className="inline-flex items-center gap-2">
-                    <span className="font-mono text-xs text-[#F3EEE1]/20">
+                    <span className="font-mono text-sm text-[#F3EEE1]/20">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     {ex.goal.length > 80 ? ex.goal.slice(0, 80) + "..." : ex.goal}

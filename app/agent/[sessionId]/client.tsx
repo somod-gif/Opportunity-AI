@@ -225,11 +225,11 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-[#F3EEE1] font-mono">AGENT_CTRL</span>
+                  <span className="text-sm font-semibold text-[#F3EEE1] font-mono">AGENT_CTRL</span>
                   {!completed && !error && (
                     <span className="inline-flex items-center gap-1 rounded-sm border border-[#3FA78E]/30 bg-[#3FA78E]/10 px-1.5 py-0.5">
                       <span className="h-1.5 w-1.5 rounded-full bg-[#3FA78E] animate-pulse" />
-                      <span className="text-[11px] font-mono text-[#3FA78E]">LIVE</span>
+                      <span className="text-[13px] font-mono text-[#3FA78E]">LIVE</span>
                     </span>
                   )}
                 </div>
@@ -237,7 +237,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-[12px] font-mono text-[#F3EEE1]/40 shrink-0">
+            <div className="flex items-center gap-2 text-[14px] font-mono text-[#F3EEE1]/40 shrink-0">
               <span className="hidden sm:flex items-center gap-1"><Cpu className="h-3 w-3" strokeWidth={1.75} /> ITR {currentIteration}/6</span>
               <span className="flex items-center gap-1"><Clock className="h-3 w-3" strokeWidth={1.75} /> {formatTime(elapsed * 1000)}</span>
               <span className="hidden sm:flex items-center gap-1"><Activity className="h-3 w-3" strokeWidth={1.75} /> T{completedCount + failedCount}</span>
@@ -245,12 +245,12 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                 <>
                   <motion.button initial={{ scale: 0.9 }} animate={{ scale: 1 }}
                     onClick={() => router.push(`/dashboard/${sessionId}`)}
-                    className="flex items-center gap-1 rounded-sm bg-[#C9A227]/20 px-2 py-1 text-[11px] font-medium text-[#C9A227] hover:bg-[#C9A227]/30 transition-all">
+                    className="flex items-center gap-1 rounded-sm bg-[#C9A227]/20 px-2 py-1 text-[13px] font-medium text-[#C9A227] hover:bg-[#C9A227]/30 transition-all">
                     DASH <ArrowRight className="h-2.5 w-2.5" strokeWidth={2} />
                   </motion.button>
                   <motion.button initial={{ scale: 0.9 }} animate={{ scale: 1 }}
                     onClick={() => router.push("/mission")}
-                    className="flex items-center gap-1 rounded-sm border border-[#C9A227]/20 px-2 py-1 text-[11px] font-medium text-[#C9A227]/60 hover:bg-[#C9A227]/10 transition-all">
+                    className="flex items-center gap-1 rounded-sm border border-[#C9A227]/20 px-2 py-1 text-[13px] font-medium text-[#C9A227]/60 hover:bg-[#C9A227]/10 transition-all">
                     + NEW
                   </motion.button>
                 </>
@@ -282,7 +282,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                           {isDone ? <CheckCircle2 className="h-3 w-3 text-[#3FA78E]" strokeWidth={2} /> : <Icon className={`h-3 w-3 ${isActive ? "text-[#C9A227] animate-pulse" : "text-[#F3EEE1]/40"}`} strokeWidth={1.75} />}
                         </div>
                         <div className="hidden sm:block">
-                          <p className={`text-[12px] font-semibold leading-tight ${isActive ? "text-[#F3EEE1]" : isDone ? "text-[#3FA78E]/70" : "text-[#F3EEE1]/40"}`}>
+                          <p className={`text-[14px] font-semibold leading-tight ${isActive ? "text-[#F3EEE1]" : isDone ? "text-[#3FA78E]/70" : "text-[#F3EEE1]/40"}`}>
                             {p.name.split(" ")[0]}
                           </p>
                         </div>
@@ -307,7 +307,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                     <span className="text-sm font-semibold text-[#F3EEE1]">{activeSubAgent?.name || currentPersona.name}</span>
                     {!completed && !error && (
                       <motion.span animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
-                        className="text-[11px] font-mono text-[#C9A227] px-1.5 py-0.5 rounded-sm bg-[#C9A227]/10 border border-[#C9A227]/20">
+                        className="text-[13px] font-mono text-[#C9A227] px-1.5 py-0.5 rounded-sm bg-[#C9A227]/10 border border-[#C9A227]/20">
                         {currentPhaseVal.replace("agent:", "").replace("complete:", "").toUpperCase()}
                       </motion.span>
                     )}
@@ -318,7 +318,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                   <div className="text-lg font-bold text-[#C9A227]" style={{ fontFamily: "var(--font-mono)" }}>
                     {completed ? 100 : subAgents.find(a => a.status === "complete") ? Math.min(95, subAgents.filter(a => a.status === "complete").length * 8 + 10) : 10}%
                   </div>
-                  <p className="text-[11px] text-[#F3EEE1]/40 font-mono">COMPLETE</p>
+                  <p className="text-[13px] text-[#F3EEE1]/40 font-mono">COMPLETE</p>
                 </div>
               </div>
               <div className="mt-2.5 h-1 w-full rounded-full bg-[#F3EEE1]/[0.06] overflow-hidden">
@@ -334,7 +334,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
               <div className="flex items-center justify-between border-b border-[#F3EEE1]/10 px-3 py-2 bg-[#12161D]/50">
                 <div className="flex items-center gap-2">
                   <Terminal className="h-3 w-3 text-[#3FA78E]" strokeWidth={1.75} />
-                  <span className="text-[12px] font-semibold text-[#3FA78E] font-mono">agent_terminal</span>
+                  <span className="text-[14px] font-semibold text-[#3FA78E] font-mono">agent_terminal</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-[#3FA78E]/50" />
@@ -399,7 +399,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                     <span className="text-sm font-semibold text-[#F3EEE1] tracking-wide" style={{ fontFamily: "var(--font-display)" }}>
                       Discovered Opportunities
                     </span>
-                    <span className="ml-auto text-xs font-mono text-[#C9A227] bg-[#C9A227]/10 px-2 py-0.5 rounded-sm border border-[#C9A227]/20">
+                    <span className="ml-auto text-sm font-mono text-[#C9A227] bg-[#C9A227]/10 px-2 py-0.5 rounded-sm border border-[#C9A227]/20">
                       {allOpps.length} found
                     </span>
                   </div>
@@ -426,17 +426,17 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                                 {item.title || "Opportunity"}
                               </p>
                               <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                                <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-[#3FA78E] bg-[#3FA78E]/10 px-2 py-0.5 rounded-sm uppercase tracking-wider">
+                                <span className="inline-flex items-center gap-1 text-[13px] font-mono font-semibold text-[#3FA78E] bg-[#3FA78E]/10 px-2 py-0.5 rounded-sm uppercase tracking-wider">
                                   {item.type || (isWebResult ? "web" : "opportunity")}
                                 </span>
                                 {item.provider && (
-                                  <span className="text-[12px] text-[#F3EEE1]/50 font-medium">{item.provider}</span>
+                                  <span className="text-[14px] text-[#F3EEE1]/50 font-medium">{item.provider}</span>
                                 )}
                                 {item.location && (
-                                  <span className="text-[12px] text-[#F3EEE1]/35">· {item.location}</span>
+                                  <span className="text-[14px] text-[#F3EEE1]/35">· {item.location}</span>
                                 )}
                                 {item.isRemote && (
-                                  <span className="text-[11px] text-[#3FA78E]/60 font-mono">· Remote</span>
+                                  <span className="text-[13px] text-[#3FA78E]/60 font-mono">· Remote</span>
                                 )}
                               </div>
                             </div>
@@ -453,8 +453,8 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                           {item.eligibilityCriteria && (
                             <div className="px-4 pb-1.5">
                               <div className="rounded-sm bg-[#F3EEE1]/[0.03] border border-[#F3EEE1]/[0.05] px-3 py-2">
-                                <p className="text-[10px] font-mono font-semibold text-[#F3EEE1]/40 uppercase tracking-wider mb-1">Eligibility Criteria</p>
-                                <p className="text-[12px] text-[#F3EEE1]/55 leading-relaxed line-clamp-3">{item.eligibilityCriteria}</p>
+                                <p className="text-[12px] font-mono font-semibold text-[#F3EEE1]/40 uppercase tracking-wider mb-1">Eligibility Criteria</p>
+                                <p className="text-[14px] text-[#F3EEE1]/55 leading-relaxed line-clamp-3">{item.eligibilityCriteria}</p>
                               </div>
                             </div>
                           )}
@@ -463,8 +463,8 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                           {item.advice && (
                             <div className="px-4 pb-1.5">
                               <div className="rounded-sm bg-[#C9A227]/[0.04] border border-[#C9A227]/15 px-3 py-2">
-                                <p className="text-[10px] font-mono font-semibold text-[#C9A227]/60 uppercase tracking-wider mb-1">AI Recommendation</p>
-                                <p className="text-[12px] text-[#C9A227]/70 leading-relaxed line-clamp-3">{item.advice}</p>
+                                <p className="text-[12px] font-mono font-semibold text-[#C9A227]/60 uppercase tracking-wider mb-1">AI Recommendation</p>
+                                <p className="text-[14px] text-[#C9A227]/70 leading-relaxed line-clamp-3">{item.advice}</p>
                               </div>
                             </div>
                           )}
@@ -473,7 +473,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                           {item.tags && Array.isArray(item.tags) && item.tags.length > 0 && (
                             <div className="px-4 pb-2 flex flex-wrap gap-1.5">
                               {item.tags.slice(0, 6).map((tag: string, t: number) => (
-                                <span key={t} className="text-[10px] font-mono text-[#C9A227]/50 bg-[#C9A227]/[0.06] px-2 py-0.5 rounded-sm border border-[#C9A227]/10">
+                                <span key={t} className="text-[12px] font-mono text-[#C9A227]/50 bg-[#C9A227]/[0.06] px-2 py-0.5 rounded-sm border border-[#C9A227]/10">
                                   {tag}
                                 </span>
                               ))}
@@ -484,19 +484,19 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                           <div className="border-t border-[#F3EEE1]/[0.04] px-4 py-2.5 flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2.5 min-w-0">
                               {daysLeft !== null && (
-                                <span className={`text-[12px] font-mono font-semibold ${
+                                <span className={`text-[14px] font-mono font-semibold ${
                                   daysLeft <= 30 ? "text-[#C2703D]" : "text-[#F3EEE1]/50"
                                 }`}>
                                   {daysLeft <= 0 ? "Due today" : `${daysLeft}d left`}
                                 </span>
                               )}
                               {item.deadline && (
-                                <span className="text-[11px] font-mono text-[#F3EEE1]/35">
+                                <span className="text-[13px] font-mono text-[#F3EEE1]/35">
                                   {new Date(item.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                                 </span>
                               )}
                               {isWebResult && (
-                                <span className="text-[10px] font-mono text-[#3FA78E]/50">· web</span>
+                                <span className="text-[12px] font-mono text-[#3FA78E]/50">· web</span>
                               )}
                             </div>
                             {hasUrl ? (
@@ -504,13 +504,13 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                                 href={item.applicationUrl || item.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 rounded-sm bg-[#C9A227] px-3 py-1.5 text-[12px] font-semibold text-[#0B0E13] hover:bg-[#C9A227]/90 transition-all shrink-0"
+                                className="inline-flex items-center gap-1.5 rounded-sm bg-[#C9A227] px-3 py-1.5 text-[14px] font-semibold text-[#0B0E13] hover:bg-[#C9A227]/90 transition-all shrink-0"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 Apply <ExternalLink className="h-3 w-3" strokeWidth={2.5} />
                               </a>
                             ) : (
-                              <span className="text-[11px] text-[#F3EEE1]/30 font-mono italic">Apply info pending</span>
+                              <span className="text-[13px] text-[#F3EEE1]/30 font-mono italic">Apply info pending</span>
                             )}
                           </div>
                         </motion.div>
@@ -518,7 +518,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                     })}
                   </div>
                   {allOpps.length > 8 && (
-                    <p className="text-center text-xs text-[#F3EEE1]/30 mt-3 font-mono">
+                    <p className="text-center text-sm text-[#F3EEE1]/30 mt-3 font-mono">
                       +{allOpps.length - 8} more opportunities — visit{" "}
                       <button onClick={() => router.push(`/workspace/${sessionId}`)} className="text-[#C9A227]/60 hover:text-[#C9A227] underline decoration-dotted underline-offset-2">
                         workspace
@@ -537,8 +537,8 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
             <div className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D]/60 backdrop-blur-xl p-2.5">
               <div className="flex items-center gap-1.5 mb-2 px-1">
                 <Radio className="h-3 w-3 text-[#C9A227]" strokeWidth={1.75} />
-                <span className="text-[11px] font-semibold text-[#F3EEE1]/50 uppercase tracking-wider font-mono">Agent Roster</span>
-                <span className="ml-auto text-[11px] font-mono text-[#F3EEE1]/40">
+                <span className="text-[13px] font-semibold text-[#F3EEE1]/50 uppercase tracking-wider font-mono">Agent Roster</span>
+                <span className="ml-auto text-[13px] font-mono text-[#F3EEE1]/40">
                   {subAgents.filter(a => a.status === "complete").length}/{toolCalls.length > 0 ? toolCalls.length + 1 : 9}
                 </span>
               </div>
@@ -558,7 +558,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className={`text-[12px] font-medium ${isActive ? "text-[#F3EEE1]" : isDone ? "text-[#3FA78E]/70" : "text-[#F3EEE1]/40"}`}>
+                          <span className={`text-[14px] font-medium ${isActive ? "text-[#F3EEE1]" : isDone ? "text-[#3FA78E]/70" : "text-[#F3EEE1]/40"}`}>
                             {p.name.split(" ")[0]}
                           </span>
                           {isActive && <Loader2 className="h-2.5 w-2.5 text-[#C9A227] animate-spin" />}
@@ -577,7 +577,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                 className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D]/60 backdrop-blur-xl p-2.5">
                 <div className="flex items-center gap-1.5 mb-2 px-1">
                   <BarChart3 className="h-3 w-3 text-[#3FA78E]" strokeWidth={1.75} />
-                  <span className="text-[11px] font-semibold text-[#F3EEE1]/50 uppercase tracking-wider font-mono">Telemetry</span>
+                  <span className="text-[13px] font-semibold text-[#F3EEE1]/50 uppercase tracking-wider font-mono">Telemetry</span>
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
                   {[
@@ -588,7 +588,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                   ].map(s => (
                     <div key={s.label} className="rounded-sm bg-[#0B0E13]/50 border border-[#F3EEE1]/[0.06] px-2.5 py-2">
                       <p className={`text-sm font-bold font-mono ${s.color}`}>{s.value}</p>
-                      <p className="text-[11px] text-[#F3EEE1]/40 font-mono mt-0.5">{s.label}</p>
+                      <p className="text-[13px] text-[#F3EEE1]/40 font-mono mt-0.5">{s.label}</p>
                     </div>
                   ))}
                 </div>
@@ -599,11 +599,11 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
             <div className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D]/60 backdrop-blur-xl p-2.5">
               <div className="flex items-center gap-1.5 mb-2 px-1">
                 <Database className="h-3 w-3 text-[#3FA78E]" strokeWidth={1.75} />
-                <span className="text-[11px] font-semibold text-[#F3EEE1]/50 uppercase tracking-wider font-mono">Memory Buffer</span>
+                <span className="text-[13px] font-semibold text-[#F3EEE1]/50 uppercase tracking-wider font-mono">Memory Buffer</span>
               </div>
               <div className="space-y-1 max-h-[120px] overflow-y-auto">
                 {memories.length === 0 && (
-                  <p className="text-[12px] text-[#F3EEE1]/40 px-1">
+                  <p className="text-[14px] text-[#F3EEE1]/40 px-1">
                     {completed ? "No memories stored" : "Awaiting memory writes..."}
                   </p>
                 )}
@@ -611,7 +611,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                   m.memories.slice(0, 1).map((mem, j) => (
                     <div key={`${i}-${j}`} className="flex items-center gap-2 rounded-sm bg-[#0B0E13]/50 border border-[#F3EEE1]/[0.06] px-2 py-1.5">
                       <Database className="h-2.5 w-2.5 text-[#3FA78E]/50 shrink-0" strokeWidth={1.5} />
-                      <span className="text-[11px] text-[#F3EEE1]/50 truncate flex-1 font-mono">{mem.key}</span>
+                      <span className="text-[13px] text-[#F3EEE1]/50 truncate flex-1 font-mono">{mem.key}</span>
                       <span className="text-[13px] text-[#F3EEE1]/40 font-mono">{Math.round(mem.importance * 100)}%</span>
                     </div>
                   ))
@@ -626,7 +626,7 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                   className="rounded-sm border border-[#3FA78E]/20 bg-[#3FA78E]/5 p-3">
                   <div className="flex items-center gap-1.5 mb-2">
                     <CheckCircle2 className="h-4 w-4 text-[#3FA78E]" strokeWidth={2} />
-                    <span className="text-[12px] font-semibold text-[#3FA78E] uppercase tracking-wider font-mono">Mission Complete</span>
+                    <span className="text-[14px] font-semibold text-[#3FA78E] uppercase tracking-wider font-mono">Mission Complete</span>
                   </div>
                   <div className="grid grid-cols-3 gap-1.5 mb-2">
                     <div className="text-center bg-[#0B0E13]/50 rounded-sm p-1.5">
@@ -644,11 +644,11 @@ export function ClientAgentPage({ sessionId, goal }: { sessionId: string; goal: 
                   </div>
                   <div className="flex gap-1.5">
                     <button onClick={() => router.push(`/dashboard/${sessionId}`)}
-                      className="flex-1 rounded-sm bg-[#C9A227] px-2.5 py-1.5 text-[12px] font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all">Dashboard</button>
+                      className="flex-1 rounded-sm bg-[#C9A227] px-2.5 py-1.5 text-[14px] font-semibold text-[#0B0E13] hover:-translate-y-0.5 transition-all">Dashboard</button>
                     <button onClick={() => router.push(`/memory/${sessionId}`)}
-                      className="flex-1 rounded-sm border border-[#F3EEE1]/10 px-2.5 py-1.5 text-[12px] font-medium text-[#F3EEE1]/60 hover:bg-[#F3EEE1]/[0.03] transition-all">Memory</button>
+                      className="flex-1 rounded-sm border border-[#F3EEE1]/10 px-2.5 py-1.5 text-[14px] font-medium text-[#F3EEE1]/60 hover:bg-[#F3EEE1]/[0.03] transition-all">Memory</button>
                     <button onClick={() => router.push("/mission")}
-                      className="flex-1 rounded-sm border border-[#C9A227]/30 px-2.5 py-1.5 text-[12px] font-medium text-[#C9A227]/70 hover:bg-[#C9A227]/10 transition-all">+ New Mission</button>
+                      className="flex-1 rounded-sm border border-[#C9A227]/30 px-2.5 py-1.5 text-[14px] font-medium text-[#C9A227]/70 hover:bg-[#C9A227]/10 transition-all">+ New Mission</button>
                   </div>
                 </motion.div>
               )}

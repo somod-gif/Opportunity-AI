@@ -17,7 +17,7 @@ interface Mission {
 
 function Stamp({ label, tone = "brass" }: { label: string; tone?: "brass" | "signal" | "muted" }) {
   const c = tone === "signal" ? "border-[#3FA78E] text-[#3FA78E]" : tone === "muted" ? "border-[#F3EEE1]/20 text-[#F3EEE1]/30" : "border-[#C9A227] text-[#C9A227]";
-  return <span className={`inline-block border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider ${c}`}>{label}</span>;
+  return <span className={`inline-block border px-2 py-0.5 font-mono text-[12px] uppercase tracking-wider ${c}`}>{label}</span>;
 }
 
 export function HistoryClient() {
@@ -67,7 +67,7 @@ export function HistoryClient() {
             <span className="font-medium tracking-tight text-[#F3EEE1]" style={{ fontFamily: "var(--font-display)" }}>History</span>
           </a>
           <div className="flex items-center gap-3">
-            <button onClick={fetchMissions} className="flex items-center gap-1.5 rounded-sm border border-[#F3EEE1]/10 px-3 py-1.5 font-mono text-[11px] text-[#F3EEE1]/50 hover:text-[#F3EEE1] transition-colors">
+            <button onClick={fetchMissions} className="flex items-center gap-1.5 rounded-sm border border-[#F3EEE1]/10 px-3 py-1.5 font-mono text-[13px] text-[#F3EEE1]/50 hover:text-[#F3EEE1] transition-colors">
               <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} /> Refresh
             </button>
             <a href="/mission" className="inline-flex items-center gap-2 rounded-sm bg-[#C9A227] px-4 py-2 text-[13px] font-semibold text-[#0B0E13] transition-transform hover:-translate-y-0.5">
@@ -115,7 +115,7 @@ export function HistoryClient() {
                     <span className="text-sm font-medium text-[#F3EEE1] truncate">{m.goal}</span>
                     <Stamp label={m.status} tone={m.status === "complete" ? "signal" : m.status === "running" ? "brass" : "muted"} />
                   </div>
-                  <div className="flex items-center gap-3 font-mono text-[11px] text-[#F3EEE1]/30">
+                  <div className="flex items-center gap-3 font-mono text-[13px] text-[#F3EEE1]/30">
                     <span>{new Date(m.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                     <span>·</span>
                     <span>{m.currentIteration} iteration{m.currentIteration !== 1 ? "s" : ""}</span>

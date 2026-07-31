@@ -22,7 +22,7 @@ export function FinalCTA() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5">
             <Bot className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-medium text-primary">Ready?</span>
+            <span className="text-sm font-medium text-primary">Ready?</span>
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.15]">
@@ -53,7 +53,7 @@ export function FinalCTA() {
             </Link>
           </div>
 
-          <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground/40">
+          <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground/40">
             <span className="flex items-center gap-1.5">
               <Shield className="h-3.5 w-3.5 text-ash-400/60" /> No signup required
             </span>

@@ -56,7 +56,7 @@ export function AgentThinking() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-iron-500/20 bg-iron-500/10 px-4 py-1.5 mb-4">
             <Brain className="h-3.5 w-3.5 text-iron-400" />
-            <span className="text-xs font-medium text-iron-400">Agent Reasoning</span>
+            <span className="text-sm font-medium text-iron-400">Agent Reasoning</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
             How the Agent <span className="text-gradient">Thinks</span>
@@ -117,7 +117,7 @@ export function AgentThinking() {
                         </span>
                       )}
                     </div>
-                    <p className={`text-xs mt-0.5 ${isActive ? "text-primary/60" : isPast ? "text-ash-400/40" : "text-muted-foreground/30"}`}>
+                    <p className={`text-sm mt-0.5 ${isActive ? "text-primary/60" : isPast ? "text-ash-400/40" : "text-muted-foreground/30"}`}>
                       {step.description}
                     </p>
                   </div>
@@ -147,11 +147,11 @@ export function AgentThinking() {
             <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl overflow-hidden shadow-2xl">
               <div className="flex items-center gap-2 border-b border-white/5 px-5 py-3">
                 <Brain className="h-4 w-4 text-iron-400" />
-                <span className="text-xs font-semibold">Current Reasoning</span>
+                <span className="text-sm font-semibold">Current Reasoning</span>
                 <motion.span
                   animate={{ opacity: [1, 0.3, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
-                  className="text-[10px] font-mono text-iron-400/60 ml-auto"
+                  className="text-[12px] font-mono text-iron-400/60 ml-auto"
                 >
                   THINKING
                 </motion.span>
@@ -162,9 +162,9 @@ export function AgentThinking() {
                 <div className="rounded-xl bg-white/[0.03] border border-white/5 p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <Target className="h-3.5 w-3.5 text-stone-400" />
-                    <span className="text-[10px] font-semibold text-stone-400/70">PLAN</span>
+                    <span className="text-[12px] font-semibold text-stone-400/70">PLAN</span>
                   </div>
-                  <p className="text-xs text-muted-foreground/60 leading-relaxed">
+                  <p className="text-sm text-muted-foreground/60 leading-relaxed">
                     {activeStep < 3
                       ? "Initializing mission parameters. Defining search scope and success criteria..."
                       : activeStep < 6
@@ -175,7 +175,7 @@ export function AgentThinking() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-4 text-[10px] text-muted-foreground/30 font-mono">
+                <div className="flex items-center gap-4 text-[12px] text-muted-foreground/30 font-mono">
                   <span>Step {activeStep + 1}/{steps.length}</span>
                   <span className="h-3 w-px bg-white/10" />
                   <span>Reasoning tokens: {tokens}</span>

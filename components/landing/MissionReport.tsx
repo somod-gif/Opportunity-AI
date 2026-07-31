@@ -70,7 +70,7 @@ export function MissionReport() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-ash-500/20 bg-ash-500/10 px-4 py-1.5 mb-4">
             <BarChart3 className="h-3.5 w-3.5 text-ash-400" />
-            <span className="text-xs font-medium text-ash-400">Mission Report</span>
+            <span className="text-sm font-medium text-ash-400">Mission Report</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
             Mission <span className="text-gradient">Completed</span>
@@ -94,13 +94,13 @@ export function MissionReport() {
               </div>
               <div>
                 <h3 className="text-sm font-semibold">Mission Completed Successfully</h3>
-                <p className="text-[10px] text-muted-foreground/50 font-mono">
+                <p className="text-[12px] text-muted-foreground/50 font-mono">
                   7 iterations · 12.4s execution time
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-[10px] text-muted-foreground/60 hover:text-foreground hover:border-white/20 transition-all">
+              <button className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-[12px] text-muted-foreground/60 hover:text-foreground hover:border-white/20 transition-all">
                 <Share2 className="h-3 w-3" /> Share Report
               </button>
             </div>
@@ -127,7 +127,7 @@ export function MissionReport() {
                   <div className={`text-2xl font-bold ${stat.color}`}>
                     <AnimatedCounter target={stat.value} suffix={stat.suffix} />
                   </div>
-                  <p className="text-[10px] text-muted-foreground/50 mt-1">{stat.label}</p>
+                  <p className="text-[12px] text-muted-foreground/50 mt-1">{stat.label}</p>
                 </motion.div>
               );
             })}
@@ -137,7 +137,7 @@ export function MissionReport() {
           <div className="border-t border-white/5 px-6 py-4">
             <div className="flex items-center gap-2 mb-3">
               <FileText className="h-4 w-4 text-ash-400" />
-              <span className="text-xs font-semibold">Generated Documents</span>
+              <span className="text-sm font-semibold">Generated Documents</span>
             </div>
             <div className="grid sm:grid-cols-3 gap-3">
               {[
@@ -151,7 +151,7 @@ export function MissionReport() {
                 >
                   <FileText className="h-4 w-4 text-primary/50 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium text-foreground/70 truncate">{doc.name}</p>
+                    <p className="text-[13px] font-medium text-foreground/70 truncate">{doc.name}</p>
                     <p className="text-[9px] text-muted-foreground/40">{doc.size}</p>
                   </div>
                   <span className="text-[9px] text-ash-400/70">{doc.status}</span>
@@ -162,11 +162,11 @@ export function MissionReport() {
 
           {/* Bottom CTA */}
           <div className="border-t border-white/5 px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-[10px] text-muted-foreground/40">
+            <div className="flex items-center gap-2 text-[12px] text-muted-foreground/40">
               <Database className="h-3 w-3" />
               All data stored to persistent memory
             </div>
-            <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary/20 border border-primary/30 px-3 py-1.5 text-[10px] font-medium text-primary hover:bg-primary/30 transition-colors">
+            <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary/20 border border-primary/30 px-3 py-1.5 text-[12px] font-medium text-primary hover:bg-primary/30 transition-colors">
               View Full Report <ArrowRight className="h-3 w-3" />
             </button>
           </div>
