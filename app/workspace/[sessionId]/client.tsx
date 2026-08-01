@@ -3,21 +3,110 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Target, Search, ExternalLink, Plus, Edit3, Trash2, CheckCircle2, X, Save, FileText, Briefcase } from "lucide-react";
+import { ArrowLeft, Target, Search, ExternalLink, Plus, Edit3, Trash2, CheckCircle2, X, Save, FileText, Briefcase, Download } from "lucide-react";
 import type { Opportunity, Application } from "@/lib/db/schema";
 import * as crud from "@/lib/actions/crud";
+
+interface GeneratedDoc {
+  id: string;
+  toolParams: unknown;
+  toolResult: unknown;
+  timestamp: Date | null;
+}
 
 interface Props {
   sessionId: string;
   opportunities: Opportunity[];
   applications: Application[];
+  documents: GeneratedDoc[];
   missionGoal: string;
 }
 
 const OPP_TYPES = ["scholarship", "fellowship", "job", "internship", "grant", "accelerator", "competition", "conference", "research", "hackathon"];
 const APP_STATUSES = ["saved", "drafting", "submitted", "accepted", "rejected", "missed"];
 
-export function WorkspaceClient({ sessionId, opportunities: initialOpps, applications: initialApps, missionGoal }: Props) {
+function DocViewer({ doc }: { doc: GeneratedDoc }) {
+  const params = (doc.toolParams || {}) as Record<string, unknown>;
+  const result = (doc.toolResult || {}) as { data?: Record<string, unknown> };
+  const d = result.data || {};
+  const type = String(params.type || "");
+  const oppTitle = String(params.opportunityTitle || "Opportunity");
+  const title = type.replace(/_/g, " ");
+
+  return (
+    <div className="rounded-sm border border-[#F3EEE1]/[0.08] bg-[#0B0E13]/60 p-6">
+      <div className="text-xs font-mono uppercase tracking-wider text-[#C9A227]/70 mb-1">AI-generated · tailored for {oppTitle}</div>
+      <h3 className="text-lg font-semibold text-[#F3EEE1] mb-4 capitalize" style={{ fontFamily: "var(--font-display)" }}>{title}</h3>
+
+      {type === "resume" && (
+        <div className="space-y-5">
+          <p className="text-sm text-[#F3EEE1]/80 leading-relaxed whitespace-pre-wrap">{String(d.professionalSummary || "")}</p>
+          {Array.isArray(d.skills) && d.skills.length > 0 && (
+            <div>
+              <p className="text-xs font-mono uppercase tracking-wider text-[#3FA78E] mb-2">Skills</p>
+              <div className="flex flex-wrap gap-1.5">
+                {(d.skills as string[]).map((s, i) => (
+                  <span key={i} className="rounded-sm bg-[#3FA78E]/10 border border-[#3FA78E]/20 px-2 py-0.5 text-xs text-[#3FA78E]">{s}</span>
+                ))}
+              </div>
+            </div>
+          )}
+          {Array.isArray(d.experience) && d.experience.length > 0 && (
+            <div>
+              <p className="text-xs font-mono uppercase tracking-wider text-[#3FA78E] mb-2">Experience</p>
+              <div className="space-y-3">
+                {(d.experience as Array<Record<string, unknown>>).map((e, i) => (
+                  <div key={i} className="border-l-2 border-[#3FA78E]/30 pl-3">
+                    <p className="text-sm font-semibold text-[#F3EEE1]/90">{String(e.title || "")} <span className="text-[#F3EEE1]/40">@ {String(e.company || "")}</span></p>
+                    <p className="text-xs text-[#F3EEE1]/40 mb-1">{String(e.duration || "")}</p>
+                    {Array.isArray(e.highlights) && (e.highlights as string[]).map((h, j) => (
+                      <p key={j} className="text-sm text-[#F3EEE1]/60">- {h}</p>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {Array.isArray(d.education) && d.education.length > 0 && (
+            <div>
+              <p className="text-xs font-mono uppercase tracking-wider text-[#3FA78E] mb-2">Education</p>
+              {(d.education as Array<Record<string, unknown>>).map((e, i) => (
+                <p key={i} className="text-sm text-[#F3EEE1]/70">{String(e.degree || "")} — {String(e.institution || "")} <span className="text-[#F3EEE1]/40">({String(e.year || "")})</span></p>
+              ))}
+            </div>
+          )}
+          {typeof d.matchScore === "number" && (
+            <div className="flex items-center gap-2 pt-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-[#F3EEE1]/40">Match confidence</span>
+              <span className="text-sm font-semibold text-[#C9A227]">{d.matchScore}%</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {type === "cover_letter" && (
+        <div className="space-y-4 max-w-prose">
+          <p className="text-sm text-[#F3EEE1]/70">{String(d.salutation || "")}</p>
+          <p className="text-sm text-[#F3EEE1]/80 leading-relaxed">{String(d.introduction || "")}</p>
+          {Array.isArray(d.body) && d.body.map((p, i) => (
+            <p key={i} className="text-sm text-[#F3EEE1]/80 leading-relaxed">{String(p)}</p>
+          ))}
+          <p className="text-sm text-[#F3EEE1]/80 leading-relaxed">{String(d.closing || "")}</p>
+          <p className="text-sm text-[#F3EEE1]/70">{String(d.signOff || "")}</p>
+          {typeof d.confidenceScore === "number" && (
+            <p className="text-xs text-[#C9A227] font-medium">Confidence: {d.confidenceScore}%</p>
+          )}
+        </div>
+      )}
+
+      {(type !== "resume" && type !== "cover_letter") && (
+        <pre className="whitespace-pre-wrap text-sm text-[#F3EEE1]/70 font-sans">{JSON.stringify(d, null, 2).slice(0, 4000)}</pre>
+      )}
+    </div>
+  );
+}
+
+export function WorkspaceClient({ sessionId, opportunities: initialOpps, applications: initialApps, documents, missionGoal }: Props) {
   const router = useRouter();
   const [opps, setOpps] = useState(initialOpps);
   const [apps, setApps] = useState(initialApps);
@@ -26,6 +115,44 @@ export function WorkspaceClient({ sessionId, opportunities: initialOpps, applica
   const [showNewOpp, setShowNewOpp] = useState(false);
   const [applyingOppId, setApplyingOppId] = useState<string | null>(null);
   const [form, setForm] = useState({ title: "", type: "scholarship", provider: "", description: "", eligibilityCriteria: "", deadline: "", location: "", applicationUrl: "" });
+  const [openDoc, setOpenDoc] = useState<GeneratedDoc | null>(documents[0] || null);
+
+  function downloadDoc(doc: GeneratedDoc) {
+    const params = (doc.toolParams || {}) as Record<string, unknown>;
+    const result = (doc.toolResult || {}) as { data?: Record<string, unknown> };
+    const type = String(params.type || "document");
+    const data = result.data || {};
+    const lines: string[] = [];
+    if (data.professionalSummary) lines.push("PROFESSIONAL SUMMARY", String(data.professionalSummary), "");
+    if (Array.isArray(data.skills)) lines.push("SKILLS", (data.skills as string[]).join(", "), "");
+    if (Array.isArray(data.experience)) {
+      lines.push("EXPERIENCE");
+      for (const e of data.experience as Array<Record<string, unknown>>) {
+        lines.push(`- ${e.title || ""} @ ${e.company || ""} (${e.duration || ""})`);
+        if (Array.isArray(e.highlights)) lines.push(...(e.highlights as string[]).map((h) => `  - ${h}`));
+      }
+      lines.push("");
+    }
+    if (Array.isArray(data.education)) {
+      lines.push("EDUCATION");
+      for (const e of data.education as Array<Record<string, unknown>>) {
+        lines.push(`- ${e.degree || ""} — ${e.institution || ""} (${e.year || ""})`);
+      }
+      lines.push("");
+    }
+    if (data.introduction) lines.push("COVER LETTER", String(data.introduction), "");
+    if (Array.isArray(data.body)) lines.push(...(data.body as string[]).map((b) => String(b) + "\n"));
+    if (data.closing) lines.push(String(data.closing), "");
+    if (data.signOff) lines.push(String(data.signOff));
+    if (data.salutation) lines.unshift(String(data.salutation), "");
+
+    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${type}-${String(params.opportunityTitle || "opportunity").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}.txt`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
 
   function resetForm() { setForm({ title: "", type: "scholarship", provider: "", description: "", eligibilityCriteria: "", deadline: "", location: "", applicationUrl: "" }); }
 
@@ -152,6 +279,48 @@ export function WorkspaceClient({ sessionId, opportunities: initialOpps, applica
             })}
           </div>
         </div>
+
+        {/* GENERATED DOCUMENTS */}
+        {documents.length > 0 && (
+          <div className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D] p-5 mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-sm border border-[#3FA78E]/30 bg-[#3FA78E]/10">
+                <FileText className="h-5 w-5 text-[#3FA78E]" strokeWidth={1.75} />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-base font-semibold text-[#F3EEE1]">Generated Documents</h2>
+                <p className="text-sm text-[#F3EEE1]/40">AI-tailored application documents for your top opportunity</p>
+              </div>
+              {openDoc && (
+                <button
+                  onClick={() => downloadDoc(openDoc)}
+                  className="inline-flex items-center gap-2 rounded-sm bg-[#3FA78E]/15 border border-[#3FA78E]/30 px-3 py-1.5 text-sm font-medium text-[#3FA78E] hover:bg-[#3FA78E]/25 transition-all"
+                >
+                  <Download className="h-4 w-4" strokeWidth={1.75} /> Download
+                </button>
+              )}
+            </div>
+
+            <div className="flex gap-1 mb-4">
+              {documents.map((doc) => {
+                const params = (doc.toolParams || {}) as Record<string, unknown>;
+                const type = String(params.type || "document").replace(/_/g, " ");
+                const active = openDoc?.id === doc.id;
+                return (
+                  <button
+                    key={doc.id}
+                    onClick={() => setOpenDoc(doc)}
+                    className={`rounded-sm px-3 py-1.5 text-sm font-medium transition-all ${active ? "bg-[#3FA78E]/20 text-[#3FA78E] border border-[#3FA78E]/40" : "text-[#F3EEE1]/40 hover:text-[#F3EEE1]/70 border border-transparent"}`}
+                  >
+                    {type}
+                  </button>
+                );
+              })}
+            </div>
+
+            {openDoc && <DocViewer doc={openDoc} />}
+          </div>
+        )}
 
         {/* APPLICATIONS */}
         <div className="rounded-sm border border-[#F3EEE1]/10 bg-[#12161D] p-5">

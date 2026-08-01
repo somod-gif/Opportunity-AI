@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { opportunities, agentMissions, applications } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { opportunities, agentMissions, applications, agentIterations } from "@/lib/db/schema";
+import { eq, desc, and } from "drizzle-orm";
 import { WorkspaceClient } from "./client";
 
 export const dynamic = "force-dynamic";
@@ -33,11 +33,25 @@ export default async function WorkspacePage({
     .where(eq(applications.sessionId, sessionId))
     .orderBy(desc(applications.createdAt));
 
+  const docs = mission
+    ? await db
+        .select()
+        .from(agentIterations)
+        .where(
+          and(
+            eq(agentIterations.missionId, mission.id),
+            eq(agentIterations.toolUsed, "generate_document")
+          )
+        )
+        .orderBy(desc(agentIterations.timestamp))
+    : [];
+
   return (
     <WorkspaceClient
       sessionId={sessionId}
       opportunities={opps}
       applications={apps}
+      documents={docs}
       missionGoal={mission?.goal || "Browse opportunities"}
     />
   );
