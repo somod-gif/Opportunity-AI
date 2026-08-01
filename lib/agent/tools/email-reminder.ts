@@ -33,7 +33,7 @@ export const emailReminderTool: AgentTool = {
     if (resend && p.email) {
       try {
         await resend.emails.send({
-          from: "Opportunity AI <reminders@opportunity-ai.vercel.app>",
+          from: process.env.RESEND_FROM || "Opportunity AI <onboarding@resend.dev>",
           to: p.email,
           subject: `Reminder: ${p.reminderType.replace("_", " ")} — ${p.opportunityTitle}`,
           html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#0B1020;color:#F8FAFC;border-radius:12px">

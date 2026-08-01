@@ -113,7 +113,7 @@ export const searchOpportunitiesTool: AgentTool = {
       const searchPrompt = `List up to 3 real, current 2026 ${compressedQuery || "scholarships, fellowships, and internships"} opportunities open to African students. Answer immediately with NO reasoning. Return ONLY a JSON array of 3 objects with short fields: title, provider, type, url, deadline, eligibility. Every field under 20 words. Today is ${new Date().toISOString().split("T")[0]}.`;
       const aiResult = await Promise.race([
         ctx.ai.generateJSON("search", searchPrompt) as Promise<Array<Record<string, unknown>>>,
-        waitFor(Math.min(38000, timeLeft())).then(() => null),
+        waitFor(Math.min(30000, timeLeft())).then(() => null),
       ]);
       if (Array.isArray(aiResult) && aiResult.length > 0) {
         const raw = await Promise.all(aiResult.slice(0, Math.min(limit, 6)).map(async (r, i) => ({

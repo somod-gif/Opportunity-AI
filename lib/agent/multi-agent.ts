@@ -156,6 +156,10 @@ export class MultiAgentCoordinator {
       }
     }
 
+    // Guarantee every mission ships with at least one ready-to-use document,
+    // even when the 3-minute cap fires before the Document Agent's turn.
+    await this.ensureDocumentsShip();
+
     for (const agent of this.subAgents) {
       if (agent.status === "active") {
         agent.status = "complete";
@@ -412,6 +416,59 @@ Only include agents that are relevant to this specific mission.`;
     }
   }
 
+  private async ensureDocumentsShip(): Promise<void> {
+    if (this.documentsGenerated > 0) return;
+    const elapsed = Date.now() - this.startTime;
+    const budget = 250_000 - elapsed;
+    if (budget < 20_000) return;
+
+    const top = this.stateHistory
+      .flatMap((s) => (Array.isArray(s.toolResult?.data) ? (s.toolResult.data as Array<Record<string, unknown>>) : []))
+      .find((o) => o.title);
+
+    this.emitter.emitToolCall("generate_document", {
+      type: "resume",
+      opportunityTitle: top?.title || this.mission.goal,
+    });
+    this.emitter.emitThought(
+      `The Document Agent didn't get a turn within the mission budget — using the remaining time to draft a resume for "${String(top?.title || this.mission.goal)}" so you ship with ready-to-use documents.`
+    );
+
+    const result = await Promise.race([
+      this.context.dispatcher.dispatch(
+        { name: "generate_document", params: {
+          type: "resume",
+          opportunityTitle: top?.title || this.mission.goal,
+          opportunityProvider: top?.provider || "",
+          opportunityType: top?.type || "",
+          opportunityDescription: top?.description || this.mission.goal,
+          opportunityEligibility: top?.eligibilityCriteria || "",
+          deadline: top?.deadline || null,
+          profileEducation: this.mission.education || "",
+          profileSkills: this.mission.skills || [],
+          profileCareerGoal: this.mission.careerGoal || "",
+          profileCountry: this.mission.country || "",
+          complexity: "moderate",
+        }, status: "running" },
+        { sessionId: this.sessionId, missionId: this.context.missionId, db, ai: this.context.ai }
+      ),
+      new Promise<Awaited<ReturnType<ToolDispatcher["dispatch"]>>>((resolve) =>
+        setTimeout(() => resolve({
+          success: true,
+          data: null,
+          summary: "Document generation timed out during finalization",
+          metadata: { timedOut: true },
+        }), Math.min(budget, 45_000))
+      ),
+    ]);
+
+    this.emitter.emitToolResult("generate_document", result);
+    this.toolsUsed.add("generate_document");
+    if (!(result.metadata as { timedOut?: boolean } | undefined)?.timedOut && result.success) {
+      this.documentsGenerated += 1;
+    }
+  }
+
   private async buildReport(missionComplete: boolean): Promise<MissionReport> {
     const elapsed = Date.now() - this.startTime;
     const timeSavedHours = Math.round((elapsed / 3600000 + Math.random() * 3) * 10) / 10;
@@ -462,6 +519,8 @@ Only include agents that are relevant to this specific mission.`;
         updatedAt: new Date(),
         metadata: {
           ...this.context.mission,
+          deviceId: this.meta.deviceId ?? null,
+          source: this.meta.source ?? "mission",
           report: {
             success: report.missionSuccess,
             iterations: report.iterations,
