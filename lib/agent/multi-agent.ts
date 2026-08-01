@@ -37,6 +37,7 @@ export class MultiAgentCoordinator {
   private toolsUsed = new Set<string>();
   private sourcesFound = 0;
   private documentsGenerated = 0;
+  private topOpportunity: Record<string, unknown> | null = null;
   private planner: AgentPlanner;
   private reflector: AgentReflector;
 
@@ -289,6 +290,9 @@ Only include agents that are relevant to this specific mission.`;
 
       if (result.success && result.data && Array.isArray(result.data)) {
         this.sourcesFound += result.data.length;
+        if (!this.topOpportunity) {
+          this.topOpportunity = (result.data as Array<Record<string, unknown>>).find((o) => o && typeof o.title === "string") ?? null;
+        }
       }
 
       if (toolSelection.tool === "generate_document") {
@@ -419,22 +423,20 @@ Only include agents that are relevant to this specific mission.`;
   private async ensureDocumentsShip(): Promise<void> {
     if (this.documentsGenerated > 0) return;
     const elapsed = Date.now() - this.startTime;
-    let budget = 250_000 - elapsed;
+    let budget = 295_000 - elapsed;
     if (budget < 20_000) return;
 
-    const top = this.stateHistory
-      .flatMap((s) => (Array.isArray(s.toolResult?.data) ? (s.toolResult.data as Array<Record<string, unknown>>) : []))
-      .find((o) => o.title);
-    const title = String(top?.title || this.mission.goal);
+    const top = this.topOpportunity;
+    const title = top && top.title ? String(top.title) : this.mission.goal;
 
     const docParams = (type: string) => ({
       type,
       opportunityTitle: title,
-      opportunityProvider: top?.provider || "",
-      opportunityType: top?.type || "",
-      opportunityDescription: top?.description || this.mission.goal,
-      opportunityEligibility: top?.eligibilityCriteria || "",
-      deadline: top?.deadline || null,
+      opportunityProvider: top && top.provider ? String(top.provider) : "",
+      opportunityType: top && top.type ? String(top.type) : "",
+      opportunityDescription: top && top.description ? String(top.description) : this.mission.goal,
+      opportunityEligibility: top && top.eligibilityCriteria ? String(top.eligibilityCriteria) : "",
+      deadline: top && top.deadline ? String(top.deadline) : null,
       profileEducation: this.mission.education || "",
       profileSkills: this.mission.skills || [],
       profileCareerGoal: this.mission.careerGoal || "",
@@ -448,6 +450,7 @@ Only include agents that are relevant to this specific mission.`;
 
     for (const type of ["resume", "cover_letter"]) {
       if (budget < 20_000) break;
+      if (type === "cover_letter" && this.documentsGenerated === 0 && budget < 50_000) break;
       this.emitter.emitToolCall("generate_document", { type, opportunityTitle: title });
       const result = await Promise.race([
         this.context.dispatcher.dispatch(
@@ -460,13 +463,13 @@ Only include agents that are relevant to this specific mission.`;
             data: null,
             summary: "Document generation timed out during finalization",
             metadata: { timedOut: true },
-          }), Math.min(budget, 45_000))
+          }), Math.min(budget, 60_000))
         ),
       ]);
       this.emitter.emitToolResult("generate_document", result);
       this.toolsUsed.add("generate_document");
       const timedOut = (result.metadata as { timedOut?: boolean } | undefined)?.timedOut;
-      if (!timedOut && result.success) {
+      if (!timedOut && result.success && result.data) {
         this.documentsGenerated += 1;
       }
       await db.insert(agentIterations).values({
@@ -480,7 +483,7 @@ Only include agents that are relevant to this specific mission.`;
         observations: result.summary,
         timestamp: new Date(),
       }).catch(() => {});
-      budget = 250_000 - (Date.now() - this.startTime);
+      budget = 295_000 - (Date.now() - this.startTime);
     }
   }
 
