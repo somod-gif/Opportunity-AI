@@ -43,3 +43,6 @@ next-env.d.ts
 # runtime artifacts
 *.log
 curl-stream*.txt
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
